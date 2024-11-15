@@ -13,7 +13,7 @@ export const useAPI = () => {
     // GET 요청
     const get = async (url, params) => {
         try {
-            const response = await api.get(url, { params });
+            const response = await api.get(url, params);
             return response;
         } catch (error) {
             throw error;
@@ -23,7 +23,7 @@ export const useAPI = () => {
     // POST 요청
     const post = async (url, params) => {
         try {
-            const response = await api.post(url, { params });
+            const response = await api.post(url, params);
             return response;
         } catch (error) {
             throw error;
@@ -33,7 +33,7 @@ export const useAPI = () => {
     // PATCH 요청
     const patch = async (url, params) => {
         try {
-            const response = await api.patch(url, { params });
+            const response = await api.patch(url, params);
             return response;
         } catch (error) {
             throw error;
@@ -43,7 +43,7 @@ export const useAPI = () => {
     // DELETE 요청
     const remove = async (url, params) => {
         try {
-            const response = await api.delete(url, { params });
+            const response = await api.delete(url, params);
             return response;
         } catch (error) {
             throw error;
