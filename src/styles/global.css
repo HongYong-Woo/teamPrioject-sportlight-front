@@ -61,6 +61,14 @@ header {
     z-index: 10;
 }
 
+.dp--menu-wrapper {
+    z-index: 5 !important;
+}
+
+.dropdown-menu {
+    z-index: 5;
+}
+
 .banner-container{
     z-index: 2;
 }
