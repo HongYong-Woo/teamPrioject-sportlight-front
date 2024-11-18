@@ -77,8 +77,9 @@ function addCommas(amount) {
 
 <style scoped>
 .card {
-    width: 250px;
+    width: 266px;
     height: 300px;
+    padding: 0 8px;
 }
 
 .card:hover {

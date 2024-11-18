@@ -33,7 +33,6 @@ const props = defineProps({
 .card-list {
     width: 100vw;
     display: flex;
-    gap: 16px;
 }
 
 .card-list-container::-webkit-scrollbar {
