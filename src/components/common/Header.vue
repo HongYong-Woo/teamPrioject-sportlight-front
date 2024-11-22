@@ -1,14 +1,54 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { faChevronDown, faChevronUp, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { useAuthStore } from "@/stores/auth";
+import { useRouter } from "vue-router";
+import Login from './Login.vue';
+
+const auth = useAuthStore();
+const router = useRouter();
+
 
 const isCategoryOpen = ref(false);
+//const isModalVisible = ref(false);
+const isMyPageDropdownVisible = ref(false);
+
+const profileImage = computed(() => {
+  return auth.token
+    ? auth.profileImage || new URL('@/assets/기본이미지.jpg', import.meta.url).href
+    : new URL('@/assets/기본이미지.jpg', import.meta.url).href;
+});
+
+const MyPageDropdownOptions = [
+    { label: "마이페이지", value: "mypage" },
+    { label: "로그아웃", value: "logout" },
+];
+
+function handleDropdownChange(selectedValue) {
+    if (selectedValue === "mypage") {
+        router.push("/mypage");
+    } else if (selectedValue === "logout") {
+        auth.logout();
+        router.push("/");
+    }
+}
 
 function toggleCategoryMenu() {
     isCategoryOpen.value = !isCategoryOpen.value;
 }
+
+function toggleLoginModal() {
+    isModalVisible.value = !isModalVisible.value;
+}
+
+function toggleMyPageDropdown() {
+    isMyPageDropdownVisible.value = !isMyPageDropdownVisible.value;
+    console.log("Dropdown visibility:", isMyPageDropdownVisible.value);
+}
+
 </script>
+
 
 <template>
     <header>
@@ -30,6 +70,7 @@ function toggleCategoryMenu() {
                     </button>
                 </div>
             </nav>
+            
 
             <form class="search-container">
                 <input type="text" />
@@ -39,7 +80,16 @@ function toggleCategoryMenu() {
             </form>
 
             <div class="user-info">
-                <button class="login-btn" type="button">로그인</button>
+                <div v-if="auth.isAuthenticated()" class="profile-container">
+                    <div @click="toggleMyPageDropdown" class="profile-dropdown">
+                    <img :src="profileImage" alt="Profile" class="profile-img" />
+                    </div>
+                    <ul v-if="isMyPageDropdownVisible" class="dropdown-menu">
+                    <li @click="handleDropdownChange('mypage')">마이페이지</li>
+                    <li @click="handleDropdownChange('logout')">로그아웃</li>
+                </ul>
+                </div>
+                <button v-else class="login-btn" @click="auth.openLoginModal">로그인</button>
             </div>
         </div>
     </header>
@@ -58,6 +108,8 @@ function toggleCategoryMenu() {
     <transition name="dark-page">
         <div v-if="isCategoryOpen" class="dark-page" @click="toggleCategoryMenu"></div>
     </transition>
+
+    <Login v-if="auth.showLoginModal" @close="auth.closeLoginModal" />
 </template>
 
 <style scoped>
@@ -123,6 +175,48 @@ header{
 
 .dark-page-enter-to, .dark-page-leave-from {
     opacity: 1;
+}
+
+.profile-container {
+    position: relative;
+}
+
+.profile-dropdown {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 50px;
+    left: 20%;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    padding: 10px;
+    width: 120px;
+}
+
+.dropdown-menu li {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+.dropdown-menu li:hover {
+    background-color: #f0f0f0;
 }
 
 </style>
