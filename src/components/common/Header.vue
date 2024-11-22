@@ -63,6 +63,10 @@ function toggleCategoryMenu() {
 <style scoped>
 @import '../../styles/header.css';
 
+header{
+    border-bottom: 1px solid #d9d9d9;
+}
+
 .category-list {
     list-style: none;
     padding: 1rem 15rem 0 15rem;

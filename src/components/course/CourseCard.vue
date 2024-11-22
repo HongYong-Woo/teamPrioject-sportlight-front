@@ -3,10 +3,11 @@
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faArrowRight, faStar, faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
-
 import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
 
 const props = defineProps({
+    id: { type: Number, required: true },
     nickname: { type: String, default: 'Card Host', },
     title: { type: String, default: 'Card Title', },
     address: { type: String, default: 'Card Address', },
@@ -21,6 +22,7 @@ const props = defineProps({
     profileImage: { type: String, default: null, }
 });
 
+const router = useRouter();
 const emits = defineEmits(['button-click']);
 const isHovered = ref(false);
 const discounted = computed(() => props.discountRate > 0);
@@ -28,10 +30,14 @@ const discounted = computed(() => props.discountRate > 0);
 function addCommas(amount) {
     return '￦' + amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
+function goToCourseDetail() {
+  router.push({ name: 'CourseDetail', params: { id: props.id } });
+}
 </script>
 
 <template>
-    <div class="card" @mouseenter="isHovered = true" @mouseleave="isHovered = false">
+    <div class="card" @mouseenter="isHovered = true" @mouseleave="isHovered = false" @click="goToCourseDetail">
         <!-- <img v-if="image" :src="image" alt="Card image" class="card-image" /> -->
         <img src="../../assets/logo.png" alt="Card image" class="card-image">
         <div class="card-content">
@@ -46,8 +52,10 @@ function addCommas(amount) {
                 <div v-if="discounted" class="price">
                     <span class="discount-rate">{{ discountRate }}%</span>
                     <span class="tuition original">{{ addCommas(tuition) }}</span>
+                    <div>
                     <FontAwesomeIcon :icon="faArrowRight" size="sm" />
                     <span class="tuition discounted">{{ addCommas(tuition - tuition * discountRate / 100) }}</span>
+                </div>
                 </div>
                 <p v-else class="tuition">{{ addCommas(tuition) }}</p>
                 
@@ -127,6 +135,7 @@ function addCommas(amount) {
 .price {
     display: flex;
     align-items: baseline;
+    flex-wrap: wrap;
     gap: 4px;
 }
 

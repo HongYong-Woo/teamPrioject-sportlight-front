@@ -11,7 +11,7 @@ const loading = ref(true);
 
 async function fetchCards() {
     try {
-        const response = await get('/courses/popular');  // 백엔드에서 데이터 가져오기
+        const response = await get('/popular');  // 백엔드에서 데이터 가져오기
         courses.value = response.data;
         console.log('couses: ', courses.value);
     } catch (error) {

@@ -22,6 +22,7 @@ function toggleDropdown() {
 
 function clearSelectedValues() {
     selectedValues.value = [];
+    emit('update:selectedValues', selectedValues.value);
 }
 
 // 바깥쪽 클릭 감지 및 닫기

@@ -40,9 +40,9 @@ const levels = [
 const sortType = [
     { value: 'POPULARITY', label: '인기순' },
     { value: 'NEWEST', label: '최신순' },
-    { value: 'RATING', label: '별점순' },
-    { value: 'REVIEW_COUNT', label: '리뷰순' },
-    { value: 'DISTANCE', label: '거리순' }
+    // { value: 'RATING', label: '별점순' },
+    // { value: 'REVIEW_COUNT', label: '리뷰순' },
+    // { value: 'DISTANCE', label: '거리순' }
 ];
 
 async function fetchInitialcourses() {
@@ -121,9 +121,14 @@ function addCommas(amount) {
                 @update:minValue="(newValue) => updateFilterOption('minPrice', newValue)"
                 @update:maxValue="(newValue) => updateFilterOption('maxPrice', newValue)" />
 
-            <Datepicker :startDate="startDate" :endDate="endDate"
-                @update:startDate="(newValue) => updateFilterOption('startDate', newValue)"
-                @update:endDate="(newValue) => updateFilterOption('endDate', newValue)" />
+                <div class="datepicker-container">
+                    <Datepicker 
+                    :startDate="startDate" 
+                    :endDate="endDate"
+                    @update:startDate="(newValue) => updateFilterOption('startDate', newValue)"
+                    @update:endDate="(newValue) => updateFilterOption('endDate', newValue)" 
+                    />
+                </div>
         </div>
         <div class="sort">
             <DropdownSingle :options="sortType" :selectedValue="filterOptions.sortType"
@@ -146,5 +151,9 @@ function addCommas(amount) {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.datepicker-container {
+    width: 16rem;
 }
 </style>
