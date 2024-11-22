@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { chatbot } from '@/axios/ChatBot';
 
 
@@ -7,11 +7,14 @@ const {
     showChatbot,
     questionMessage,
     messages,
+    chatScroll,
     toggleShowChatbot,
     sendChatbot
 } = chatbot();
 
-
+onMounted(() => {
+  chatScroll.value = document.querySelector('.chatbotModalBody');
+});
 
 </script>
 
@@ -31,7 +34,7 @@ const {
             <img src="../../assets/logo.png" alt="sportlight" class="titlelogo">
             <hr>
         </div>
-        <div class="chatbotModalBody">
+        <div class="chatbotModalBody" ref="chatScroll">
             <div v-for="message in messages" class="chatbotMessage">
                 <div class="chatbotMessagecontent">
                     <img v-if="message.sender === 'chatbot'" src="../../assets/img/chatbot.png" class="messageImg">
@@ -101,13 +104,13 @@ const {
 
 .chatbotModal {
     position: fixed;
-    right: 20px;
-    bottom: 90px;
+    right: 30px;
+    bottom: 110px;
     width: 323px;
     height: 550px;
   
     background: rgb(243, 243, 243);
-  box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+  box-shadow: 5px 5px 5px rgba(0,0,0,0.5);
   z-index: 1000;
   border: 3px;;
     /* border: 3px solid transparent;  */
