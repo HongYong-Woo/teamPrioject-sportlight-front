@@ -21,9 +21,9 @@ export const useAPI = () => {
     };
 
     // POST 요청
-    const post = async (url, params) => {
+    const post = async (url, params, config = {}) => {
         try {
-            const response = await api.post(url, params);
+            const response = await api.post(url, params, config); // config로 추가 설정 전달
             return response;
         } catch (error) {
             throw error;

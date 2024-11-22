@@ -11,5 +11,4 @@ const pinia = createPinia()
 createApp(App)
     .use(routers)
     .use(pinia)
-
     .mount('#app')
