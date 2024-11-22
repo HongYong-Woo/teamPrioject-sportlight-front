@@ -14,7 +14,7 @@ const props = defineProps({
     <div class="card-list-container">
         <!-- <div v-if="loading" class="loading">Loading...</div> -->
         <div class="card-list">
-            <Card v-for="card in courses" :key="card.id" :nickname="card.nickname" :title="card.title"
+            <Card v-for="card in courses" :key="card.id" :id="card.id" :nickname="card.nickname" :title="card.title"
                 :address="card.address" :tuition="card.tuition" :discountRate="card.discountRate" :time="card.time"
                 :level="card.level" :category="card.category" :rating="card.rating" :reviewCount="card.reviewCount"
                 :image="card.image" @button-click="handleCardButtonClick(card.id)" class="card"/>
@@ -40,7 +40,7 @@ const props = defineProps({
 }
 
 .card {
-    width: 20%;
+    width: 25%;
     min-width: 200px;
 }
 
