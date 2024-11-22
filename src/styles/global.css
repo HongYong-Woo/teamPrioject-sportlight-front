@@ -22,7 +22,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 15rem 0 15rem;
+    padding: 0 15%;
 
 }
 
@@ -37,12 +37,12 @@ header button {
 }
 
 main {
-    margin: 64px 15rem 0 15rem;
+    margin: 64px 15% 0 15%;
 }
 
 footer {
     border-top: solid 1px var(--border-color);
-    margin: 64px 15rem 0 15rem;
+    margin: 64px 15% 0 15%;
     padding: 24px 0 48px 0;
 }
 
