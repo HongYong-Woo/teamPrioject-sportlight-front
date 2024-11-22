@@ -46,6 +46,8 @@ function toggleDropdown() {
 function clearValues() {
     localMaxValue.value = localMaxRange.value;
     localMinValue.value = localMinRange.value;
+    emit('update:minValue', localMinValue.value);
+    emit('update:maxValue', localMaxValue.value);
 }
 
 function clickOutside(event) {
