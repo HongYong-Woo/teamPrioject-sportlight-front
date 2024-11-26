@@ -38,9 +38,8 @@ const {
 </script>
 
 <template>
- 
+ {{ isLogin }}
   <div @click="handleClickOutside" style="position: relative">
-    {{ isLogin }}
     <!-- 알림 버튼 -->
       <span @click.stop="toggleNotifications" class="notification-button">
       <img src="../assets/img/alram.png" class="button-img"/>
