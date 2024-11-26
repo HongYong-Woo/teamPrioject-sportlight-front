@@ -1,5 +1,6 @@
 <script setup>
 import { ref, defineProps, computed, onMounted } from 'vue';
+import axios from 'axios';
 import { Notifications } from '../axios/Notifications';
 
 const {
@@ -8,7 +9,6 @@ const {
   showNotifications,
   showDeleteNotificationModal,
   deleteIndex,
-  isLogin,
   toggleNotifications,
   deleteNotification,
   deleteAllNotifications,
@@ -19,6 +19,9 @@ const {
   closeDeleteModal
 } = Notifications();
 
+
+const notiTitle = ref('');
+const notiContent = ref('');
 
   // 필터링된 알림
   const filterNotifications = computed(() => {
@@ -38,27 +41,9 @@ const {
 </script>
 
 <template>
- 
-  <div @click="handleClickOutside" style="position: relative">
-    {{ isLogin }}
-    <!-- 알림 버튼 -->
-      <span @click.stop="toggleNotifications" class="notification-button">
-      <img src="../assets/img/alram.png" class="button-img"/>
-      <span v-show="unreadCount > 0" class="red-dot">{{ unreadCount }}</span>
-    </span>
-
+  <div class="background">
+ <div class="modal-list" id="noti-list">
     <!-- 알림 모달 -->
-    <Transition name="slide-fade">
-    <div v-if="showNotifications" class="modal" id="noti-modal">
-      <div class="modal-header">
-        <span style="color: black; padding-left: 10px; padding-top: 10px; font-size:x-large; font: bolder;">알림
-          
-        </span>
-        <button @click="deleteAllNotifications" class="delete-all-button">
-          모두 삭제
-          </button>
-      </div>
-
       <div class="modal-content">
         <!-- 스크롤 가능한 알림 리스트 -->
         <div class="notification-list">
@@ -85,16 +70,7 @@ const {
 
       <!-- 삭제 확인 모달 -->
       <div v-if="showDeleteNotificationModal" class="delete-modal-overlay" @click.stop="closeDeleteModal">
-        <div class="delete-modal-target-content-container">
-        <div class="delete-modal-targetContent">
-            <p>
-              <span  class="notiMessage">{{ notifications[deleteIndex].notiTitle }}</span>
-              <span class="notification-date">{{ formatTime(notifications[deleteIndex].createdAt)}}</span>
-            </p>
-            <span  class="notiMessage">{{ notifications[deleteIndex].notiContent }}</span>
-          
-        </div>
-      </div>    
+            
         <div class="delete-modal" >
               <button @click.stop="deleteNotification" class="confirm-delete-button">
                 <img src="../assets/img/delete.svg" class="deleteImg">
@@ -103,79 +79,28 @@ const {
               <button @click.stop="closeDeleteModal" class="cancel-delete-button">취소</button>
           </div>
         </div>
+      </div>
     </div>
-  </Transition>
 
-</div>
 </template>
 
 <style scoped>
-.inputform{
-  position: fixed;
-  top: 550px;
-}
 
-/* 알림창 버튼 */
-.notification-button {
-  position: absolute;
-  right: 100px;
-  /* align-content: center; */
-  background : none;
-  cursor: pointer;
-
-}
-
-.button-img {
+.background {
   position: relative;
-  border-radius: 50%;
-  background: none;
-  outline: none;
-  width: 50px;
+  border: 1px solid red;
+  height: 200px;
+  border-radius: 10px;
 }
 
-
-.red-dot {
-  bottom: 15px;
-  right: 0px;
-  width: 17px;
-  height: 17px;
-  background: red;
-  border-radius: 50%;
-  font-size: 70%;
-  text-align: center;
-  position: absolute;
-  float: right;
-  color: white;
-}
-
-.modal {
-  position: absolute;
-  top: 4rem;
-  left: -263px;
-  width: 323px;
-  height: 503px;
+.modal-list {
+  height: 100%;
   background: rgb(230, 230, 230);
-  box-shadow: 5px 5px 5px rgba(0,0,0,0.5);
-  z-index: 1000;
-  /* overflow-y: auto; */
- 
-  /* outline-style: solid;
-  outline-width: medium; */
-  /* outline-color: fuchsia; */
   
   border-radius: 10px;
   display:grid;
   flex-direction: column;
-}
-
-.modal-header {
-background: white;
-height: 50px;
-z-index: 1000;
-border-top-left-radius: 10px;
-border-top-right-radius: 10px;
-flex-direction: row;
-
+  overflow-y: auto;
 }
 
 
@@ -202,7 +127,6 @@ flex-direction: row;
   border-radius: 10px;
   overflow-y: auto;
   background-color: transparent;
-  outline: none;
   border: none;
 }
 
@@ -252,6 +176,7 @@ flex-direction: row;
   cursor: pointer;
   border-radius: 25%;
   flex-direction: column;
+  border: none;
 }
 
 .notification-delete:hover {
@@ -261,20 +186,19 @@ flex-direction: row;
 .deleteImg {
   width: 20px;
   height: 20px;
+  border: none;
+  outline: none;
 }
 
 /* 삭제 확인 모달 스타일 */
 .delete-modal-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   background: rgba(85, 85, 85, 0.5);
   border-radius: 10px;
   z-index: 1100;
 
-  display: flex;
   flex-direction: column;
   align-content: center;
 }
@@ -344,27 +268,4 @@ flex-direction: row;
 }
 
 
-/*
-  진입/진출 애니메이션은 다른 지속 시간과
-  타이밍 함수를 사용할 수 있습니다.
-*/
-.slide-fade {
-  top: 20%;
-    left: 50%;
-}
-
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  /* transform: translateX(20px); */
-  transform: translate(20px, -10px);
-  opacity: 0;
-}
 </style>

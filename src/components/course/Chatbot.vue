@@ -59,9 +59,6 @@ onMounted(() => {
 
 <style scoped>
 .chatbot_button {
-    position: fixed;
-    /* right: 20px;
-    bottom: 20px; */
     width: 60px;
     height: 60px;
     border-radius: 50%;
@@ -76,9 +73,9 @@ onMounted(() => {
     cursor: pointer;
 
     overflow: hidden;
-    position: relative;
-    left: 1585px;
-    bottom: -250px;
+    position: fixed;
+    left: 1800px;
+    bottom: 50px;
 }
 
 .buttonImg {
@@ -105,7 +102,7 @@ onMounted(() => {
 .chatbotModal {
     position: fixed;
     right: 30px;
-    bottom: 110px;
+    bottom: 120px;
     width: 323px;
     height: 550px;
   

@@ -1,6 +1,6 @@
-import { ref, computed, onMounted, onBeforeUnmount  } from 'vue';
-import axios from 'axios';
-import dayjs from 'dayjs';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { useAPI } from './useAPI.js';
+import { useAuthStore }  from '../stores/auth.js';
 
 
 export function Notifications() {
@@ -10,35 +10,69 @@ export function Notifications() {
   const deleteIndex = ref(null);
   const deleteId = ref(null);
 
- 
+  const { remove,
+    get,
+    patch
+   } = useAPI();
+
+   const { isAuthenticated,
+    userRoles,
+      token,
+      userId,
+     
+    } = useAuthStore();
+  const isLogin = ref(isAuthenticated());
+   let eventSource = null;
 
     // SSE 연결
     const connectSSE = () => {
-      const eventSource = new EventSource("http://localhost:8080/notifications/subscribe");
-      console.log("Connected to EventSource");
-      eventSource.onmessage = (event) => {
-        const notification = JSON.parse(event.data);
-        console.log("Received notification:", notification);
-        notifications.value.unshift(notification);
-      };
+      if(!eventSource) {
+        eventSource = new EventSource("http://localhost:8080/notifications/subscribe");
+        console.log("Connected to EventSource");
+        eventSource.onmessage = (event) => {
+          const notification = JSON.parse(event.data);
+          console.log("Received notification:", notification);
+          notifications.value.unshift(notification);
+        };
+
+        eventSource.onerror = (error) => {
+          console.error("EventSource failed:", error);
+          eventSource.close();
+          eventSource = null;
+        };
+      }
     };
 
     // 읽지 않은 알림 개수 체크
     const unreadCount = computed(() => {
       return notifications.value.filter(n => !n.notiReadOrNot).length;
    });
+   
   
     // 알림창 토글
     const toggleNotifications = () => {
-      showNotifications.value = !showNotifications.value;
+      showNotifications.value = !showNotifications.value;      
     };
 
-    // 초기 알림 데이터 가져오기
+    // 초기 모든 알림 데이터 가져오기
     const fetchInitialNotifications = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/notifications');
+        const response = await get('/notifications');
+        // const response = await axios.get('http://localhost:8080/notifications');
         notifications.value = response.data;
-        console.log("notifications.value:", notifications.value);
+        console.log("Fetched notifications:", notifications.value);
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+      }
+    };
+
+    // 초기 사용자의 알림 데이터 가져오기
+    const fetchUserNotifications = async (id) => {
+      try {
+        const response = await get(`/notifications/${id}`);
+        // const response = await axios.get('http://localhost:8080/notifications');
+        notifications.value = response.data;
+        console.log("Fetched notifications:", notifications.value);
       } catch (error) {
         console.error("Failed to fetch notifications:", error);
       }
@@ -46,10 +80,10 @@ export function Notifications() {
 
     // 알림 읽음 상태 변경
     const changeReadStatus = (index, id) => {
-      console.log("changeReadStatus notification index:", index);
-      console.log("changeReadStatus notification id:", id); 
-             if(notifications.value[index].notiReadOrNot === false) {
+      if(notifications.value[index].notiReadOrNot === false) {
          notifications.value[index].notiReadOrNot = true;
+         patch(`/notifications/${id}`);
+
         // axios.patch(`http://localhost:8080/notifications/${id}`)
         // .catch(error => {
         //   console.error("Failed to change read status:", error);
@@ -58,22 +92,24 @@ export function Notifications() {
     };
 
     // 개별 알림 삭제 index,id
-    const deleteNotification = () => {
-      console.log("Deleting notificationIndex:", deleteIndex.value);
-      console.log("Deleting notificationId:", deleteId.value);
-      axios.delete(`http://localhost:8080/notifications/${deleteId.value}`)
-        .then(() => {
-          notifications.value.splice(deleteIndex.value, 1);
-          closeDeleteModal();
-        })
-        .catch(error => {
-          console.error("Failed to delete notification:", error);
-        });
+    const deleteNotification = async () => {
+      await remove(`/notifications/${deleteId.value}`);
+      closeDeleteModal();
+
+      // axios.delete(`http://localhost:8080/notifications/${deleteId.value}`)
+      //   .then(() => {
+      //     notifications.value.splice(deleteIndex.value, 1);
+      //     closeDeleteModal();
+      //   })
+      //   .catch(error => {
+      //     console.error("Failed to delete notification:", error);
+      //   });
     };
   
     // 전체 알림 삭제
-    const deleteAllNotifications = () => {
-      console.log("Deleting all notifications");
+    const deleteAllNotifications = async () => {
+      await remove('/notifications');
+
       // axios.delete('http://localhost:8080/notifications')
       // .catch(error => {
       //   console.error("Failed to delete all notifications:", error);
@@ -91,15 +127,17 @@ export function Notifications() {
 
     // 시간 포맷 변경
     const formatTime = (time) => {
-      return dayjs(time).format('YYYY-MM-DD');
-    }
+   
+      const timestr = time[1] + "월" + time[2] + "일";
+      return timestr;
+    };
 
 
 
     // 삭제확인창 열기
     const openDeleteModal = (index, id) => {
-      console.log("index:", index);
-      console.log("id:", id);
+      // console.log("index:", index);
+      // console.log("id:", id);
       deleteIndex.value = index;
       deleteId.value = id;
       showDeleteNotificationModal.value = true;
@@ -113,15 +151,32 @@ export function Notifications() {
     };
 
 
-
     onMounted(() => {
-      fetchInitialNotifications();
-      connectSSE();
+      // fetchInitialNotifications();
+      // connectSSE();
       document.addEventListener('click', handleClickOutside);
+      console.log("userRoles:", userRoles);
+      console.log("token:", token);
+      console.log("findId:", userId);
     });
   
     onBeforeUnmount(() => {
       document.removeEventListener('click', handleClickOutside);
+    });
+
+    watch(isLogin, (newVal) => {
+      if(newVal) { //로그인 됨
+        console.log("로그인 됨");
+        console.log("userRoles:", token);
+        fetchInitialNotifications();
+        // fetchUserNotifications();
+        connectSSE();
+      } else { //로그아웃
+        console.log("로그아웃 됨");
+        notifications.value = [];
+        eventSource.close();
+        eventSource = null;
+      }
     });
     
 
@@ -132,6 +187,7 @@ export function Notifications() {
     showDeleteNotificationModal,
     deleteId,
     deleteIndex,
+    isLogin,
     toggleNotifications,
     deleteNotification,
     deleteAllNotifications,
