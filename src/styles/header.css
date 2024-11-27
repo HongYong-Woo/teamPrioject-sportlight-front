@@ -14,7 +14,7 @@
 
 
 /* 네비게이션 */
-nav {
+/* nav {
   display: flex;
   height: 24px;
   gap: 1rem;
@@ -24,7 +24,7 @@ nav {
 nav>.menu {
   display: flex;
   height: 24px;
-}
+} */
 
 
 /* 검색창 */
