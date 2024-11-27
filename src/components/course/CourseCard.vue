@@ -5,6 +5,7 @@ import { faArrowRight, faStar, faLocationDot } from "@fortawesome/free-solid-svg
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+import priceFormatter from "../../util/priceFormatter.js";
 
 const props = defineProps({
     id: { type: Number, required: true },
@@ -27,10 +28,6 @@ const emits = defineEmits(['button-click']);
 const isHovered = ref(false);
 const discounted = computed(() => props.discountRate > 0);
 
-function addCommas(amount) {
-    return '￦' + amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
 function goToCourseDetail() {
   router.push({ name: 'CourseDetail', params: { id: props.id } });
 }
@@ -51,13 +48,13 @@ function goToCourseDetail() {
                 
                 <div v-if="discounted" class="price">
                     <span class="discount-rate">{{ discountRate }}%</span>
-                    <span class="tuition original">{{ addCommas(tuition) }}</span>
+                    <span class="tuition original">{{ priceFormatter(tuition) }}</span>
                     <div>
                     <FontAwesomeIcon :icon="faArrowRight" size="sm" />
-                    <span class="tuition discounted">{{ addCommas(tuition - tuition * discountRate / 100) }}</span>
+                    <span class="tuition discounted">{{ priceFormatter(tuition - tuition * discountRate / 100) }}</span>
                 </div>
                 </div>
-                <p v-else class="tuition">{{ addCommas(tuition) }}</p>
+                <p v-else class="tuition">{{ priceFormatter(tuition) }}</p>
                 
                 <div class="rating-details">
                     <span><FontAwesomeIcon :icon="faStar" size="sm" style="color: #FFD43B; margin-right: 4px;"/></span>
