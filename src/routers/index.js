@@ -2,13 +2,14 @@ import { createRouter, createWebHistory } from "vue-router";
 import courseRouter from './course.js';
 import communityRouter from './community.js';
 import courseDetailRouter from "./courseDetail.js";
-import hostChannelRouter from "./host-channel.js"
+import hostChannelRouter from "./host-channel.js";
+import applyCourse from "./applyCourse.js";
 const routes = [
     {
         path: '',
         component: () => import('../pages/MainPage.vue')
     },
-    courseRouter, communityRouter, courseDetailRouter, hostChannelRouter,
+    courseRouter, communityRouter, courseDetailRouter, hostChannelRouter, applyCourse,
 
     { path: '/join', component: () => import('../pages/auth/JoinPage.vue'), meta: { layout: 'empty' } },
     { path: '/find-id', component: () => import('../pages/auth/FindIdPage.vue'), meta: { layout: 'empty' } },
