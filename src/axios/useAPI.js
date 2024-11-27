@@ -3,14 +3,19 @@ import { useAuthStore } from "@/stores/auth";
 
 export const useAPI = () => {
     const baseURL = "http://localhost:8080";
-
+    const auth = useAuthStore();
+    const headers = {
+        "Content-Type": "application/json",
+    };
+    console.log("token: " + auth.token);
+    if(auth.isAuthenticated()) {
+        headers['Authorization'] = `Bearer ${auth.token}`;
+    }
     const api = axios.create({
         baseURL: baseURL,
-        headers: {
-            "Content-Type": "application/json",
-        },
         withCredentials: true,
         timeout: 10000,
+        headers: headers,
     });
 
     api.interceptors.request.use(
@@ -81,6 +86,7 @@ export const useAPI = () => {
             const response = await api.get(url, params);
             return response;
         } catch (error) {
+            console.log(error);
             throw error;
         }
     };
