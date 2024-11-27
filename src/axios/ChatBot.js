@@ -80,8 +80,8 @@ export function chatbot() {
 
     onMounted(() => {
         console.log("Chatbot mounted");
-         loadMessages();
-        //  openChatbot();
+        //  loadMessages();
+         openChatbot();
     });
 
     //messages 변경을 감지하여 saveMessages 호출, 채팅 스크롤을 아래로 내림
