@@ -72,7 +72,7 @@ onUnmounted(() => {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(115, 115, 115, 0.2);
     color: white;
     border: none;
     padding: 10px;
@@ -81,11 +81,11 @@ onUnmounted(() => {
 }
 
 .left-arrow {
-    left: 20px;
+    left: 150px;
 }
 
 .right-arrow {
-    right: 20px;
+    right: 150px;
 }
 
 /* 인디케이터 스타일 */

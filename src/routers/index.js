@@ -3,6 +3,7 @@ import courseRouter from './course.js';
 import communityRouter from './community.js';
 import courseDetailRouter from "./courseDetail.js";
 import hostChannelRouter from "./host-channel.js"
+
 const routes = [
     {
         path: '',
@@ -15,6 +16,8 @@ const routes = [
     { path: '/check-id', component: () => import('../pages/auth/CheckIdPage.vue'), meta: { layout: 'empty' } },
     { path: '/find-pwd', component: () => import('../pages/auth/FindPwdPage.vue'), meta: { layout: 'empty' } },
     { path: '/reset-pwd', component: () => import('../pages/auth/ResetPwdPage.vue'), meta: { layout: 'empty' } },
+    { path: '/mypage', component: () => import('../pages/MyPage.vue'), meta: { layout: 'default' } },
+      
 ];
 
 const router = createRouter({
