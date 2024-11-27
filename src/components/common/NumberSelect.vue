@@ -22,6 +22,9 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
+  },
+  inputName: {
+    type: String,
   }
 });
 
@@ -91,12 +94,12 @@ watch(
 
 <template>
   <div class="number-select">
-    <button class="minus-btn" @click="decrement" :disabled="localValue === min">
+    <button type="button" class="minus-btn" @click="decrement" :disabled="localValue === min">
       <FontAwesomeIcon :icon="faMinus" size="sm"/>
     </button>
-    <input type="number" v-model="localValue" :min="min" :max="max" :step="step" :placeholder="placeholder"
+    <input type="number" :name="inputName" v-model="localValue" :min="min" :max="max" :step="step" :placeholder="placeholder"
       @blur="handleInput" @keydown.enter="removeFocus"/>
-    <button class="plus-btn" @click="increment" :disabled="localValue === max">
+    <button type="button" class="plus-btn" @click="increment" :disabled="localValue === max">
       <FontAwesomeIcon :icon="faPlus" size="sm"/>
     </button>
   </div>
