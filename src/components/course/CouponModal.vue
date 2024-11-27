@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch } from 'vue';
+import Button from '../common/Button.vue';
 
 const props = defineProps({
     coupons: Array, // 쿠폰 목록
@@ -39,6 +40,10 @@ function formattedDateTime(dateTime) {
         <div class="modal-content" @click.stop>
             <h3>쿠폰 선택</h3>
             <div class="coupon-list">
+                <div v-if="!coupons.length" class="no-coupon">
+                    <p>🤪</p>
+                    사용 가능한 쿠폰이 없습니다.
+                </div>
                 <div v-for="coupon in coupons" :key="coupon.id" :class="['coupon-option', { selected: coupon === internalSelectedCoupon }]">
                     <label>
                         <div>
@@ -55,8 +60,8 @@ function formattedDateTime(dateTime) {
                 </div>
             </div>
             <div class="modal-actions">
-                <button @click="applyCoupon" :disabled="!internalSelectedCoupon">적용하기</button>
-                <button @click="cancelModal">취소</button>
+                <Button @click="applyCoupon" :disabled="!internalSelectedCoupon">적용하기</Button>
+                <Button @click="cancelModal">취소</Button>
             </div>
         </div>
     </div>
@@ -82,6 +87,21 @@ function formattedDateTime(dateTime) {
     border-radius: 8px;
     width: auto;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.no-coupon {
+    text-align: center;
+}
+
+.no-coupon>p {
+    font-size: 4rem;
+    animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(-360deg);
+    }
 }
 
 .coupon-list {
@@ -133,7 +153,7 @@ function formattedDateTime(dateTime) {
 .modal-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 1rem;
+    gap: 0.5rem;
     margin-top: 1rem;
 }
 
@@ -145,12 +165,15 @@ button {
 }
 
 button:first-of-type {
-    background-color: var(--primary-skyblue-color);
     color: white;
 }
 
 button:last-of-type {
-    background-color: #f44336;
+    background-color: #ccc;
     color: white;
+}
+
+button:last-of-type:hover {
+    background-color: #767676;
 }
 </style>
