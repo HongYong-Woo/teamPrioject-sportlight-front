@@ -1,9 +1,9 @@
 <template>
-  <div class="main-container">
-    <div class="sidebar">
+  <div class="main-container row">
+    <div class="sidebar col-3">
       <SideBar :categories="categories" :submenus="submenus"></SideBar>
     </div>
-    <div class="content">
+    <div class="content col-9">
       <router-view></router-view>
     </div>
   </div>
@@ -29,18 +29,16 @@ const submenus = {
 
 <style scoped>
 .main-container{
-  height: 1200px;
+  height: auto;
 }
 .sidebar {
   width: 25%;
-  height: fit-content;
+  height: 100%;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  float: left;
 }
 .content {
   width: 75%;
   height: 100%;
-  padding-left: 3%;
-  float: right;
+  padding: 3%;
 }
 </style>
