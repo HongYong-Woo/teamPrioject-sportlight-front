@@ -10,6 +10,7 @@ import Button from '../../components/common/Button.vue';
 import NumberSelect from '../../components/common/NumberSelect.vue';
 import ReviewList from '../../components/course/ReviewList.vue';
 import QnAList from '../../components/course/QnAList.vue';
+import router from '@/routers';
 
 const props = defineProps(
     {
@@ -28,7 +29,7 @@ const tuition = computed(() => courseDetails.value.tuition * request.value.parti
 const selectedTime = ref(null);
 
 const request = ref({
-    courseId: props.id,
+    scheduleId: null,
     dateTime: null,
     participantNum: 1,
 });
@@ -52,6 +53,31 @@ async function fetchSchedules() {
     }
 }
 
+// const applyForm = async () => {
+//     try {
+//         const form = new FormData();
+
+//         const scheduleId = request.value['scheduleId'];
+//         const dateTime = request.value['dateTime'].split('T')[0] + ' ' + request.value['dateTime'].split('T')[1];
+//         const participantNum = request.value['participantNum'];
+
+//         form.set('scheduleId', scheduleId);
+//         form.set('dateTime', dateTime);
+//         form.set('participantNum', participantNum);
+//         console.log(scheduleId);
+        
+//         const response = await post(`/courses/apply`, form, {
+//             headers: { "Content-Type": "multipart/form-data" },
+//         });
+//         const id = response.data.data;
+//         console.log(`id: ${id}`);
+//         alert("수강 신청이 완료되었습니다.");
+//     } catch (error) {
+//         console.error("Failed to submit the form", error);
+//         alert("수강 신청에 실패했습니다.");
+//     }
+// };
+
 onMounted(() => {
     fetchDetails();
     fetchSchedules();
@@ -62,10 +88,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
     window.removeEventListener('scroll', updateActiveSection);
 })
-
-function submitBtnClickEvent() {
-    alert('courseId : ' + request.value.courseId + ', dateTime : ' + request.value.dateTime + ', participantNum : ' + request.value.participantNum);
-}
 
 function updateSelectableDates() {
     const maxCapacity = courseDetails.value.maxCapacity;
@@ -117,6 +139,7 @@ function updateRequestDate(newDate) {
 function selectTimeEvent(schedule) {
   selectedTime.value = new Date(schedule.startTime);
   request.value.dateTime = schedule.startTime;
+  request.value.scheduleId = schedule.id;
 }
 
 const courseTimeRange = computed(() => {
@@ -197,19 +220,34 @@ const scrollToSection = (sectionId) => {
     });
 };
 
+
+function goToApplyCourse() {
+    if (!request.value.dateTime) {
+        alert("수강할 날짜를 선택해주세요.")
+        return;
+    }
+
+    if (!request.value.dateTime.includes('T')) {
+        alert("수강할 시간을 정해주세요.")
+        return;
+    }
+
+    router.push({ name: 'ApplyCourse', query: {scheduleId: request.value.scheduleId, participantNum: request.value.participantNum} })
+}
+
 </script>
 
 <template>
     <div>
-        <h1 class="category-name">{{ capitalizeFirstLetter(courseDetails.category) }}</h1>
+        <h2 class="category-name">{{ capitalizeFirstLetter(courseDetails.category) }}</h2>
         <div class="top">
             <div class="top-contents-container">
                 <div class="img-container">
                     <img src="../../assets/running.jpeg" alt="Course Image" style="background-color: white;">
                 </div>
                 <div class="contents-container">
-                    <h2 class="title">{{ courseDetails.title }}</h2>
-                    <h4 class="content">{{ courseDetails.content }}</h4>
+                    <h4 class="title">{{ courseDetails.title }}</h4>
+                    <h6 class="content">{{ courseDetails.content }}</h6>
                     <div class="host-info-container">
                         <img src="../../../public/favicon.ico" alt="Host Profile">
                         <span class="host-nickname">{{ courseDetails.nickname }}</span>
@@ -230,21 +268,21 @@ const scrollToSection = (sectionId) => {
                     </div>
                     <div class="attend-info-container">
                         <div class="participants">
-                            <h4> 인원 </h4>
-                            <NumberSelect :min="1" :max="100" :step="1" :modelValue="request.participantNum"
+                            <h6> 인원 </h6>
+                            <NumberSelect :min="1" :max="99" :step="1" :modelValue="request.participantNum"
                                 @update:modelValue="(newValue) => updateRequestParticipants(newValue)"
                                 placeholder="인원" />
                         </div>
                         <div class="calendar">
-                            <h4> 날짜 </h4>
+                            <h6> 날짜 </h6>
                             <Datepicker :startDate="request.dateTime" :isRange="false" :inline="false" locale="ko"
                                 format="yyyy/MM/dd" :selectableDates="selectableDates"
                                 @update:startDate="(newValue) => updateRequestDate(newValue)" />
                         </div>
                         <div class="start-time">
-                            <h4> 시간 </h4>
+                            <h6> 시간 </h6>
                             <div class="schedule-item">
-                                <Button v-for="schedule in filteredSchedules" :key="schedule.id" size="small"
+                                <Button v-for="schedule in filteredSchedules" :key="schedule.id" size="small" type="button"
                                     @click="selectTimeEvent(schedule)">
                                     {{ new Date(schedule.startTime).toLocaleTimeString([], {
                                         hour: '2-digit', minute: '2-digit'
@@ -253,12 +291,12 @@ const scrollToSection = (sectionId) => {
                             </div>
                         </div>
                         <div class="course-time">
-                            <h4>수업 시간</h4>
+                            <h6>수업 시간</h6>
                             <div>{{ courseTimeRange }}</div>
                         </div>
                         <div class="result-container">
-                            <h3 class="tuition">{{ addCommas(tuition) }}</h3>
-                            <Button class="attend-btn" @click="submitBtnClickEvent">
+                            <h5 class="tuition">{{ addCommas(tuition) }}</h5>
+                            <Button class="attend-btn" @click="goToApplyCourse()">
                                 수강 신청
                             </Button>
                         </div>
@@ -284,17 +322,17 @@ const scrollToSection = (sectionId) => {
                 </ul>
             </div>
             <div class="detail-container" id="intro">
-                <h2>클래스 소개</h2>
+                <h4>클래스 소개</h4>
                 <div class="course-intro">{{ courseDetails.content }}</div>
             </div>
             <div class="detail-container" id="location">
-                <h2>위치</h2>
+                <h4>위치</h4>
                 <div class="map">{{ courseDetails.latitude }}, {{ courseDetails.longitude }}</div>
                 <p>{{ courseDetails.address }} {{ courseDetails.detailAddress }}</p>
                 <p>찾아오는 길 ~~~~</p>
             </div>
             <div class="detail-container" id="host">
-                <h2>강사 소개</h2>
+                <h4>강사 소개</h4>
                 <div class="host-info-container">
                     <img src="../../../public/favicon.ico" alt="Host Profile">
                     <span class="host-nickname">{{ courseDetails.nickname }}</span>
@@ -320,13 +358,13 @@ const scrollToSection = (sectionId) => {
                 </div>
             </div>
             <div class="detail-container" id="reviews">
-                <h2>리뷰</h2>
+                <h4>리뷰</h4>
                 <div>
                     <ReviewList :courseId="courseId"/>
                 </div>
             </div>
             <div class="detail-container" id="qna">
-                <h2>Q&A</h2>
+                <h4>Q&A</h4>
                 <div>
                     <QnAList :courseId="courseId" />
                 </div>
@@ -341,12 +379,6 @@ const scrollToSection = (sectionId) => {
 </template>
 
 <style scoped>
-.top {}
-
-.category-name {
-}
-
-
 .top-contents-container {
     display: flex;
     flex-wrap: wrap;
@@ -388,12 +420,6 @@ const scrollToSection = (sectionId) => {
     height: auto;
 }
 
-.title {
-}
-
-.content {
-}
-
 .host-info-container {
     display: flex;
     align-items: center;
@@ -403,9 +429,6 @@ const scrollToSection = (sectionId) => {
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 50%;
-}
-
-.host-nickname {
 }
 
 .course-details-info {
@@ -418,6 +441,7 @@ const scrollToSection = (sectionId) => {
     display: flex;
     flex-direction: row;
     gap: 0.1rem;
+    align-items: center;
 }
 
 .attend-info-container {
@@ -531,9 +555,6 @@ const scrollToSection = (sectionId) => {
 
 .detail-container h2 {
     margin-bottom: 1rem;
-}
-
-.course-intro {
 }
 
 .map {
