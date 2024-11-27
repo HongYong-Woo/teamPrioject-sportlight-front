@@ -1,6 +1,7 @@
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, onUnmounted } from 'vue';
 import { useAPI } from './useAPI.js';
 import { useAuthStore }  from '../stores/auth.js';
+import dayjs from 'dayjs';
 
 
 export function Notifications() {
@@ -66,12 +67,15 @@ export function Notifications() {
     const changeReadStatus = (index, id) => {
       if(notifications.value[index].notiReadOrNot === false) {
          notifications.value[index].notiReadOrNot = true;
+         console.log("notification id:", id);
          patch(`/notifications/${id}`);
       }
     };
 
     // 개별 알림 삭제 index,id
     const deleteNotification = async () => {
+      console.log("deleteId:", deleteId.value);
+      notifications.value.splice(deleteIndex.value, 1);
       await remove(`/notifications/${deleteId.value}`);
       closeDeleteModal();
 
@@ -79,8 +83,8 @@ export function Notifications() {
   
     // 전체 알림 삭제
     const deleteAllNotifications = async () => {
+      console.log("delete all notifications");
       await remove('/notifications');
-
       notifications.value = [];
     };
 
@@ -94,8 +98,7 @@ export function Notifications() {
 
     // 시간 포맷 변경
     const formatTime = (time) => {
-   
-      const timestr = time[1] + "월" + time[2] + "일";
+      const timestr = dayjs(time).format('MM월 DD일');
       return timestr;
     };
 
@@ -119,6 +122,7 @@ export function Notifications() {
 
 
     onMounted(() => {
+      console.log("Notification mounted");
       fetchInitialNotifications();
       connectSSE();
       document.addEventListener('click', handleClickOutside);
@@ -128,18 +132,16 @@ export function Notifications() {
       document.removeEventListener('click', handleClickOutside);
     });
 
-    watch(isLogin, (newVal) => {
-      if(newVal) {
-        console.log("로그인 됨");
-        // fetchInitialNotifications();
-        // connectSSE();
-      } else {
-        console.log("로그아웃 됨");
+    onUnmounted
+    (() => {
+      console.log("Notification unmounted");
+      if(eventSource) {
         notifications.value = [];
         eventSource.close();
         eventSource = null;
       }
     });
+ 
     
 
   return {

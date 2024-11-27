@@ -38,7 +38,6 @@ const {
 </script>
 
 <template>
- {{ isLogin }}
   <div @click="handleClickOutside" style="position: relative">
     <!-- 알림 버튼 -->
       <span @click.stop="toggleNotifications" class="notification-button">
@@ -116,8 +115,8 @@ const {
 
 /* 알림창 버튼 */
 .notification-button {
-  position: absolute;
-  right: 100px;
+  /* position: absolute; */
+  /* right: 10px; */
   /* align-content: center; */
   background : none;
   cursor: pointer;
@@ -134,7 +133,7 @@ const {
 
 
 .red-dot {
-  bottom: 15px;
+  bottom: 30px;
   right: 0px;
   width: 17px;
   height: 17px;
