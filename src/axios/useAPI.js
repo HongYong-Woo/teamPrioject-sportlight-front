@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useAuthStore } from "@/stores/auth";
 
 export const useAPI = () => {
     const baseURL = "http://localhost:8080";
@@ -8,7 +9,71 @@ export const useAPI = () => {
         headers: {
             "Content-Type": "application/json",
         },
+        withCredentials: true,
+        timeout: 10000,
     });
+
+    api.interceptors.request.use(
+        (config) => {
+            try {
+                const token = localStorage.getItem("accessToken");
+                if (token) {
+                    config.headers["Authorization"] = `Bearer ${token}`;
+                }
+                return config;
+            } catch (error) {
+                console.error("Request interceptor error:", error);
+                return Promise.reject(error);
+            }
+        },
+        (error) => {
+            console.error("Request interceptor error:", error);
+            return Promise.reject(error);
+        }
+    );
+
+
+    api.interceptors.response.use(
+        (response) => response,
+        async (error) => {
+            const originalRequest = error.config;
+            
+            if (!error.response) {
+                return Promise.reject(new Error("네트워크 연결을 확인해주세요."));
+            }
+
+            if (
+                error.response.status === 401 && 
+                !originalRequest._retry && 
+                !originalRequest.url.includes('/login')
+            ) {
+                originalRequest._retry = true;
+                
+                try {
+                    const authStore = useAuthStore();
+                    const success = await authStore.refreshToken();
+                    
+                    if (success) {
+                        const newToken = localStorage.getItem("accessToken");
+                        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+                        return api(originalRequest);
+                    }
+                } catch (refreshError) {
+                    const authStore = useAuthStore();
+                    await authStore.logout();
+                    throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
+                }
+            }
+
+            if (error.response.status === 403) {
+                console.error("Permission denied:", error);
+                throw new Error("접근 권한이 없습니다.");
+            }
+
+            return Promise.reject(error);
+        }
+    );
+
 
     // GET 요청
     const get = async (url, params) => {
@@ -49,6 +114,8 @@ export const useAPI = () => {
             throw error;
         }
     };
+
+    
 
     return { get, post, patch, remove };
 }

@@ -3,23 +3,37 @@ import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from "@/stores/auth";
 import { useAPI } from "@/axios/useAPI";
+import { Eye, EyeOff } from 'lucide-vue-next';
+
 
 const currentStep = ref('login');
+
 const auth = useAuthStore();
 const route = useRoute();
 const router = useRouter();
+
 const userName = ref('');
 const userPhone = ref('');
+
 const loginId = ref('');
 const passwordConfirm = ref('');
+
 const loginError = ref("");
+
 const isVisible = ref(false);
 const emit = defineEmits(['close']);
+
 const loginIds = ref([]);
+
 const isCodeSent = ref(false);
 const timer = ref(180);
 const timerInterval = ref(null);
+
 const passwordResetSuccess = ref(false);
+
+const loginPasswordVisible = ref(false);
+const newPasswordVisible = ref(false);
+const confirmPasswordVisible = ref(false);
 
 const verificationCode = ref('');
 
@@ -28,25 +42,49 @@ const loginData = ref({
   password: '',
 });
 
+const passwordFieldType = ref("password");
+
+const switchVisibility = () => {
+  passwordFieldType.value = passwordFieldType.value === "password" ? "text" : "password";
+};
 
 function closeModal() {
-  isVisible.value = false;
-  currentStep.value = 'login';
-  loginError.value = '';
-  userName.value = '';
-  userPhone.value = '';
-  loginId.value = '';
-  verificationCode.value = '';
-  loginIds.value = [];
-  loginData.value.password = '';
-  passwordConfirm.value = '';
-  isCodeSent.value = false;
-  clearInterval(timerInterval.value);
-  timer.value = 180;
-  passwordResetSuccess.value = false;
-  auth.closeLoginModal();
-  emit('close');
-  router.replace({ query: { ...route.query, showLoginModal: undefined } });
+  try {
+    isVisible.value = false;
+    currentStep.value = 'login';
+    loginError.value = '';
+    userName.value = '';
+    userPhone.value = '';
+    loginId.value = '';
+    verificationCode.value = '';
+    loginIds.value = [];
+    loginData.value = {
+      username: '',
+      password: ''
+    };
+    passwordConfirm.value = '';
+    isCodeSent.value = false;
+    if (timerInterval.value) {
+      clearInterval(timerInterval.value);
+      timerInterval.value = null;
+    }
+    timer.value = 180;
+    passwordResetSuccess.value = false;
+    auth.closeLoginModal();
+    emit('close');
+  } catch (error) {
+    console.error('Error in closeModal:', error);
+  } finally {
+    if (route.query.showLoginModal) {
+      router.replace({
+        query: {
+          ...Object.fromEntries(
+            Object.entries(route.query).filter(([key]) => key !== 'showLoginModal')
+          )
+        }
+      });
+    }
+  }
 }
 
 function handleKeydown(event) {
@@ -75,15 +113,24 @@ watch(
   () => auth.showLoginModal,
   (newValue) => {
     isVisible.value = newValue;
+    if (!newValue) {
+      closeModal();
+    }
   },
   { immediate: true }
+);
+
+watch(
+  currentStep,
+  () => {
+    loginError.value = ''; 
+  }
 );
 
 
 const handleFindId = async () => {
   try {
     await auth.findLoginIds(userName.value, userPhone.value);
-    //console.log("아이디 목록:", auth.findIdMessage);
     loginIds.value = auth.findIdMessage;
     if (loginIds.value.length > 0) {
       currentStep.value = 'check-id';
@@ -113,12 +160,11 @@ const sendVerificationCode = async () => {
 
     console.log("응답:", response.data);
     console.log("response.data:", response?.data);
-    
+
     if (response?.data?.code === 200) {
       isCodeSent.value = true;
       loginError.value = "";
       startTimer();
-      //currentStep.value = 'verify-code';
     } else {
       loginError.value = "인증번호를 전송할 수 없습니다.";
     }
@@ -159,8 +205,8 @@ const verifyCodeAndMoveToResetPwd = async () => {
 };
 
 const changePassword = async () => {
-  console.log("changePassword 함수 실행됨");  // 디버깅용 로그
-  
+  console.log("changePassword 함수 실행됨");
+
   if (!loginData.value.password || !passwordConfirm.value) {
     loginError.value = "새 비밀번호와 확인 비밀번호를 모두 입력해주세요.";
     return;
@@ -174,12 +220,12 @@ const changePassword = async () => {
   const { post } = useAPI();
 
   try {
-    console.log("API 요청 시작"); // 디버깅용 로그
+    console.log("API 요청 시작");
     const response = await post("/api/auth/password-reset/confirm", {
       newPwd: loginData.value.password,
     });
 
-    console.log("API 응답:", response); // 디버깅용 로그
+    console.log("API 응답:", response);
 
     if (response?.data?.code === 200) {
       console.log("비밀번호 변경 성공");
@@ -195,11 +241,33 @@ const changePassword = async () => {
   }
 };
 
+const passwordRules = computed(() => ({
+  length: loginData.value.password?.length >= 8,
+  complexity: /(?=.*[A-Za-z])(?=.*\d)|(?=.*[A-Za-z])(?=.*\W)|(?=.*\d)(?=.*\W)/.test(
+    loginData.value.password || ""
+  ),
+  noRepeat: !/(.)\1{2,}/.test(loginData.value.password || ""),
+}));
 
+const isPasswordValid = computed(() => {
+  return passwordRules.value.length && passwordRules.value.complexity && passwordRules.value.noRepeat;
+});
 
 const passwordMismatchError = computed(() => {
-  return loginData.password && passwordConfirm.value && loginData.password !== passwordConfirm.value;
+  return (
+    loginData.value.password &&
+    passwordConfirm.value &&
+    loginData.value.password !== passwordConfirm.value
+  );
 });
+
+function validatePassword() {
+  console.log("Password Validation:", passwordRules.value);
+}
+
+function validatePasswordConfirm() {
+  console.log("Confirm Password Validation:", !passwordMismatchError.value);
+}
 
 
 const startTimer = () => {
@@ -230,17 +298,20 @@ const formattedTimer = computed(() => {
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown);
-
   if (route.query.showLoginModal === 'true') {
     isVisible.value = true;
+    auth.openLoginModal();
   }
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
-  clearInterval(timerInterval.value);
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value);
+    timerInterval.value = null;
+  }
+  closeModal();
 });
-
 
 </script>
 
@@ -248,25 +319,35 @@ onUnmounted(() => {
   <div v-if="isVisible" class="modal-overlay">
     <transition name="fade-slide">
       <div class="modal-content">
-        <button class="back-btn" v-if="currentStep !== 'login'" @click="currentStep = currentStep === 'login'">
-          ← 뒤로
+        <button class="back-btn" v-if="currentStep !== 'login'"
+          @click="currentStep = currentStep === 'find-id' ? 'login' : 'login'">
+          ⬅
         </button>
         <button class="close-btn" @click="closeModal">×</button>
-    
+
         <div v-if="currentStep === 'login'">
           <img src="@/assets/logo.png" alt="Logo" class="modal-logo" />
-          <div class="input-group">
-            <input type="email" class="input-box" placeholder="이메일" v-model="loginData.username" required />
-          </div>
-          <div class="input-group">
-            <input type="password" class="input-box" placeholder="비밀번호" v-model="loginData.password" required />
-          </div>
-          <button class="login-btn" @click="handleLogin">로그인</button>
+          <form @submit.prevent="handleLogin">
+            <div class="input-group">
+              <input type="email" class="input-box" placeholder="이메일" v-model="loginData.username" required />
+            </div>
+            <div class="input-group">
+              <div class="input-group password-input-wrapper">
+                <input :type="loginPasswordVisible ? 'text' : 'password'" class="input-box" placeholder="비밀번호"
+                  v-model="loginData.password" required />
+                <button type="button" class="password-toggle-btn" @click="loginPasswordVisible = !loginPasswordVisible">
+                  <Eye v-if="loginPasswordVisible" class="password-icon" />
+                  <EyeOff v-else class="password-icon" />
+                </button>
+              </div>
+            </div>
+            <button type="submit" class="login-btn">로그인</button>
+          </form>
           <p v-if="loginError" class="error-message">{{ loginError }}</p>
           <div class="extra-options">
-            <button @click="currentStep = 'find-pwd'" class ="authButton">비밀번호 찾기</button> |
+            <button @click="currentStep = 'find-pwd'" class="authButton">비밀번호 찾기</button> |
             <a href="/join">회원가입</a> |
-            <button @click="currentStep = 'find-id'" class="authButton">이메일(아이디) 찾기</button> 
+            <button @click="currentStep = 'find-id'" class="authButton">이메일(아이디) 찾기</button>
           </div>
 
           <div class="social-login">
@@ -282,13 +363,13 @@ onUnmounted(() => {
         </div>
 
         <div v-if="currentStep === 'find-pwd'">
-          <h1>비밀번호 찾기</h1>
-          <p class="subtitle">이름, 전화번호, 이메일을 입력하시고<br/> 해당 이메일에서 인증코드를 확인해주세요.</p>
+          <h2>비밀번호 찾기</h2>
+          <p class="subtitle">이름, 전화번호, 이메일을 입력하시고<br /> 해당 이메일에서 인증코드를 확인해주세요.</p>
           <div class="input-group">
             <input type="text" class="input-box" placeholder="이름" v-model="userName" required />
           </div>
           <div class="input-group">
-            <input type="text" class="input-box" placeholder="전화번호" v-model="userPhone" required />
+            <input type="text" class="input-box" placeholder="휴대폰 번호 입력 (- 제외)" v-model="userPhone" required />
           </div>
           <div class="input-group email-group">
             <input type="email" class="input-box email-box" placeholder="이메일" v-model="loginId" required />
@@ -304,32 +385,65 @@ onUnmounted(() => {
         </div>
 
         <div v-if="currentStep === 'change-password'">
-          <h1>비밀번호 변경</h1>
+          <h2>비밀번호 변경</h2>
           <p class="subtitle">새 비밀번호를 입력하고 변경 버튼을 눌러주세요.</p>
+
           <div class="input-group">
-            <input type="password" class="input-box" placeholder="새 비밀번호" v-model="loginData.password" required />
+            <div class="input-group">
+              <div class="password-input-wrapper">
+                <input :type="newPasswordVisible ? 'text' : 'password'" class="input-box" placeholder="새 비밀번호"
+                  v-model="loginData.password" @input="validatePassword" required />
+                <button type="button" class="password-toggle-btn" @click="newPasswordVisible = !newPasswordVisible">
+                  <Eye v-if="newPasswordVisible" class="password-icon" />
+                  <EyeOff v-else class="password-icon" />
+                </button>
+              </div>
+              <div class="password-rules">
+                <div :class="{ valid: passwordRules.length }">
+                  <span class="check-box" :class="{ valid: passwordRules.length }">✓</span>
+                  <span>8자 이상</span>
+                </div>
+                <div :class="{ valid: passwordRules.complexity }">
+                  <span class="check-box" :class="{ valid: passwordRules.complexity }">✓</span>
+                  <span>숫자와 영문자 조합</span>
+                </div>
+                <div :class="{ valid: passwordRules.noRepeat }">
+                  <span class="check-box" :class="{ valid: passwordRules.noRepeat }">✓</span>
+                  <span>같은 문자 3회 연속 사용 불가</span>
+                </div>
+              </div>
+            </div>
           </div>
+
           <div class="input-group">
-            <input type="password" class="input-box" placeholder="새 비밀번호 확인" v-model="passwordConfirm" required />
+            <div class="input-group password-input-wrapper">
+              <input :type="confirmPasswordVisible ? 'text' : 'password'" class="input-box" placeholder="새 비밀번호 확인"
+                v-model="passwordConfirm" @input="validatePasswordConfirm" required />
+              <button type="button" class="password-toggle-btn" @click="confirmPasswordVisible = !confirmPasswordVisible">
+                <Eye v-if="confirmPasswordVisible" class="password-icon" />
+                <EyeOff v-else class="password-icon" />
+              </button>
+            </div>
+            <p v-if="passwordMismatchError" class="error-message">비밀번호가 일치하지 않습니다.</p>
           </div>
-          <button 
-            class="login-btn" 
-            @click="changePassword" 
-            :disabled="passwordMismatchError || !loginData.password || !passwordConfirm">
+
+          <button class="login-btn" @click="changePassword" :disabled="!isPasswordValid || passwordMismatchError">
             변경 완료
           </button>
+
           <p v-if="loginError" class="error-message">{{ loginError }}</p>
         </div>
 
+
         <div v-if="currentStep === 'find-id'">
-          <h1>아이디 찾기</h1>
+          <h2>아이디 찾기</h2>
           <p class="subtitle">정보를 입력하시면<br />
-             회원님의 이메일이 표시됩니다.</p>
+            회원님의 이메일이 표시됩니다.</p>
           <div class="input-group">
             <input type="text" class="input-box" placeholder="이름" v-model="userName" required />
           </div>
           <div class="input-group">
-            <input type="text" class="input-box" placeholder="전화번호" v-model="userPhone" required />
+            <input type="text" class="input-box" placeholder="휴대폰 번호 입력 (- 제외)" v-model="userPhone" required />
           </div>
           <button class="find-id-btn" @click="handleFindId">아이디 찾기</button>
           <p v-if="loginError" class="error-message">
@@ -338,7 +452,7 @@ onUnmounted(() => {
         </div>
 
         <div v-if="currentStep === 'check-id'">
-          <h1>아이디 확인</h1>
+          <h2>아이디 확인</h2>
           <p class="subtitle">회원님의 이메일을 확인하세요</p>
           <div v-if="loginIds.length > 0" class="id-list">
             <div v-for="id in loginIds" :key="id" class="id-item">
@@ -348,7 +462,7 @@ onUnmounted(() => {
           <p v-else>일치하는 아이디를 찾을 수 없습니다.</p>
           <div class="button-group">
             <button class="login-btn standard" @click="currentStep = 'login'">로그인 하기</button>
-            <button class="login-btn outlined" @click="$router.push('/find-pwd')">비밀번호 찾기</button>
+            <button class="login-btn outlined" @click="currentStep = 'find-pwd'">비밀번호 찾기</button>
           </div>
         </div>
       </div>
@@ -365,6 +479,7 @@ onUnmounted(() => {
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -374,8 +489,9 @@ onUnmounted(() => {
 .modal-content {
   background: white;
   padding: 2.5rem;
-  width: 550px;
-  height: 650px;
+  width: 420px;
+  height: 530px;
+  min-width: 350px;
   border-radius: 12px;
   text-align: center;
   position: relative;
@@ -386,11 +502,11 @@ onUnmounted(() => {
 
 .close-btn {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 9px;
+  right: 25px;
   background: none;
   border: none;
-  font-size: 2rem;
+  font-size: 1.5rem;
   color: #a0a0a0;
   cursor: pointer;
 }
@@ -400,55 +516,60 @@ onUnmounted(() => {
 }
 
 .modal-logo {
-  width: 250px;
+  width: 200px;
   margin: 30px auto 20px;
 }
 
 .input-group {
-  margin-bottom: 10px;
+  margin-bottom: 3px;
 }
 
 .input-box {
   width: 100%;
-  padding: 1.2rem;
-  margin-top: 5px;
+  height: 52px;
+  padding: 0.9rem;
+  margin-top: 6px;
   border: 1px solid #ccc;
-  border-radius: 12px;
-  font-size: 21px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.email-group div:first-of-type input {
+  border-radius: 10px;
 }
 
 .login-btn {
   width: 100%;
-  padding: 1.2rem;
-  background-color: #e79843;
+  height: 52px;
+  background-color: #FF9300;
   color: white;
   border: none;
-  border-radius: 12px;
-  margin: 15px 0;
-  font-size: 20px;
+  border-radius: 8px;
+  margin: 7px 0;
+  font-size: 16px;
   cursor: pointer;
 }
 
 .reset-pwd-btn {
   width: 100%;
-  padding: 1.2rem;
-  background-color: #e79843;
+  height: 53px;
+  background-color: #FF9300;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   margin: 5px 0;
-  font-size: 20px;
+  font-size: 16px;
   cursor: pointer;
 }
 
 .verify-btn {
-  height: 63px;
-  width: 120px;
-  font-size: 16px;
-  border: 1px solid #e79843;
+  height: 50px;
+  width: 80px;
+  font-size: 15px;
+  border: 1px solid #FF9300;
   background-color: white;
-  color: #e79843;
-  border-radius: 8px;
+  color: #FF9300;
+  border-radius: 8px !important;
   cursor: pointer;
 }
 
@@ -457,6 +578,7 @@ onUnmounted(() => {
   color: #999;
   border-color: #ccc;
   cursor: not-allowed;
+  border-radius: 8px;
 }
 
 .verify-btn:hover {
@@ -465,15 +587,16 @@ onUnmounted(() => {
 
 .login-btn.outlined {
   background-color: white;
-  color: #e79843;
-  border: 2px solid #e79843;
+  color: #FF9300;
+  border: 2px solid #FF9300;
 }
 
 .login-btn.outlined:hover {
   background-color: #fdf2e1;
-  color: #d7893e;
-  border-color: #d7893e;
+  color: #FF9300;
+  border-color: #FF9300;
 }
+
 .login-btn.offset {
   margin-top: 40px;
 }
@@ -488,6 +611,7 @@ onUnmounted(() => {
 }
 
 .id-item {
+  font-size: 13px;
   margin-bottom: 5px;
   padding: 8px 12px;
   background-color: #f1f1f1;
@@ -495,9 +619,8 @@ onUnmounted(() => {
 }
 
 .extra-options {
-  font-size: 18px;
+  font-size: 13px;
   color: #959595;
-  margin-bottom: 10px;
 }
 
 .extra-options a {
@@ -515,15 +638,15 @@ onUnmounted(() => {
 .social-btn-container {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 15px;
 }
 
 .social-btn {
-  width: 70px;
-  height: 70px;
+  width: 55px;
+  height: 55px;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 14px;
   display: flex;
   justify-content: center;
@@ -549,7 +672,7 @@ onUnmounted(() => {
 .social-divider span {
   margin: 0 10px;
   color: #aaa;
-  font-size: 19px;
+  font-size: 13px;
   white-space: nowrap;
 }
 
@@ -568,27 +691,30 @@ onUnmounted(() => {
 
 .email-group {
   display: flex;
-  align-items:end;
+  align-items: end;
   gap: 5px;
+  margin-bottom: 3px;
 }
 
 .email-box {
   flex: 1;
-  height: 63px;
+  height: 50px;
   padding: 12px 16px;
   border: 1px solid #ccc;
-  border-radius: 12px;
-  font-size: 21px;
+  border-radius: 8px !important;
+  font-size: 16px;
 }
 
 .authButton {
-  font-size: 18px;
+  font-size: 13px;
   color: #a0a0a0;
   text-decoration: underline;
   cursor: pointer;
-  background: none; 
+  background: none;
   border: none;
-  padding: 0;
+  padding: 3px;
+  margin-top: 5px;
+  margin-bottom: 3px;
 }
 
 .link:hover {
@@ -599,32 +725,32 @@ onUnmounted(() => {
 .find-id-btn,
 .find-pwd-btn {
   width: 100%;
-  padding: 1.2rem;
-  background-color: #e79843;
+  height: 53px;
+  background-color: #FF9300;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   margin: 10px 0;
-  font-size: 20px;
+  font-size: 16px;
   cursor: pointer;
   text-align: center;
 }
 
 .back-btn {
-  font-size: 1.2rem; 
-  font-weight: bold; 
+  font-size: 1.0rem;
+  font-weight: bold;
   color: #7a7a7a;
   background: none;
   border: none;
   padding: 0;
   position: absolute;
-  top: 27px; 
-  left: 15px;
+  top: 19px;
+  left: 25px;
   cursor: pointer;
 }
 
 .back-btn:hover {
-  color: #999; 
+  color: #999;
 }
 
 .find-id-btn:hover,
@@ -633,22 +759,21 @@ onUnmounted(() => {
 }
 
 .found-id {
-  font-size: 1.5rem;
+  font-size: 15px;
   font-weight: bold;
   margin: 10px 0;
 }
 
 .subtitle {
-  font-size: 1.3rem;
+  font-size: 0.9rem;
   color: #666;
   margin-bottom: 20px;
 }
 
 .error-message {
   color: red;
-  font-size: 1.2rem;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  font-size: 0.8rem;
+  margin-bottom: 5px;
 }
 
 .fade-slide-enter-active,
@@ -662,30 +787,80 @@ onUnmounted(() => {
   transform: translateY(20px);
 }
 
-h1 {
-  margin-top: 80px;
+h2 {
+  margin-top: 30px;
   margin-bottom: 15px;
 }
 
 .button-group {
   display: flex;
   justify-content: center;
-  gap: 15px; /* 버튼 간격 */
+  height: 67px;
+  gap: 15px;
   margin-top: 20px;
 }
 
 .login-btn.small {
-  padding: 0.8rem 2rem; /* 가로 길이 조정 */
-  font-size: 1rem; /* 버튼 텍스트 크기 */
+  padding: 0.8rem 2rem;
+  font-size: 16px;
 }
 
 .login-btn.small.secondary {
-  background-color: #ccc; 
+  background-color: #ccc;
   color: #333;
 }
 
 .login-btn.small.secondary:hover {
-  background-color: #bbb; /* 호버 시 색상 변경 */
+  background-color: #bbb;
 }
 
+.password-rules {
+  margin-top: 10px;
+}
+
+.password-rules div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ccc;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.password-rules div.valid {
+  color: #FF9300;
+}
+
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle-btn:hover {
+  color: #333;
+}
+
+.password-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.password-input-wrapper .input-box {
+  padding-right: 45px;
+}
 </style>

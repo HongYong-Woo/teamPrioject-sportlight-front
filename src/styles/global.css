@@ -6,6 +6,7 @@
     text-decoration: none;
 }
 
+
 /* 헤더 */
 header {
     position: fixed;
@@ -38,12 +39,11 @@ header button {
 
 main {
     margin: 64px 15% 0 15%;
+    min-height: 100px;
 }
 
 footer {
     border-top: solid 1px var(--border-color);
-    margin: 64px 15% 0 15%;
-    padding: 24px 0 48px 0;
 }
 
 
