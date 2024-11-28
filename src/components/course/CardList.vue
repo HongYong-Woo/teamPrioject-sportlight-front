@@ -1,5 +1,6 @@
 <!-- src/components/CardList.vue -->
 <script setup>
+import { onMounted } from 'vue';
 import Card from './CourseCard.vue';
 
 const props = defineProps({
@@ -7,7 +8,6 @@ const props = defineProps({
         type: Array,
     }
 })
-
 </script>
 
 <template>

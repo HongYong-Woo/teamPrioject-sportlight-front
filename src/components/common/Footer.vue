@@ -50,8 +50,6 @@ const companyInfo = {
 .footer {
   background: #f9f9f9;
   color: #404040;
-  position: fixed;
-  bottom: 0;
   width: 100%;
   min-width: 320px;
 }

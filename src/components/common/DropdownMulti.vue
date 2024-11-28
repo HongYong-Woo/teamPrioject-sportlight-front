@@ -62,7 +62,7 @@ onUnmounted(() => {
         <!-- 드롭다운 토글 -->
         <button @click="toggleDropdown"
             :class="selectedValues.length > 0 ? 'dropdown-toggle-exist' : 'dropdown-toggle-none'">
-            {{ selectedValues.length == 0 ? placeholder : selectedValues.join(', ') }}
+            <span>{{ selectedValues.length == 0 ? placeholder : selectedValues.join(', ') }}</span>
             <FontAwesomeIcon v-if="!isOpen && selectedValues.length == 0" :icon="faChevronDown" size="sm"
                 style="pointer-events: none;" />
             <FontAwesomeIcon v-else :icon="faXmark" size="sm" @click="clearSelectedValues" class="xmark" />
@@ -108,6 +108,12 @@ onUnmounted(() => {
     border-radius: 8px;
     background-color: white;
     height: 2.2rem;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown>button>span {
+    margin-right: 0.25rem;
 }
 
 .dropdown-toggle-exist {
