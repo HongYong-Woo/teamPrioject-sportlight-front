@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import { useAPI } from "@/axios/useAPI";
 import TextEditor from "@/components/common/TextEditor.vue";
 import DaumAddressAPI from "@/components/common/DaumAddressAPI.vue";
@@ -9,6 +9,7 @@ const { get, post } = useAPI();
 const categories = ref([]);
 const titleMaxLength = 50;
 const classImgInput = ref(null);
+const possibleTodayReservation = ref(null);
 
 const titleCounter = ref(0);
 const onInputTitle = e => {
@@ -33,12 +34,12 @@ onMounted(() => {
   fetchCategories();
 })
 
-const inputData = ref({
+let inputData = ref({
   title: '',
   categoryId: null,
   content: '',
   tuition: 0,
-  discountRate: 0.0,
+  discountRate: 0,
   level: '',
   address: '',
   detailAddress: '',
@@ -46,7 +47,7 @@ const inputData = ref({
   longitude: 127.055536318832,
   time: 0,
   maxCapacity: 0,
-  minDaysPriorToReservation: 0,
+  minDaysPriorToReservation: 1,
   mainImage: null,
   images: [],
 });
@@ -108,7 +109,45 @@ const getTotalTuition = computed(() => {
     return Math.ceil(inputData.value.tuition * (1 - inputData.value.discountRate / 100));
   }
   return inputData.value.tuition;
-})
+});
+
+const createForm = () => {
+  const form = new FormData();
+  form.set('title', inputData.value.title);
+  console.log(form.get('title'));
+  form.set('categoryId', inputData.value.categoryId);
+  form.set('content', inputData.value.content);
+  form.set('tuition', inputData.value.tuition);
+  form.set('discountRate', inputData.value.discountRate);
+  form.set('level', inputData.value.level);
+  form.set('address', inputData.value.address);
+  form.set('detailAddress', inputData.value.detailAddress);
+  form.set('latitude', inputData.value.latitude);
+  form.set('longitude', inputData.value.longitude);
+  form.set('time', inputData.value.time);
+  form.set('maxCapacity', inputData.value.maxCapacity);
+  form.set('minDaysPriorToReservation', inputData.value.minDaysPriorToReservation);
+  form.set('mainImage', inputData.value.mainImage);
+  for (let i = 0; i < inputData.value.images.length; i++) {
+    form.append(`images`, inputData.value.images[i]);
+  }
+  return form;
+};
+
+const submitRegisterForm = async () => {
+  try {
+    const form = createForm();
+    const response = await post('/courses', form, {
+      headers: {'Content-Type': 'multipart/form-data'}
+    });
+    const id = response.data.data;
+    console.log(`id: ${id}`);
+    alert("클래스 개설 신청이 완료되었습니다.");
+    //router.go();
+  } catch (error) {
+    console.error('Failed to fetch Details', error);
+  }
+}
 </script>
 <template>
   <div class="mb-4">
@@ -146,7 +185,7 @@ const getTotalTuition = computed(() => {
     </div>
     <div>
       <select class="form-select" v-model="inputData.categoryId">
-        <option :value="null">선택</option>
+        <option :value="null" disabled>선택</option>
         <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
       </select>
     </div>
@@ -269,7 +308,7 @@ const getTotalTuition = computed(() => {
   <div class="title">
     5. 클래스 금액
   </div>
-  <div>
+  <div class="mb-3">
     <div class="sub-title">
       인당 금액
     </div>
@@ -280,7 +319,7 @@ const getTotalTuition = computed(() => {
       <input class="form-control m-2" style="width: 150px;" type="number" v-model="inputData.tuition"> 원
     </div>
   </div>
-  <div>
+  <div class="mb-3">
     <div class="sub-title">
       할인 옵션
     </div>
@@ -291,7 +330,7 @@ const getTotalTuition = computed(() => {
       <input class="form-control m-2" style="width: 150px;" type="number" v-model="inputData.discountRate"> %
     </div>
   </div>
-  <div>
+  <div class="mb-3">
     <div class="sub-title">
       최종 수강 금액
     </div><br>
@@ -299,11 +338,33 @@ const getTotalTuition = computed(() => {
       <input class="form-control m-2" style="width: 150px;" disabled v-model="getTotalTuition"> 원
     </div>
   </div>
+  <div class="mb-3">
+    <div class="sub-title">
+      당일 예약 가능 여부
+    </div>
+    <div class="require">
+      (필수)
+    </div>
+    <div class="row radio-area">
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" id="possibleCheck" v-model="possibleTodayReservation" :value="true" @click="inputData.minDaysPriorToReservation=0;">
+        <label class="form-check-label" for="possibleCheck">가능해요</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" id="impossibleCheck" v-model="possibleTodayReservation" :value="false" @click="inputData.minDaysPriorToReservation=1;">
+        <label class="form-check-label" for="impossibleCheck">불가능해요</label>
+        <div class="min-days-box row align-items-center" v-show="possibleTodayReservation === false">
+          최소 <input class="form-control m-2" style="width: 50px;" v-model="inputData.minDaysPriorToReservation"> 일 전에는 예약이 필요해요
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="title">
     6. 클래스 일정
   </div>
+  {{ inputData }}
   <div>
-    <button class="btn btn-primary">등록</button>
+    <button class="btn btn-primary" @click="submitRegisterForm">등록</button>
   </div>
 
 </template>
@@ -338,5 +399,14 @@ const getTotalTuition = computed(() => {
   margin-right: 10px;
   border: 2px solid #b2b2b2;
 }
-
+.min-days-box {
+  border: 2px solid #FF9300;
+  width: fit-content;
+  padding: 0 50px;
+  margin-top: 10px;
+  border-radius: 10px;
+}
+.radio-area {
+  margin-left: 5px;
+}
 </style>
