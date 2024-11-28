@@ -7,7 +7,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
 import Login from './Login.vue';
 import ProfileDropdown from './ProfileDropdown.vue';
-
+import Notification from '../Notification.vue';
 const auth = useAuthStore();
 const router = useRouter();
 
@@ -160,6 +160,7 @@ onUnmounted(() => {
                     강사 등록하기
                 </RouterLink>
 
+                <Notification v-if="isAuthenticated"/>
                 <ProfileDropdown
                     v-if="isAuthenticated"
                     :is-visible="isMyPageDropdownVisible"
@@ -215,6 +216,7 @@ onUnmounted(() => {
                     </transition>
                     <li v-if="isAuthenticated">
                         <RouterLink to="/" class="sidebar-link">강사 등록하기</RouterLink>
+                        
                     </li>
                 </ul>
             </div>

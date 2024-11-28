@@ -1,20 +1,13 @@
 <script setup>
-import { ref, defineProps, computed, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, computed } from 'vue';
 import { Notifications } from '../axios/Notifications';
 
 const {
   notifications,
-  unreadCount,
-  showNotifications,
   showDeleteNotificationModal,
-  deleteIndex,
-  toggleNotifications,
   deleteNotification,
-  deleteAllNotifications,
   changeReadStatus,
   formatTime,
-  handleClickOutside,
   openDeleteModal,
   closeDeleteModal
 } = Notifications();
