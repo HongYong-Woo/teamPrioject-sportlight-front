@@ -114,10 +114,6 @@ function addCommas(amount) {
                 @update:selectedValues="(newValues) => updateFilterOption('categories', newValues)"
                 placeholder="카테고리" />
 
-
-            <NumberSelect :min="1" :max="100" :step="1" :modelValue="filterOptions.participants"
-                @update:modelValue="(newValue) => updateFilterOption('participants', newValue)" placeholder="인원" />
-
             <Slider :minValue="minPrice" :maxValue="maxPrice" :minRange="minRange" :maxRange="maxRange"
                 :name="addCommas(filterOptions.minPrice) + ' ~ ' + addCommas(filterOptions.maxPrice)" placeholder="가격"
                 @update:minValue="(newValue) => updateFilterOption('minPrice', newValue)"
@@ -136,8 +132,6 @@ function addCommas(amount) {
     </div>
 
     <CardTable :courses="courses" />
-
-    <div style="height: 200vh;"></div>
 </template>
 
 <style scoped>
@@ -150,6 +144,7 @@ function addCommas(amount) {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .datepicker-container {
