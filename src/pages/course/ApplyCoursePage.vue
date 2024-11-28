@@ -5,6 +5,8 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import CouponModal from '../../components/course/CouponModal.vue';
 import Button from '../../components/common/Button.vue';
+import router from "@/routers";
+import Payment from '../../components/payment/Payment.vue';
 
 const { get, post } = useAPI();
 const scheduleId = useRoute().query.scheduleId;
@@ -35,6 +37,9 @@ const courseTotalDiscount = computed(() => {
 const totalAmount = computed(() => {
     return Math.ceil(scheduleDetails.value.tuition - courseTotalDiscount.value);
 })
+const isOpenPay = ref(false);
+
+
 
 async function fetchScheduleInfo() {
     try {
@@ -84,6 +89,14 @@ function applyCoupon(coupon) {
 function cancelCoupon() {
     selectedCoupon.value = null;
     couponIsOpen.value = false;
+}
+
+function openPayment() {
+    isOpenPay.value = true;
+}
+
+function clickOutside() {
+    isOpenPay.value = false;
 }
 </script>
 <template>
@@ -189,7 +202,7 @@ function cancelCoupon() {
                     <div class="payment-info-title">총 결제 금액</div>
                     <div>{{ priceFormatter(totalAmount) }}</div>
                 </div>
-                <Button class="submit-button">
+                <Button class="submit-button" @click="openPayment">
                     결제하기
                 </Button>
                 <span class="agreement">
@@ -197,6 +210,9 @@ function cancelCoupon() {
                 </span>
             </div>
         </div>
+    </div>
+    <div v-if="isOpenPay" @click="clickOutside" class="payment-container">
+        <Payment class="payment-widget" @click.stop/>
     </div>
 </template>
 <style scoped>
@@ -409,5 +425,19 @@ function cancelCoupon() {
     color: #767676;
     font-size: 0.75rem;
     display: block;
+}
+
+.payment-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 99999;
+}
+
+.payment-widget {
+    margin-top: 10%;
 }
 </style>
