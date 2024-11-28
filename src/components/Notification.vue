@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, computed, onMounted } from 'vue';
+import { computed, ref } from 'vue';
 import { Notifications } from '../axios/Notifications';
 
 const {
@@ -8,7 +8,6 @@ const {
   showNotifications,
   showDeleteNotificationModal,
   deleteIndex,
-  isLogin,
   toggleNotifications,
   deleteNotification,
   deleteAllNotifications,
@@ -19,21 +18,33 @@ const {
   closeDeleteModal
 } = Notifications();
 
+var notificationType = ref('ALL');
 
   // 필터링된 알림
   const filterNotifications = computed(() => {
-    if(props.notificationType === '') {
+    if(notificationType.value === 'ALL') {
       return notifications.value;
     } 
     else {
-      return notifications.value.filter(n => n.notiType === props.notificationType);
+      return notifications.value.filter(n => n.notiType === notificationType.value);
     }
    });
 
-   const props = defineProps({
-  notificationType: String, // notificationType은 String 타입으로 정의
+   //카테고리 배열 생성
+  const notiCatregorys = computed(() => {
+    const categories = []; // 새로운 배열 생성
+    categories.push('ALL'); // 전체 카테고리 추가
+    notifications.value.forEach((notification) => {
+      if (!categories.includes(notification.notiType)) {
+        categories.push(notification.notiType); // 중복되지 않도록 추가
+      }
+  });
+  return categories;
 });
 
+const selectNotiType = (category) => {
+  notificationType.value = category;
+};
 
 </script>
 
@@ -55,6 +66,14 @@ const {
         <button @click="deleteAllNotifications" class="delete-all-button">
           모두 삭제
           </button>
+      </div>
+
+      <!-- 메시지 필터링 -->
+      <div class="category-body">
+      
+        <span v-for="(categoriy) in notiCatregorys">
+          <button @click="selectNotiType(categoriy)" class="category-button">{{ categoriy }}</button>
+        </span>
       </div>
 
       <div class="modal-content">
@@ -189,13 +208,29 @@ flex-direction: row;
   align-items: center;
 
   cursor: pointer;
+}
 
+.category-body{
+  background: rgb(230, 230, 230);
+  overflow-x: auto;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.category-button{
+  display: inline-block; /* 버튼 내부 텍스트를 가로로 */
+  font-size: 15px;
+  border-radius: 20px;
+  border: 1px solid black;
+  margin: 3px;
+  padding: 3px 5px;
+  background: white;
   
 }
 
 .modal-content {
   padding: 10px;
-  height: 440px;
+  height: 340px;
   width: 98%;
   border-radius: 10px;
   overflow-y: auto;

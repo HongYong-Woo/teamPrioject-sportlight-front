@@ -1,6 +1,5 @@
 import { ref, computed, onMounted, onBeforeUnmount, onUnmounted } from 'vue';
 import { useAPI } from './useAPI.js';
-import { useAuthStore }  from '../stores/auth.js';
 import dayjs from 'dayjs';
 
 
@@ -16,9 +15,7 @@ export function Notifications() {
     patch
    } = useAPI();
 
-   const { isAuthenticated,  
-    } = useAuthStore();
-  const isLogin = ref(isAuthenticated());
+
    let eventSource = null;
 
     // SSE 연결
@@ -151,7 +148,6 @@ export function Notifications() {
     showDeleteNotificationModal,
     deleteId,
     deleteIndex,
-    isLogin,
     toggleNotifications,
     deleteNotification,
     deleteAllNotifications,

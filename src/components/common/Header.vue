@@ -160,7 +160,7 @@ onUnmounted(() => {
                     강사 등록하기
                 </RouterLink>
 
-                <Notification v-if="isAuthenticated" notificationType=""/>
+                <Notification v-if="isAuthenticated"/>
                 <ProfileDropdown
                     v-if="isAuthenticated"
                     :is-visible="isMyPageDropdownVisible"
