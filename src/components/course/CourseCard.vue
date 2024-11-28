@@ -5,6 +5,7 @@ import { faArrowRight, faStar, faLocationDot } from "@fortawesome/free-solid-svg
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+import priceFormatter from "../../util/priceFormatter.js";
 
 const props = defineProps({
     id: { type: Number, required: true },
@@ -27,12 +28,8 @@ const emits = defineEmits(['button-click']);
 const isHovered = ref(false);
 const discounted = computed(() => props.discountRate > 0);
 
-function addCommas(amount) {
-    return '￦' + amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
 function goToCourseDetail() {
-  router.push({ name: 'CourseDetail', params: { id: props.id } });
+    router.push({ name: 'CourseDetail', params: { id: props.id } });
 }
 </script>
 
@@ -44,40 +41,47 @@ function goToCourseDetail() {
             <h2 class="card-title">{{ title }}</h2>
             <div class="host-details">
                 <img src="../../../public/favicon.ico" alt="Profile image" class="profile-image">
-                <p>{{ nickname }}</p>
+                <div>{{ nickname }}</div>
             </div>
 
             <div class="card-details" v-if="!isHovered">
-                
+
                 <div v-if="discounted" class="price">
                     <span class="discount-rate">{{ discountRate }}%</span>
-                    <span class="tuition original">{{ addCommas(tuition) }}</span>
+                    <span class="tuition original">{{ priceFormatter(tuition) }}</span>
                     <div>
-                    <FontAwesomeIcon :icon="faArrowRight" size="sm" />
-                    <span class="tuition discounted">{{ addCommas(tuition - tuition * discountRate / 100) }}</span>
+                        <FontAwesomeIcon :icon="faArrowRight" size="sm" />
+                        <span class="tuition discounted">{{ priceFormatter(tuition - tuition * discountRate / 100)
+                            }}</span>
+                    </div>
                 </div>
-                </div>
-                <p v-else class="tuition">{{ addCommas(tuition) }}</p>
-                
+                <p v-else class="tuition">{{ priceFormatter(tuition) }}</p>
+
                 <div class="rating-details">
-                    <span><FontAwesomeIcon :icon="faStar" size="sm" style="color: #FFD43B; margin-right: 4px;"/></span>
+                    <span>
+                        <FontAwesomeIcon :icon="faStar" size="sm" style="color: #FFD43B; margin-right: 4px;" />
+                    </span>
                     <span class="rating">{{ rating }}</span>
                     <span>({{ reviewCount }})</span>
                 </div>
-                
+
             </div>
 
             <div v-else class="card-details">
-                <span class="address"><FontAwesomeIcon :icon="faLocationDot" size="sm" style="margin-right: 4px;"/>{{ address }}</span>
+                <span class="address">
+                    <FontAwesomeIcon :icon="faLocationDot" size="sm" style="margin-right: 4px;" />{{ address }}
+                </span>
                 <div class="details-container">
                     <div class="details-left">
                         <span class="category">{{ category }}</span>
                         <span class="level">{{ level }}</span>
                     </div>
-                    <span class="time details-right"><FontAwesomeIcon :icon="faClock" size="sm"/> {{ time }}분</span>
+                    <span class="time details-right">
+                        <FontAwesomeIcon :icon="faClock" size="sm" /> {{ time }}분
+                    </span>
                 </div>
             </div>
-            
+
         </div>
     </div>
 </template>
@@ -87,7 +91,8 @@ function goToCourseDetail() {
 .card {
     width: 266px;
     height: 300px;
-    padding: 0 8px;
+    padding: 8px;
+    border: none;
 }
 
 .card:hover {
@@ -96,7 +101,7 @@ function goToCourseDetail() {
 
 .card-image {
     width: 100%;
-    height: 150px;
+    aspect-ratio: 3/ 2;
     border-radius: 8px;
     object-fit: cover;
     background-color: darkred;
@@ -105,9 +110,10 @@ function goToCourseDetail() {
 /* 강사 정보 */
 .host-details {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    margin-top: 8px;
 }
+
 .profile-image {
     width: 24px;
     height: 24px;
@@ -118,9 +124,7 @@ function goToCourseDetail() {
 }
 
 
-.card-content {
-    
-}
+.card-content {}
 
 .card-title {
     font-size: 1.3rem;
@@ -128,7 +132,6 @@ function goToCourseDetail() {
 
 /* 정보 */
 .card-details {
-    margin-top: 8px;
 }
 
 /* 기본 */
@@ -160,7 +163,7 @@ function goToCourseDetail() {
 }
 
 /* Hover 시 */
-.address{
+.address {
     color: #aaa;
     font-size: 0.9rem;
 }
@@ -176,18 +179,13 @@ function goToCourseDetail() {
     flex-direction: column;
 }
 
-.details-rigth {
+.details-rigth {}
 
-}
+.category {}
 
-.category {
-}
-
-.level {
-}
+.level {}
 
 .time {
     align-content: end;
 }
-
 </style>

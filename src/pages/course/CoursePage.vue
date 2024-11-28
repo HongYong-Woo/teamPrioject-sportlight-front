@@ -17,6 +17,8 @@ const filterOptions = ref({
     participants: 1,
     startDate: null, // 시작 날짜
     endDate: null, // 종료 날짜
+    latitude: 0,
+    longitude: 0,
     searchText: null,
     sortType: 'POPULARITY'
 });
@@ -47,20 +49,19 @@ const sortType = [
 
 async function fetchInitialcourses() {
     try {
+        console.log(filterOptions.value.levels.join(','));
         const response = await get('/courses/list', {
-            params: {
-                categories: filterOptions.value.categories.join(','),
-                levels: filterOptions.value.levels.join(','),
-                minPrice: filterOptions.value.minPrice,
-                maxPrice: filterOptions.value.maxPrice,
-                participants: filterOptions.value.participants,
-                startDate: filterOptions.value.startDate,
-                endDate: filterOptions.value.endDate,
-                minTime: filterOptions.value.minTime,
-                maxTime: filterOptions.value.maxTime,
-                searchText: filterOptions.value.searchText,
-                sortType: filterOptions.value.sortType
-            }
+            categories: filterOptions.value.categories.join(','),
+            levels: filterOptions.value.levels.join(','),
+            minPrice: filterOptions.value.minPrice,
+            maxPrice: filterOptions.value.maxPrice,
+            participants: filterOptions.value.participants,
+            startDate: filterOptions.value.startDate,
+            endDate: filterOptions.value.endDate,
+            latitude: filterOptions.value.latitude,
+            longitude: filterOptions.value.longitude,
+            searchText: filterOptions.value.searchText,
+            sortType: filterOptions.value.sortType
         });
         courses.value = response.data;
     } catch (error) {
@@ -71,9 +72,9 @@ async function fetchInitialcourses() {
 async function fetchCategories() {
     try {
         const response = await get('/categories');
-        categories.value = response.data.map((category, index) => ({
-            value: category,
-            label: category
+        categories.value = response.data.data.map((category) => ({
+            value: category.id,
+            label: category.name
         }));
         console.log(categories.value);
     } catch (error) {
@@ -110,25 +111,19 @@ function addCommas(amount) {
                 @update:selectedValues="(newValues) => updateFilterOption('levels', newValues)" placeholder="난이도" />
 
             <DropdownMulti :options="categories" :selectedValues="filterOptions.categories"
-                @update:selectedValues="(newValues) => updateFilterOption('categories', newValues)" placeholder="카테고리" />
-
-
-            <NumberSelect :min="1" :max="100" :step="1" :modelValue="filterOptions.participants"
-                @update:modelValue="(newValue) => updateFilterOption('participants', newValue)" placeholder="인원" />
+                @update:selectedValues="(newValues) => updateFilterOption('categories', newValues)"
+                placeholder="카테고리" />
 
             <Slider :minValue="minPrice" :maxValue="maxPrice" :minRange="minRange" :maxRange="maxRange"
                 :name="addCommas(filterOptions.minPrice) + ' ~ ' + addCommas(filterOptions.maxPrice)" placeholder="가격"
                 @update:minValue="(newValue) => updateFilterOption('minPrice', newValue)"
                 @update:maxValue="(newValue) => updateFilterOption('maxPrice', newValue)" />
 
-                <div class="datepicker-container">
-                    <Datepicker 
-                    :startDate="startDate" 
-                    :endDate="endDate"
+            <div class="datepicker-container">
+                <Datepicker :startDate="startDate" :endDate="endDate"
                     @update:startDate="(newValue) => updateFilterOption('startDate', newValue)"
-                    @update:endDate="(newValue) => updateFilterOption('endDate', newValue)" 
-                    />
-                </div>
+                    @update:endDate="(newValue) => updateFilterOption('endDate', newValue)" />
+            </div>
         </div>
         <div class="sort">
             <DropdownSingle :options="sortType" :selectedValue="filterOptions.sortType"
@@ -137,8 +132,6 @@ function addCommas(amount) {
     </div>
 
     <CardTable :courses="courses" />
-
-    <div style="height: 200vh;"></div>
 </template>
 
 <style scoped>
@@ -151,6 +144,7 @@ function addCommas(amount) {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .datepicker-container {

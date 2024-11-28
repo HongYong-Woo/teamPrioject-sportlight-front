@@ -2,14 +2,15 @@ import { createRouter, createWebHistory } from "vue-router";
 import courseRouter from './course.js';
 import communityRouter from './community.js';
 import courseDetailRouter from "./courseDetail.js";
-import hostChannelRouter from "./host-channel.js"
+import hostChannelRouter from "./host-channel.js";
+import applyCourseRouter from "./applyCourse.js";
 
 const routes = [
     {
         path: '',
         component: () => import('../pages/MainPage.vue')
     },
-    courseRouter, communityRouter, courseDetailRouter, hostChannelRouter,
+    courseRouter, communityRouter, courseDetailRouter, hostChannelRouter, applyCourseRouter,
 
     { path: '/join', component: () => import('../pages/auth/JoinPage.vue'), meta: { layout: 'empty' } },
     { path: '/find-id', component: () => import('../pages/auth/FindIdPage.vue'), meta: { layout: 'empty' } },
@@ -17,7 +18,8 @@ const routes = [
     { path: '/find-pwd', component: () => import('../pages/auth/FindPwdPage.vue'), meta: { layout: 'empty' } },
     { path: '/reset-pwd', component: () => import('../pages/auth/ResetPwdPage.vue'), meta: { layout: 'empty' } },
     { path: '/mypage', component: () => import('../pages/MyPage.vue'), meta: { layout: 'default' } },
-      
+    { path: '/payment/success', component: () => import('../pages/payment/SuccessPage.vue'), meta: { layout: 'empty' }},
+    { path: '/payment/fail', component: () => import('../pages/payment/FailPage.vue'), meta: { layout: 'empty' }},
 ];
 
 const router = createRouter({

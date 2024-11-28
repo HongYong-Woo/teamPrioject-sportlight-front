@@ -63,7 +63,7 @@ onUnmounted(() => {
     <div ref="dropdown" class="dropdown">
         <!-- 드롭다운 토글 -->
         <button @click="toggleDropdown">
-            {{ selectedLabel }}
+            <span>{{ selectedLabel }}</span>
             <FontAwesomeIcon :icon="faChevronDown" size="sm" style="pointer-events: none;" />
         </button>
 
@@ -111,6 +111,12 @@ onUnmounted(() => {
     background-color: white;
     border: 1px solid #ccc;
     height: 2.2rem;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown>button>span {
+    margin-right: 0.25rem;
 }
 
 .dropdown-menu {

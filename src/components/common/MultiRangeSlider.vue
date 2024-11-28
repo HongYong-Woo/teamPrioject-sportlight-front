@@ -119,7 +119,7 @@ const onRightChange = (event) => {
 <template>
     <div ref="dropdown" class="dropdown">
         <button @click="toggleDropdown" :class="localMaxRange != localMaxValue || localMinRange != localMinValue ? 'dropdown-toggle-exist' : 'dropdown-toggle-none'">
-            {{ localMaxRange == localMaxValue && localMinRange == localMinValue ? props.placeholder : props.name }}
+            <span>{{ localMaxRange == localMaxValue && localMinRange == localMinValue ? props.placeholder : props.name }}</span>
             <FontAwesomeIcon v-if="!isOpen && localMaxRange == localMaxValue && localMinRange == localMinValue" :icon="faChevronDown" size="sm"
                 style="pointer-events: none;" />
             <FontAwesomeIcon v-else :icon="faXmark" size="sm" @click="clearValues" class="xmark" />
@@ -161,6 +161,12 @@ const onRightChange = (event) => {
     cursor: pointer;
     border-radius: 8px;
     background-color: white;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown>button>span {
+    margin-right: 0.25rem;
 }
 
 .dropdown-toggle-exist {
@@ -215,6 +221,7 @@ const onRightChange = (event) => {
     border: 1px solid #ccc;
     margin-top: 8px;
     border-radius: 8px;
+    z-index: 5;
 }
 
 .middle {
