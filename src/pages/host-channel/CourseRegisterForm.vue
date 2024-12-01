@@ -4,6 +4,8 @@ import { useAPI } from "@/axios/useAPI";
 import TextEditor from "@/components/common/TextEditor.vue";
 import DaumAddressAPI from "@/components/common/DaumAddressAPI.vue";
 import KakaoMapAPI from "@/components/common/KakaoMapAPI.vue";
+import DatePicker from "@/components/common/DatePicker.vue";
+import DateTimeSchedule from "@/components/host-channel/DateTimeSchedule.vue";
 
 const { get, post } = useAPI();
 const categories = ref([]);
@@ -34,7 +36,7 @@ onMounted(() => {
   fetchCategories();
 })
 
-let inputData = ref({
+const inputData = ref({
   title: '',
   categoryId: null,
   content: '',
@@ -51,6 +53,12 @@ let inputData = ref({
   mainImage: null,
   images: [],
 });
+
+const schedules = ref([]);
+
+const removeFrontZero = num => {
+  return num.replace(/(^0+)/, "");
+};
 
 const inputClassImg = e => {
   let file = e.target.files[0];
@@ -73,7 +81,7 @@ const inputMainImage = e => {
   } else {
     alert("이미지 형식을 등록해주세요.")
   }
-}
+};
 
 let mainImgThumb = computed(() => {
   if(inputData.value.mainImage === null) {
@@ -90,6 +98,10 @@ let classImgThumbList = computed(() => {
   }
   return imgSrcList;
 });
+
+const cancelClassImg = index => {
+  inputData.value.images.splice(index, 1);
+};
 
 const inputContent = text => {
   inputData.value.content = text;
@@ -113,21 +125,20 @@ const getTotalTuition = computed(() => {
 
 const createForm = () => {
   const form = new FormData();
-  form.set('title', inputData.value.title);
-  console.log(form.get('title'));
-  form.set('categoryId', inputData.value.categoryId);
-  form.set('content', inputData.value.content);
-  form.set('tuition', inputData.value.tuition);
-  form.set('discountRate', inputData.value.discountRate);
-  form.set('level', inputData.value.level);
-  form.set('address', inputData.value.address);
-  form.set('detailAddress', inputData.value.detailAddress);
-  form.set('latitude', inputData.value.latitude);
-  form.set('longitude', inputData.value.longitude);
-  form.set('time', inputData.value.time);
-  form.set('maxCapacity', inputData.value.maxCapacity);
-  form.set('minDaysPriorToReservation', inputData.value.minDaysPriorToReservation);
-  form.set('mainImage', inputData.value.mainImage);
+  form.append('title', inputData.value.title);
+  form.append('categoryId', inputData.value.categoryId);
+  form.append('content', inputData.value.content);
+  form.append('tuition', inputData.value.tuition);
+  form.append('discountRate', inputData.value.discountRate);
+  form.append('level', inputData.value.level);
+  form.append('address', inputData.value.address);
+  form.append('detailAddress', inputData.value.detailAddress);
+  form.append('latitude', inputData.value.latitude);
+  form.append('longitude', inputData.value.longitude);
+  form.append('time', inputData.value.time);
+  form.append('maxCapacity', inputData.value.maxCapacity);
+  form.append('minDaysPriorToReservation', inputData.value.minDaysPriorToReservation);
+  form.append('mainImage', inputData.value.mainImage);
   for (let i = 0; i < inputData.value.images.length; i++) {
     form.append(`images`, inputData.value.images[i]);
   }
@@ -140,14 +151,24 @@ const submitRegisterForm = async () => {
     const response = await post('/courses', form, {
       headers: {'Content-Type': 'multipart/form-data'}
     });
-    const id = response.data.data;
-    console.log(`id: ${id}`);
+    const id = response.data.data.id;
+    console.log(id);
+    await submitRegisterScheduleForm(id);
     alert("클래스 개설 신청이 완료되었습니다.");
-    //router.go();
   } catch (error) {
-    console.error('Failed to fetch Details', error);
+    alert("클래스 개설 신청이 실패했습니다.");
   }
-}
+};
+
+const submitRegisterScheduleForm = async (courseId) => {
+  try {
+    if(schedules.value && schedules.value.length > 0) {
+      await post(`/courses/${courseId}/schedules`, schedules.value);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 </script>
 <template>
   <div class="mb-4">
@@ -172,7 +193,7 @@ const submitRegisterForm = async () => {
       (필수)
     </div>
     <div>
-      <input v-model="inputData.title" class="form-control" type="text" :maxlength="titleMaxLength" @input="onInputTitle">
+      <input v-model.trim="inputData.title" class="form-control" type="text" :maxlength="titleMaxLength" @input="onInputTitle">
       <small id="requestAmountHelp" class="form-text text-muted float-end">{{ titleCounter }} / {{ titleMaxLength }}</small>
     </div>
   </div>
@@ -216,13 +237,16 @@ const submitRegisterForm = async () => {
         (선택, 최대 8장 등록 가능)
       </div>
       <div class="row">
-        <div class="col-3 mb-3" v-for="(src, index) in classImgThumbList" :key="index">
+        <div class="class-img-thumb col-3 mb-3" v-for="(src, index) in classImgThumbList" :key="index">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill img-cancel-btn" viewBox="0 0 16 16" @click="cancelClassImg(index)">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+          </svg>
           <img width="100" height="100" class="rounded" alt="class-img" :src="src">
         </div>
         <div v-if="inputData.images.length < 8" class="col-3 mb-3">
           <input type="file" id="upload-class-image" @change="inputClassImg" hidden/>
           <label for="upload-class-image">
-            <img width="100" height="100" class="rounded" alt="class-image" src="@/assets/img_upload_thumb.jpg" />
+            <img class="rounded" width="100" height="100" alt="class-image" src="@/assets/img_upload_thumb.jpg" />
           </label>
         </div>
       </div>
@@ -268,7 +292,7 @@ const submitRegisterForm = async () => {
           (필수)
         </div>
         <div class="row align-items-center">
-          <input class="form-control m-2" style="width: 80px;" type="number" v-model="inputData.time">시간
+          <input class="form-control m-2" style="width: 80px;" v-model.number="inputData.time" maxlength="3">시간
         </div>
       </div>
       <div class="col">
@@ -279,7 +303,7 @@ const submitRegisterForm = async () => {
           (필수)
         </div>
         <div class="row align-items-center">
-          <input class="form-control m-2" style="width: 80px;" type="number" v-model="inputData.maxCapacity"> 명
+          <input class="form-control m-2" style="width: 80px;" v-model.number="inputData.maxCapacity" maxlength="3"> 명
         </div>
       </div>
     </div>
@@ -297,7 +321,7 @@ const submitRegisterForm = async () => {
     <DaumAddressAPI :address="inputData.address" @assignAddress="assignAddress" @assignLatLng="assignLatLng"></DaumAddressAPI>
     <div class="row">
       <div class="col-9">
-        <input class="form-control" type="text" v-model="inputData.detailAddress" placeholder="상세주소">
+        <input class="form-control" type="text" v-model.trim="inputData.detailAddress" placeholder="상세주소" maxlength="255">
       </div>
     </div>
     <div class="mt-3 mb-2">
@@ -316,7 +340,7 @@ const submitRegisterForm = async () => {
       (필수)
     </div>
     <div class="row align-items-center">
-      <input class="form-control m-2" style="width: 150px;" type="number" v-model="inputData.tuition"> 원
+      <input class="form-control m-2" style="width: 150px;" v-model.trim="inputData.tuition" maxlength="9"> 원
     </div>
   </div>
   <div class="mb-3">
@@ -327,7 +351,7 @@ const submitRegisterForm = async () => {
       (선택)
     </div>
     <div class="row align-items-center">
-      <input class="form-control m-2" style="width: 150px;" type="number" v-model="inputData.discountRate"> %
+      <input class="form-control m-2" style="width: 150px;" v-model.trim="inputData.discountRate" maxlength="2"> %
     </div>
   </div>
   <div class="mb-3">
@@ -354,7 +378,7 @@ const submitRegisterForm = async () => {
         <input class="form-check-input" type="radio" id="impossibleCheck" v-model="possibleTodayReservation" :value="false" @click="inputData.minDaysPriorToReservation=1;">
         <label class="form-check-label" for="impossibleCheck">불가능해요</label>
         <div class="min-days-box row align-items-center" v-show="possibleTodayReservation === false">
-          최소 <input class="form-control m-2" style="width: 50px;" v-model="inputData.minDaysPriorToReservation"> 일 전에는 예약이 필요해요
+          최소 <input class="form-control m-2" style="width: 50px;" v-model.number="inputData.minDaysPriorToReservation" maxlength="2"> 일 전에는 예약이 필요해요
         </div>
       </div>
     </div>
@@ -362,7 +386,13 @@ const submitRegisterForm = async () => {
   <div class="title">
     6. 클래스 일정
   </div>
-  {{ inputData }}
+  <div class="form-text mb-3">
+    일정을 등록하지 않고 클래스 개설 요청이 가능합니다.<br>
+    클래스 일정은 개설 후 개설 클래스 > 클래스 관리에서 언제든지 등록할 수 있습니다.
+  </div>
+  <div>
+    <DateTimeSchedule :schedules="schedules"></DateTimeSchedule>
+  </div>
   <div>
     <button class="btn btn-primary" @click="submitRegisterForm">등록</button>
   </div>
@@ -408,5 +438,13 @@ const submitRegisterForm = async () => {
 }
 .radio-area {
   margin-left: 5px;
+}
+.class-img-thumb {
+  position : relative;
+}
+.img-cancel-btn {
+  position : absolute;
+  top: 3px;
+  right: 10px;
 }
 </style>
