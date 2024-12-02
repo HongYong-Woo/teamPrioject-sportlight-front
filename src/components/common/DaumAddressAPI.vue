@@ -91,15 +91,22 @@ const execDaumPostcode = () => {
 
 <template>
   <div class="row">
-    <div class="col-9">
+    <div class="address-input col-9">
       <input class="form-control" type="text" @click="execDaumPostcode" v-model="address" placeholder="주소"><br>
     </div>
     <div class="col-3">
-      <input class="btn btn-primary" type="button" @click="execDaumPostcode" value="주소 찾기">
+      <button class="btn" @click="execDaumPostcode">주소 찾기</button>
     </div>
   </div>
 </template>
 
 <style scoped>
-
+.address-input {
+  margin-top: 4px;
+}
+.btn {
+  background-color: #FF9300;
+  color: white;
+  margin-top: 2px;
+}
 </style>
