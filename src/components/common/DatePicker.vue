@@ -23,6 +23,10 @@ const props = defineProps({
     inline: {
         type: Boolean,
         default: false
+    },
+    position: {
+        type: String,
+        dafault: 'center',
     }
 });
 
@@ -75,9 +79,9 @@ const handleDateChange = (value) => {
             :disabledDates="disabledDates"
             :minDate="today"
             :monthChangeOnScroll="false"
+            :position="position"
             @update:modelValue="handleDateChange"
         />
-        <div v-if="!inline && isExist" class="exist-light"></div>
     </div>
 </template>
 
@@ -85,7 +89,7 @@ const handleDateChange = (value) => {
 .datepicker-container {
     position: relative;
     display: inline-flex;
-    width: 100%;
+    width: 100% !important;
 }
 
 .dp__input {
@@ -94,27 +98,16 @@ const handleDateChange = (value) => {
     font-size: 1rem;
 }
 
+.dp--menu-wrapper {
+    z-index: 99999;
+}
+
 .dp__input:not(:placeholder-shown) {
     border-color: #333;
 }
 
 .dp__arrow_top {
     display: none;
-}
-
-.dp--clear-btn>.dp__icon:hover {
-    color: var(--primary-orange-color);
-}
-
-.exist-light {
-    position: absolute;
-    top: -3px;
-    right: -3px;
-    width: 12px;
-    height: 12px;
-    background-color: var(--primary-orange-color);
-    border: 2px solid white;
-    border-radius: 50%;
 }
 
 </style>
