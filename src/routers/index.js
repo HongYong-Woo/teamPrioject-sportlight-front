@@ -25,6 +25,10 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes,
+    // 라우팅 시 스크롤 동작 제어
+    scrollBehavior (){
+        return { top: 0, behavior: 'instant' };
+    },
 });
 
 export default router;

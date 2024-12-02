@@ -94,12 +94,12 @@
 
 /* 버튼 스타일 변형 */
 .btn-primary {
-    background-color: var(--primary-skyblue-color);
+    background-color: var(--primary-orange-color);
     color: white;
 }
 
 .btn-primary:hover {
-    background-color: #0056b3;
+    background-color: #e97700;
 }
 
 .btn-secondary {

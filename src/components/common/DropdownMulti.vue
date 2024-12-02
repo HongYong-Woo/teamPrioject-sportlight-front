@@ -1,7 +1,7 @@
 <script setup>
-import { faChevronDown, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
 
 const props = defineProps({
     options: Array,
@@ -11,162 +11,115 @@ const props = defineProps({
 
 const emit = defineEmits(['update:selectedValues']);
 
-const isOpen = ref(false);
-const selectedValues = ref([...props.selectedValues]); // 로컬 상태로 복사
-const dropdown = ref(null);
+const isOpen = ref(false); // 아코디언 열림 상태
+const selectedValues = ref([...props.selectedValues]); // 로컬 상태 복사
 
-// 드롭다운 열기/닫기
+// 아코디언 열기/닫기
 function toggleDropdown() {
     isOpen.value = !isOpen.value;
-}
-
-function clearSelectedValues() {
-    selectedValues.value = [];
-    emit('update:selectedValues', selectedValues.value);
-}
-
-// 바깥쪽 클릭 감지 및 닫기
-function clickOutside(event) {
-    if (isOpen.value && dropdown.value && !dropdown.value.contains(event.target)) {
-        isOpen.value = false;
-    }
 }
 
 // 체크박스 값 변경 시 부모로 업데이트 emit
 function updateSelected() {
     emit('update:selectedValues', selectedValues.value);
 }
-
-// props.selectedValues 변경 시 로컬 상태 동기화
-watch(
-    () => props.selectedValues,
-    (newValues) => {
-        selectedValues.value = [...newValues];
-    },
-    { immediate: true } // 컴포넌트 초기화 시 즉시 실행
-);
-
-// 마운트 시 이벤트 리스너 추가
-onMounted(() => {
-    document.addEventListener('click', clickOutside);
-});
-
-// 언마운트 시 이벤트 리스너 제거
-onUnmounted(() => {
-    document.removeEventListener('click', clickOutside);
-});
 </script>
 
 <template>
-    <div ref="dropdown" class="dropdown">
-        <!-- 드롭다운 토글 -->
-        <button @click="toggleDropdown"
-            :class="selectedValues.length > 0 ? 'dropdown-toggle-exist' : 'dropdown-toggle-none'">
-            <span>{{ selectedValues.length == 0 ? placeholder : selectedValues.join(', ') }}</span>
-            <FontAwesomeIcon v-if="!isOpen && selectedValues.length == 0" :icon="faChevronDown" size="sm"
-                style="pointer-events: none;" />
-            <FontAwesomeIcon v-else :icon="faXmark" size="sm" @click="clearSelectedValues" class="xmark" />
-            <div v-if="selectedValues.length > 0" class="exist-light"></div>
-        </button>
+    <div class="accordion">
+        <!-- 아코디언 헤더 -->
+        <div @click="toggleDropdown" class="accordion-header">
+            <span>{{ placeholder }}</span>
+            <FontAwesomeIcon :icon="isOpen ? faChevronUp : faChevronDown" size="sm" class="arrow"/>
+        </div>
 
-        <!-- 드롭다운 메뉴 -->
-        <transition name="dropdown-fade">
-            <div v-if="isOpen" class="dropdown-menu">
-                <label v-for="option in options" :key="option.value" class="dropdown-menu-option">
-                    <input type="checkbox" :value="option.value" v-model="selectedValues" @change="updateSelected" />
-                    <span style="width: 4px;"></span>
+        <!-- 아코디언 내용 -->
+        <div
+            class="accordion-content"
+            :class="{ open: isOpen }"
+        >
+            <div class="accordion-inner">
+                <label
+                    v-for="option in options"
+                    :key="option.value"
+                    class="dropdown-menu-option"
+                >
+                    <input
+                        type="checkbox"
+                        :value="option.value"
+                        v-model="selectedValues"
+                        @change="updateSelected"
+                    />
                     {{ option.label }}
                 </label>
             </div>
-        </transition>
+        </div>
     </div>
 </template>
 
 <style scoped>
-.dropdown {
-    position: relative;
-    display: inline-flex;
-    font-size: 1rem;
-}
-
-.dropdown-fade-enter-active,
-.dropdown-fade-leave-active {
-    transition: all 0.3s ease;
-}
-
-.dropdown-fade-enter-from, .dropdown-fade-leave-to {
-    opacity: 0;
-}
-
-.dropdown-fade-enter-to, .dropdown-fade-leave-from {
-    opacity: 1;
-}
-
-.dropdown>button {
-    padding: 0.5rem 1rem 0.5rem 1rem;
-    cursor: pointer;
-    border-radius: 8px;
-    background-color: white;
-    height: 2.2rem;
+.accordion {
     display: flex;
+    flex-direction: column;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 0.5rem;
+}
+
+.accordion-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 0.5rem;
+    border-radius: 4px;
 }
 
-.dropdown>button>span {
-    margin-right: 0.25rem;
+.arrow {
+    transition: all 0.5s ease;
 }
 
-.dropdown-toggle-exist {
-    border: 1px solid #333;
+/* 아코디언 내용 */
+.accordion-content {
+    max-height: 0; /* 기본 상태에서 높이 0 */
+    overflow: hidden;
+    transition: max-height 0.5s ease; /* 전환 효과 */
+    padding: 0 0.5rem;
 }
 
-.dropdown-toggle-none {
-    border: 1px solid #ccc;
+.accordion-content.open {
+    max-height: 300px; /* 충분히 큰 값으로 설정 (내용에 맞게 변경 가능) */
 }
 
-.xmark {
-    background: none;
-    border: none;
-}
-
-.xmark:hover {
-    color: var(--primary-orange-color);
-}
-
-.exist-light {
-    position: absolute;
-    top: -3px;
-    right: -3px;
-    width: 12px;
-    height: 12px;
-    background-color: var(--primary-orange-color);
-    border: 2px solid white;
-    border-radius: 50%;
-}
-
-.dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: max-content;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 8px;
-    margin-top: 8px;
+.accordion-inner {
     display: flex;
     flex-direction: column;
 }
 
 .dropdown-menu-option {
     display: flex;
-    align-content: center;
     align-items: center;
-    padding: 0.5rem 4px;
-    border-radius: 6px;
+    padding: 0.5rem 0;
+    font-size: 1rem;
 }
 
-.dropdown-menu-option:hover {
-    background-color: #f0f0f0;
+[type="checkbox"] {
+    appearance: none; /* 기본(네이티브) 모양을 제거 */
+    box-sizing: border-box;
+    background-clip: content-box;
+    padding: 0.125em;
+    width: 1em;
+    height: 1em;
+    border: 1px solid gray;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-right: 0.25rem;
 }
+[type="checkbox"]:checked {
+    border-color: var(--primary-orange-color);
+    background-color: var(--primary-orange-color);
+}
+
 </style>

@@ -17,7 +17,7 @@ const props = defineProps({
             <Card v-for="card in courses" :key="card.id" :id="card.id" :nickname="card.nickname" :title="card.title"
                 :address="card.address" :tuition="card.tuition" :discountRate="card.discountRate" :time="card.time"
                 :level="card.level" :category="card.category" :rating="card.rating" :reviewCount="card.reviewCount"
-                :image="card.image" @button-click="handleCardButtonClick(card.id)" class="card"/>
+                :image="card.image" @button-click="handleCardButtonClick(card.id)" class="card-item"/>
         </div>
     </div>
 </template>
@@ -27,7 +27,6 @@ const props = defineProps({
 <style scoped>
 .card-list-container {
     overflow-x: auto;
-    padding: 8px;
 }
 
 .card-list {
@@ -35,12 +34,8 @@ const props = defineProps({
     flex-wrap: wrap;
 }
 
-.card-list-container::-webkit-scrollbar {
-    display: none;
-}
-
-.card {
-    width: 25%;
+.card-item {
+    width: 33%;
     min-width: 200px;
 }
 
