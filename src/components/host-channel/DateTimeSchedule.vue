@@ -93,7 +93,6 @@ const registerScheduleList = () => {
       'endTime': dateOffset.toISOString().split('T')[0] + " " + endTimeString
     });
   });
-  dateList.value = [];
 };
 
 const timeTable = computed(() => {
@@ -171,7 +170,7 @@ const removeSchedule = schedule => {
           </div>
         </div>
         <div class="text-end">
-          <button type="button" class="btn btn-outline-secondary" style="width: 100px" @click="registerSchedule">일정 추가</button>
+          <button type="button" class="btn add-btn" style="width: 100px" @click="registerSchedule">일정 추가</button>
         </div>
       </div>
       <div v-show="selectTab === 'CYCLE'">
@@ -205,7 +204,7 @@ const removeSchedule = schedule => {
           </div>
         </div>
         <div class="text-end">
-          <button type="button" class="btn btn-outline-secondary" style="width: 100px" @click="registerScheduleList">일정 추가</button>
+          <button type="button" class="btn add-btn" style="width: 100px" @click="registerScheduleList">일정 추가</button>
         </div>
       </div>
     </div>
@@ -295,5 +294,9 @@ const removeSchedule = schedule => {
 }
 .dp__main > div {
   width: 500px;
+}
+.add-btn {
+  color: #FF9300;
+  border: #FF9300 solid 1px;
 }
 </style>
