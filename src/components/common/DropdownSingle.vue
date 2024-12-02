@@ -88,7 +88,6 @@ onUnmounted(() => {
     position: relative;
     display: inline-flex;
     font-size: 1rem;
-    margin-top: 6px;
 }
 
 .dropdown-fade-enter-active,
@@ -105,7 +104,8 @@ onUnmounted(() => {
 }
 
 .dropdown>button {
-    padding: 0.5rem 1rem 0.5rem 1rem;
+    /* padding: 0.5rem 1rem 0.5rem 1rem; */
+    padding: 1.3rem;
     cursor: pointer;
     border-radius: 8px;
     background-color: white;

@@ -17,6 +17,7 @@ header {
     align-content: center;
 
     background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
 }
 
 .header-container {
@@ -39,7 +40,7 @@ header button {
 
 main {
     margin: 64px 15% 0 15%;
-    min-height: 100px;
+    min-height: 100vh;
 }
 
 footer {
