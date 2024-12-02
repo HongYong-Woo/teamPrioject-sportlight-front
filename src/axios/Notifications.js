@@ -21,7 +21,7 @@ export function Notifications() {
     // SSE 연결
     const connectSSE = () => {
       if(!eventSource) {
-        eventSource = new EventSource("http://localhost:8080/notifications/subscribe");
+        eventSource = new EventSource("https://sport-lights.shop/api/notifications/subscribe"); //localhost
         console.log("Connected to EventSource");
         eventSource.onmessage = (event) => {
           const notification = JSON.parse(event.data);
@@ -53,7 +53,7 @@ export function Notifications() {
       try {
         const response = await get('/notifications');
         notifications.value = response.data;
-        console.log("Fetched notifications:", notifications.value);
+        console.log("알림 메시지 불러오기:", notifications.value);
       } catch (error) {
         console.error("Failed to fetch notifications:", error);
       }

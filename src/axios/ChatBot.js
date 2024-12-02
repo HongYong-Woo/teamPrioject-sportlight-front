@@ -1,5 +1,5 @@
 import { ref, onMounted, watch, onUpdated, nextTick } from "vue";
-import axios from "axios";
+import { useAPI } from "./useAPI";
 
 export function chatbot() {
 
@@ -11,6 +11,9 @@ export function chatbot() {
     const time = ref(""); // 대화 시간
     var question;
     const chatScroll = ref(null); // 채팅 스크롤
+    const { 
+        post
+       } = useAPI();
 
     // 시간 포맷
     const formatter = new Intl.DateTimeFormat("ko-KR", {
@@ -25,19 +28,26 @@ export function chatbot() {
     };
 
     // 처음 실행할 때 나오는 공통 메시지
-    const openChatbot = () => {
-        axios.post('http://localhost:8080/chatbot/open').then((response) => {
-           console.log("openResponse:", response.data);
+    const openChatbot = async () => {
+        const response = await post('/chatbot/open');
+        console.log("openResponse:", response.data);
+       time.value = formatter.format(new Date(response.data.timestamp));
 
-           time.value = formatter.format(new Date(response.data.timestamp));
+       responseMessage.value = response.data.content[0].data.details;    
 
-            responseMessage.value = response.data.content[0].data.details;    
+       messages.value.push({text : responseMessage.value, sender : 'chatbot', time : time.value});
+        // axios.post('http://localhost:8080/chatbot/open').then((response) => {
+        //    console.log("openResponse:", response.data);
 
-            messages.value.push({text : responseMessage.value, sender : 'chatbot', time : time.value});
-            console.log("details : " + responseMessage.value );
-        }).catch((error) => {
-            console.error("Failed to open chatbot:", error);
-        });
+        //    time.value = formatter.format(new Date(response.data.timestamp));
+
+        //     responseMessage.value = response.data.content[0].data.details;    
+
+        //     messages.value.push({text : responseMessage.value, sender : 'chatbot', time : time.value});
+        //     console.log("details : " + responseMessage.value );
+        // }).catch((error) => {
+        //     console.error("Failed to open chatbot:", error);
+        // });
     }
 
     // 챗봇에 질문 보내고 받기
@@ -46,19 +56,14 @@ export function chatbot() {
         question = questionMessage.value;
         messages.value.push({text : question, sender : 'user', time : formatter.format(new Date())});
 
-        axios.post('http://localhost:8080/chatbot/send', {question})
-        .then((response) => {
-            console.log("sendResponse:", response.data);
-           
-            time.value = formatter.format(new Date(response.data.timestamp));
-            responseMessage.value = response.data.content[0].data.details;
 
-            messages.value.push({text : responseMessage.value, sender : 'chatbot', time : time.value});
+        const response = await post('/chatbot/send', {question});
+        time.value = formatter.format(new Date(response.data.timestamp));
+ 
+        responseMessage.value = response.data.content[0].data.details;    
+ 
+        messages.value.push({text : responseMessage.value, sender : 'chatbot', time : time.value});
 
-            console.log("sendResponse " + responseMessage.value);
-        }).catch((error) => {
-            console.error("Failed to send chatbot:", error);
-        });
         questionMessage.value = '';
     }
 
@@ -80,8 +85,8 @@ export function chatbot() {
 
     onMounted(() => {
         console.log("Chatbot mounted");
-        //  loadMessages();
-         openChatbot();
+         loadMessages();
+        //  openChatbot();
     });
 
     //messages 변경을 감지하여 saveMessages 호출, 채팅 스크롤을 아래로 내림
