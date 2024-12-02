@@ -3,8 +3,16 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import img1 from '@/assets/banner/banner1.png';
 import img2 from '@/assets/banner/banner2.png';
 import img3 from '@/assets/banner/banner3.png';
+import img4 from '@/assets/banner/semi-banner1.png'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
-const images = [img1, img2, img3];
+const images = ['https://kr.object.ncloudstorage.com/sportlight/banner_event/%EB%A9%94%EC%9D%B8%20%EB%B0%B0%EB%84%88%20-%202.png'
+, 'https://kr.object.ncloudstorage.com/sportlight/banner_event/%EB%A9%94%EC%9D%B8%20%EB%B0%B0%EB%84%88%20-%201.png'
+, 'https://kr.object.ncloudstorage.com/sportlight/banner_event/%EB%A9%94%EC%9D%B8%EB%B0%B0%EB%84%88%20-%203.png'
+, 'https://kr.object.ncloudstorage.com/sportlight/banner_event/%EB%A9%94%EC%9D%B8%EB%B0%B0%EB%84%88%20-%204.png'
+, 'https://kr.object.ncloudstorage.com/sportlight/banner_event/%EB%A9%94%EC%9D%B8%20%EB%B0%B0%EB%84%88%20-%205.png'];
+
 let currentIndex = ref(0);
 const currentImage = ref(images[currentIndex.value]);
 
@@ -34,9 +42,13 @@ onUnmounted(() => {
     <div class="banner-container">
         <img class="banner" :src="currentImage" alt="Banner Image">
         
-        <!-- 좌우 화살표 버튼 -->
-        <button class="arrow left-arrow" @click="prevImage">❮</button>
-        <button class="arrow right-arrow" @click="nextImage">❯</button>
+        <div class="nav">
+            <div class="nav-container">
+                <FontAwesomeIcon :icon="faChevronLeft" @click="prevImage" class="arrow left"/>
+                <div class="center">{{ currentIndex % images.length + 1 }} / {{ images.length }}</div>
+                <FontAwesomeIcon :icon="faChevronRight" @click="nextImage" class="arrow right"/>
+            </div>
+        </div>
         
         <!-- 하단 인디케이터 -->
         <div class="indicator-container">
@@ -53,9 +65,9 @@ onUnmounted(() => {
 .banner-container {
     position: absolute;
     left: 0;
-    width: 100vw;
-    height: 370px;
-    background-color: #f0f0f0;
+    width: 100%;
+    height: 400px;
+    background-color: #767676;
     text-align: center;
     overflow: hidden;
 }
@@ -68,24 +80,36 @@ onUnmounted(() => {
 }
 
 /* 좌우 화살표 스타일 */
-.arrow {
+.nav {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(115, 115, 115, 0.2);
-    color: white;
+    top: 100%;
+    left: 15%;
+    transform: translateY(-100%);
     border: none;
     padding: 10px;
     cursor: pointer;
-    font-size: 24px;
 }
 
-.left-arrow {
-    left: 150px;
+.nav-container {
+    display: flex;
+    height: 1.5rem;
+    padding: 1rem;
+
+    display: flex;
+    align-items: center;
+    border: none;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border-radius: 1.25rem;
 }
 
-.right-arrow {
-    right: 150px;
+.arrow {
+    font-size: 0.8rem;
+}
+
+.center {
+    width: 3rem;
+    text-align: center;
 }
 
 /* 인디케이터 스타일 */
@@ -99,14 +123,15 @@ onUnmounted(() => {
 }
 
 .indicator {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #aaa;
-    transition: background-color 0.3s;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: all 0.5s;
 }
 
 .indicator.active {
-    background-color: #333;
+    background-color: rgba(255, 255, 255, 1);
+    width: 30px;
 }
 </style>

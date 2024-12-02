@@ -1,5 +1,5 @@
 <script setup>
-import { faXmark, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faXmark, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { ref, watch, onMounted, onUnmounted } from 'vue';
 
@@ -117,108 +117,42 @@ const onRightChange = (event) => {
 </script>
 
 <template>
-    <div ref="dropdown" class="dropdown">
-        <button @click="toggleDropdown" :class="localMaxRange != localMaxValue || localMinRange != localMinValue ? 'dropdown-toggle-exist' : 'dropdown-toggle-none'">
-            <span>{{ localMaxRange == localMaxValue && localMinRange == localMinValue ? props.placeholder : props.name }}</span>
-            <FontAwesomeIcon v-if="!isOpen && localMaxRange == localMaxValue && localMinRange == localMinValue" :icon="faChevronDown" size="sm"
-                style="pointer-events: none;" />
-            <FontAwesomeIcon v-else :icon="faXmark" size="sm" @click="clearValues" class="xmark" />
-            <div v-if="localMaxRange != localMaxValue || localMinRange != localMinValue" class="exist-light"></div>
-        </button>
-        <transition name="dropdown-fade">
+    <div class="accordion">
+        <!-- 아코디언 헤더 -->
+        <div @click="toggleDropdown" class="accordion-header">
+            <span>{{ placeholder }}</span>
+            <FontAwesomeIcon :icon="isOpen ? faChevronUp : faChevronDown" size="sm" class="arrow" />
+        </div>
+        <div class="accordion-content" :class="{ open: isOpen }">
             <div v-show="isOpen" class="slider-container">
+                <span>{{ props.name }}</span>
                 <div class="middle">
-                <div class="multi-range-slider">
-                    <!-- 진짜 슬라이더 -->
-                    <input type="range" :min="localMinRange" :max="localMaxRange" step="1000" v-model="localMinValue"
-                    :value="localMinValue" @input="onLeftChange" />
-                    <input type="range" :min="localMinRange" :max="localMaxRange" step="1000" v-model="localMaxValue"
-                    :value="localMaxValue" @input="onRightChange" />
-                    
-                    <!-- 커스텀 슬라이더 -->
-                    <div class="slider">
-                        <div class="track"></div>
-                        <div class="range"></div>
-                        <div class="thumb left"></div>
-                        <div class="thumb right"></div>
+                    <div class="multi-range-slider">
+                        <!-- 진짜 슬라이더 -->
+                        <input type="range" :min="localMinRange" :max="localMaxRange" step="1000"
+                            v-model="localMinValue" :value="localMinValue" @input="onLeftChange" />
+                        <input type="range" :min="localMinRange" :max="localMaxRange" step="1000"
+                            v-model="localMaxValue" :value="localMaxValue" @input="onRightChange" />
+
+                        <!-- 커스텀 슬라이더 -->
+                        <div class="slider">
+                            <div class="track"></div>
+                            <div class="range"></div>
+                            <div class="thumb left"></div>
+                            <div class="thumb right"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </transition>
     </div>
 </template>
 
 <style scoped>
-.dropdown {
-    position: relative;
-    display: inline-flex;
-}
-
-.dropdown>button {
-    height: 2.2rem;
-    padding: 0.5rem 1rem 0.5rem 1rem;
-    cursor: pointer;
-    border-radius: 8px;
-    background-color: white;
-    display: flex;
-    align-items: center;
-}
-
-.dropdown>button>span {
-    margin-right: 0.25rem;
-}
-
-.dropdown-toggle-exist {
-    border: 1px solid #333;
-}
-
-.dropdown-toggle-none {
-    border: 1px solid #ccc;
-}
-
-.xmark {
-    background: none;
-    border: none;
-}
-
-.xmark:hover {
-    color: var(--primary-orange-color);
-}
-
-.exist-light {
-    position: absolute;
-    top: -3px;
-    right: -3px;
-    width: 12px;
-    height: 12px;
-    background-color: var(--primary-orange-color);
-    border: 2px solid white;
-    border-radius: 50%;
-}
-
-.dropdown-fade-enter-active,
-.dropdown-fade-leave-active {
-    transition: all 0.3s ease;
-}
-
-.dropdown-fade-enter-from, .dropdown-fade-leave-to {
-    opacity: 0;
-}
-
-.dropdown-fade-enter-to, .dropdown-fade-leave-from {
-    opacity: 1;
-}
 
 .slider-container {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 30vw;
     height: max-content;
     padding: 0.7rem 1rem;
-    background-color: white;
-    border: 1px solid #ccc;
     margin-top: 8px;
     border-radius: 8px;
     z-index: 5;
@@ -245,7 +179,7 @@ const onRightChange = (event) => {
     top: 0;
     bottom: 0;
     border-radius: 2px;
-    background-color: #0096FF33;
+    background-color: #e9770033;
 }
 
 .slider>.range {
@@ -254,7 +188,7 @@ const onRightChange = (event) => {
     top: 0;
     bottom: 0;
     border-radius: 2px;
-    background-color: var(--primary-skyblue-color);
+    background-color: var(--primary-orange-color);
 }
 
 .slider>.thumb {
@@ -262,7 +196,7 @@ const onRightChange = (event) => {
     z-index: 3;
     width: 16px;
     height: 16px;
-    background-color: var(--primary-skyblue-color);
+    background-color: var(--primary-orange-color);
     border-radius: 50%;
     cursor: pointer;
 }
@@ -293,8 +227,46 @@ input[type="range"]::-webkit-slider-thumb {
     height: 30px;
     border-radius: 0;
     border: 0 none;
-    background-color: red;
     cursor: pointer;
     -webkit-appearance: none;
+}
+
+
+
+
+
+
+.accordion {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 0.5rem;
+}
+
+.accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.arrow {
+    transition: all 0.5s ease;
+}
+
+/* 아코디언 내용 */
+.accordion-content {
+    max-height: 0; /* 기본 상태에서 높이 0 */
+    overflow: hidden;
+    transition: max-height 0.5s ease; /* 전환 효과 */
+}
+
+.accordion-content.open {
+    max-height: 300px; /* 충분히 큰 값으로 설정 (내용에 맞게 변경 가능) */
 }
 </style>

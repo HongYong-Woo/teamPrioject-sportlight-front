@@ -34,75 +34,95 @@ function goToCourseDetail() {
 </script>
 
 <template>
-    <div class="card" @mouseenter="isHovered = true" @mouseleave="isHovered = false" @click="goToCourseDetail">
-        <!-- <img v-if="image" :src="image" alt="Card image" class="card-image" /> -->
-        <img src="../../assets/logo.png" alt="Card image" class="card-image">
-        <div class="card-content">
-            <h2 class="card-title">{{ title }}</h2>
-            <div class="host-details">
-                <img src="../../../public/favicon.ico" alt="Profile image" class="profile-image">
-                <div>{{ nickname }}</div>
+    <div class="wrapper">
+        <div class="card-wrapper" @mouseenter="isHovered = true" @mouseleave="isHovered = false" @click="goToCourseDetail">
+            <!-- <img v-if="image" :src="image" alt="Card image" class="card-image" /> -->
+             <div class="img-wrapper">
+                <div v-if="discounted" class="discount-rate">{{ discountRate }}% off</div>
+                <img :src="image" alt="Card image" class="card-image">
             </div>
+            <div class="card-content">
+                <h2 class="card-title">{{ title }}</h2>
+                <div class="host-details">
+                    <img src="../../../public/favicon.ico" alt="Profile image" class="profile-image">
+                    <div>{{ nickname }}</div>
+                </div>
 
-            <div class="card-details" v-if="!isHovered">
+                <div class="card-details" v-if="!isHovered">
 
-                <div v-if="discounted" class="price">
-                    <span class="discount-rate">{{ discountRate }}%</span>
-                    <span class="tuition original">{{ priceFormatter(tuition) }}</span>
-                    <div>
-                        <FontAwesomeIcon :icon="faArrowRight" size="sm" />
-                        <span class="tuition discounted">{{ priceFormatter(tuition - tuition * discountRate / 100)
-                            }}</span>
+                    
+                    <div class="rating-details">
+                        <span>
+                            <FontAwesomeIcon :icon="faStar" size="sm" style="color: #FFD43B; margin-right: 4px;" />
+                        </span>
+                        <span class="rating">{{ rating }}</span>
+                        <span class="rating-count">({{ reviewCount }})</span>
+                    </div>
+                    <div v-if="discounted" class="price">
+                        <span class="tuition discounted">{{ priceFormatter(tuition - tuition * discountRate / 100)}}</span>
+                        <span class="original">{{ priceFormatter(tuition) }}</span>
+                    </div>
+                    <span v-else class="tuition">{{ priceFormatter(tuition) }}</span>
+                    <div class="empty-space"></div>
+                </div>
+
+                <div v-else class="card-details">
+                    <span class="address">
+                        <FontAwesomeIcon :icon="faLocationDot" size="sm" style="margin-right: 4px;" />{{ address }}
+                    </span>
+                    <div class="details-container">
+                        <div class="details-left">
+                            <span class="category">{{ category }}</span>
+                            <span class="level">{{ level }}</span>
+                        </div>
+                        <span class="time details-right">
+                            <FontAwesomeIcon :icon="faClock" size="sm" /> {{ time }}분
+                        </span>
                     </div>
                 </div>
-                <p v-else class="tuition">{{ priceFormatter(tuition) }}</p>
-
-                <div class="rating-details">
-                    <span>
-                        <FontAwesomeIcon :icon="faStar" size="sm" style="color: #FFD43B; margin-right: 4px;" />
-                    </span>
-                    <span class="rating">{{ rating }}</span>
-                    <span>({{ reviewCount }})</span>
-                </div>
 
             </div>
-
-            <div v-else class="card-details">
-                <span class="address">
-                    <FontAwesomeIcon :icon="faLocationDot" size="sm" style="margin-right: 4px;" />{{ address }}
-                </span>
-                <div class="details-container">
-                    <div class="details-left">
-                        <span class="category">{{ category }}</span>
-                        <span class="level">{{ level }}</span>
-                    </div>
-                    <span class="time details-right">
-                        <FontAwesomeIcon :icon="faClock" size="sm" /> {{ time }}분
-                    </span>
-                </div>
-            </div>
-
         </div>
     </div>
 </template>
 
 
 <style scoped>
-.card {
-    width: 266px;
-    height: 300px;
-    padding: 8px;
-    border: none;
+.wrapper {
+    padding: 0 0.25rem;
+}
+
+.card-wrapper {
+    width: 100%;
+    padding: 0.5rem;
+
+    display: flex;
+    flex-direction: column;
 }
 
 .card:hover {
     transition: all 1s;
 }
 
+.img-wrapper {
+    position: relative;
+}
+
+.discount-rate {
+    position: absolute;
+    top: 0.25rem;
+    left: 0.25rem;
+    background-color: red;
+    padding: 0.125rem 0.5rem;
+    color: white;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+}
+
 .card-image {
     width: 100%;
-    aspect-ratio: 3/ 2;
-    border-radius: 8px;
+    aspect-ratio: 3 / 2;
+    border-radius: 0.25rem;
     object-fit: cover;
     background-color: darkred;
 }
@@ -112,29 +132,36 @@ function goToCourseDetail() {
     display: flex;
     flex-direction: row;
     align-items: center;
+    margin-top: 0.25rem;
 }
 
 .profile-image {
-    width: 24px;
-    height: 24px;
+    width: 1.5rem;
+    height: 1.5rem;
     border-radius: 50%;
     object-fit: cover;
-    margin-right: 4px;
+    margin-right: 0.25rem;
     background-color: dimgrey;
 }
 
 
-.card-content {}
+.card-content {
+    
+}
 
 .card-title {
     font-size: 1.3rem;
+    font-weight: bold;
 }
 
 /* 정보 */
-.card-details {
-}
+.card-details {}
 
 /* 기본 */
+.empty-space {
+    height: 1rem;
+}
+
 .price {
     display: flex;
     align-items: baseline;
@@ -142,16 +169,14 @@ function goToCourseDetail() {
     gap: 4px;
 }
 
-.discount-rate {
-    font-size: 1.3rem;
+.tuition {
     font-weight: bold;
-    color: red;
 }
 
 .original {
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     text-decoration: line-through;
-    color: #ccc;
+    color: #767676;
 }
 
 .rating-details {
@@ -159,7 +184,12 @@ function goToCourseDetail() {
 }
 
 .rating {
-    font-weight: bold;
+    margin-right: 0.125rem;
+}
+
+.rating-count {
+    font-size: 0.75rem;
+    color: #767676;
 }
 
 /* Hover 시 */
@@ -169,7 +199,6 @@ function goToCourseDetail() {
 }
 
 .details-container {
-    margin-top: 8px;
     display: flex;
     justify-content: space-between;
 }

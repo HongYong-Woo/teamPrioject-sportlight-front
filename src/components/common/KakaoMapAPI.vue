@@ -64,6 +64,7 @@ const initializeMap = () => {
   };
 
   const map = new window.kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+  map.setMaxLevel(1);
   const markerPosition = coords;
   const marker = new window.kakao.maps.Marker({
     position: markerPosition
