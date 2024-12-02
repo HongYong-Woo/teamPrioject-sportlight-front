@@ -103,51 +103,94 @@ function addCommas(amount) {
 </script>
 
 <template>
+    <h1 class="search-title">Search</h1>
+    <div class="container">
+        <div class="filter-container">
+            <div class="filter">
 
-    <div class="options">
-        <div class="filter">
+                <DropdownMulti :options="levels" :selectedValues="filterOptions.levels" class="filter-input"
+                    @update:selectedValues="(newValues) => updateFilterOption('levels', newValues)" placeholder="난이도" />
 
-            <DropdownMulti :options="levels" :selectedValues="filterOptions.levels"
-                @update:selectedValues="(newValues) => updateFilterOption('levels', newValues)" placeholder="난이도" />
+                <DropdownMulti :options="categories" :selectedValues="filterOptions.categories" class="filter-input"
+                    @update:selectedValues="(newValues) => updateFilterOption('categories', newValues)"
+                    placeholder="카테고리" />
 
-            <DropdownMulti :options="categories" :selectedValues="filterOptions.categories"
-                @update:selectedValues="(newValues) => updateFilterOption('categories', newValues)"
-                placeholder="카테고리" />
+                <Slider :minValue="minPrice" :maxValue="maxPrice" :minRange="minRange" :maxRange="maxRange"
+                    class="filter-input"
+                    :name="addCommas(filterOptions.minPrice) + ' ~ ' + addCommas(filterOptions.maxPrice)"
+                    placeholder="가격" @update:minValue="(newValue) => updateFilterOption('minPrice', newValue)"
+                    @update:maxValue="(newValue) => updateFilterOption('maxPrice', newValue)" />
 
-            <Slider :minValue="minPrice" :maxValue="maxPrice" :minRange="minRange" :maxRange="maxRange"
-                :name="addCommas(filterOptions.minPrice) + ' ~ ' + addCommas(filterOptions.maxPrice)" placeholder="가격"
-                @update:minValue="(newValue) => updateFilterOption('minPrice', newValue)"
-                @update:maxValue="(newValue) => updateFilterOption('maxPrice', newValue)" />
 
-            <div class="datepicker-container">
-                <Datepicker :startDate="startDate" :endDate="endDate"
+                <div class="calendar-wrapper">
+                <Datepicker :startDate="startDate" :endDate="endDate" position="right" class="filter-input"
                     @update:startDate="(newValue) => updateFilterOption('startDate', newValue)"
                     @update:endDate="(newValue) => updateFilterOption('endDate', newValue)" />
+                </div>
             </div>
         </div>
-        <div class="sort">
-            <DropdownSingle :options="sortType" :selectedValue="filterOptions.sortType"
-                @update:selectedValue="(newValue) => updateFilterOption('sortType', newValue)" />
+        <div class="table">
+            <div class="sort">
+                <DropdownSingle :options="sortType" :selectedValue="filterOptions.sortType"
+                    @update:selectedValue="(newValue) => updateFilterOption('sortType', newValue)" />
+            </div>
+
+            <CardTable :courses="courses" />
         </div>
     </div>
-
-    <CardTable :courses="courses" />
 </template>
 
 <style scoped>
-.options {
+.search-title {
+    margin: 5rem 0 1rem 0;
+    padding-left: 1rem;
+}
+.container {
     display: flex;
-    justify-content: space-between;
+    flex-direction: row;
+}
+
+.filter-container {
+    position: sticky;
+    height: fit-content;
+    top: 6rem;
+    width: 30%;
+    padding-right: 1.5rem;
 }
 
 .filter {
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
+    width: 100%;
+}
+
+.calendar-wrapper {
+    width: 100%;
+}
+
+.filter-input {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .datepicker-container {
     width: 16rem;
+}
+
+
+.table {
+    display: flex;
+    flex-direction: column;
+    justify-items: end;
+}
+
+.sort {
+    display: flex;
+    justify-content: end;
+    margin-right: 1rem;
+    margin-bottom: 1rem;
 }
 </style>

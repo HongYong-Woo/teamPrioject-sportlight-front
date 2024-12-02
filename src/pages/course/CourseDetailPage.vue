@@ -53,31 +53,6 @@ async function fetchSchedules() {
     }
 }
 
-// const applyForm = async () => {
-//     try {
-//         const form = new FormData();
-
-//         const scheduleId = request.value['scheduleId'];
-//         const dateTime = request.value['dateTime'].split('T')[0] + ' ' + request.value['dateTime'].split('T')[1];
-//         const participantNum = request.value['participantNum'];
-
-//         form.set('scheduleId', scheduleId);
-//         form.set('dateTime', dateTime);
-//         form.set('participantNum', participantNum);
-//         console.log(scheduleId);
-        
-//         const response = await post(`/courses/apply`, form, {
-//             headers: { "Content-Type": "multipart/form-data" },
-//         });
-//         const id = response.data.data;
-//         console.log(`id: ${id}`);
-//         alert("수강 신청이 완료되었습니다.");
-//     } catch (error) {
-//         console.error("Failed to submit the form", error);
-//         alert("수강 신청에 실패했습니다.");
-//     }
-// };
-
 onMounted(() => {
     fetchDetails();
     fetchSchedules();
@@ -239,11 +214,10 @@ function goToApplyCourse() {
 
 <template>
     <div>
-        <h2 class="category-name">{{ capitalizeFirstLetter(courseDetails.category) }}</h2>
         <div class="top">
             <div class="top-contents-container">
                 <div class="img-container">
-                    <img src="../../assets/running.jpeg" alt="Course Image" style="background-color: white;">
+                    <img :src="courseDetails.imgUrl" alt="Course Image" style="background-color: white;">
                 </div>
                 <div class="contents-container">
                     <h4 class="title">{{ courseDetails.title }}</h4>
@@ -379,6 +353,14 @@ function goToApplyCourse() {
 </template>
 
 <style scoped>
+.top {
+    margin-top: 7rem;
+}
+
+.detail {
+    margin-bottom: 7rem;
+}
+
 .top-contents-container {
     display: flex;
     flex-wrap: wrap;
