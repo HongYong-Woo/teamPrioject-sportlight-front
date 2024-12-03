@@ -1,8 +1,5 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import img1 from '@/assets/banner/semi-banner1.png';
-import img2 from '@/assets/banner/banner2.png';
-import img3 from '@/assets/banner/banner3.png';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
