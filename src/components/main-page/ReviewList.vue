@@ -93,12 +93,12 @@ function goToRequestCourse() {
         <div class="content-right">
             <div class="list-container">
                 <div v-for="(review, index) in infiniteReviews" :key="index" :id="review.courseId" class="content-item">
-                    <div @click="goToCourseDetail(review.courseId)">
+                    <div>
                         <div>
                             <span class="nickname">{{ review.userNickname }} 님</span>
                             <span class="reg-date">{{ relativeTimeFormatter(review.regDate) }}</span>
                         </div>
-                        <div class="title">
+                        <div class="title" @click="goToCourseDetail(review.courseId)">
                             {{ review.courseTitle }}
                             <FontAwesomeIcon :icon="faChevronRight" size="sm" />
                         </div>
