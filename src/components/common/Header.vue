@@ -8,6 +8,7 @@ import { useRouter } from "vue-router";
 import Login from './Login.vue';
 import ProfileDropdown from './ProfileDropdown.vue';
 import Notification from '../Notification.vue';
+
 const auth = useAuthStore();
 const router = useRouter();
 
@@ -27,7 +28,7 @@ const isAuthenticated = computed(() => {
     return Boolean(auth.token) && auth.isAuthenticated();
 });
 
-const defaultProfileImage = new URL('@/assets/기본이미지.jpg', import.meta.url).href;
+const defaultProfileImage = new URL('@/assets/default_img.jpg', import.meta.url).href;
 
 const profileImage = computed(() => {
     if (!auth.token || !auth.profileImage) {
@@ -141,38 +142,22 @@ onUnmounted(() => {
             <form v-if="!isResponsive" class="search-container" @submit="handleSearch">
                 <div class="search-input-container">
                     <FontAwesomeIcon :icon="faMagnifyingGlass" class="search-icon" />
-                    <input 
-                        type="text" 
-                        v-model="searchQuery"
-                        placeholder="검색어를 입력하세요" 
-                        class="search-input" 
-                    />
+                    <input type="text" v-model="searchQuery" placeholder="검색어를 입력하세요" class="search-input" />
                 </div>
             </form>
 
             <div class="header-right">
 
-                <RouterLink
-                    v-if="isAuthenticated"
-                    :to="instructorRegistrationLink"
-                    class="custom-btn instructor-btn"
-                >
+                <RouterLink v-if="isAuthenticated" to="/mypage/host-request" class="custom-btn instructor-btn">
                     강사 등록하기
                 </RouterLink>
+                
 
-                <Notification v-if="isAuthenticated"/>
-                <ProfileDropdown
-                    v-if="isAuthenticated"
-                    :is-visible="isMyPageDropdownVisible"
-                    :profile-image="profileImage"
-                    @update:is-visible="updateDropdownVisibility"
-                    @handle-dropdown="handleDropdownChange"
-                />
-                <button
-                    v-else
-                    class="custom-btn"
-                    @click="toggleLoginModal"
-                >
+                <Notification v-if="isAuthenticated" />
+
+                <ProfileDropdown v-if="isAuthenticated" :is-visible="isMyPageDropdownVisible" :profile-image="profileImage"
+                    @update:is-visible="updateDropdownVisibility" @handle-dropdown="handleDropdownChange" />
+                <button v-else class="custom-btn" @click="toggleLoginModal">
                     로그인
                 </button>
             </div>
@@ -181,28 +166,24 @@ onUnmounted(() => {
         <transition name="slide-right">
             <div v-if="isSidebarOpen && isResponsive" class="sidebar">
                 <button class="close-btn" @click="toggleSidebar">&times;</button>
-                
+
                 <form class="sidebar-search" @submit="handleSidebarSearch">
                     <div class="search-input-container">
                         <FontAwesomeIcon :icon="faMagnifyingGlass" class="search-icon" />
-                        <input 
-                            type="text" 
-                            v-model="sidebarSearchQuery"
-                            placeholder="검색어를 입력하세요" 
-                            class="search-input" 
-                        />
+                        <input type="text" v-model="sidebarSearchQuery" placeholder="검색어를 입력하세요" class="search-input" />
                     </div>
                 </form>
 
                 <ul class="sidebar-menu">
-                    <li><RouterLink to="/course" class="sidebar-link">클래스</RouterLink></li>
-                    <li><RouterLink to="/community" class="sidebar-link">커뮤니티</RouterLink></li>
+                    <li>
+                        <RouterLink to="/course" class="sidebar-link">클래스</RouterLink>
+                    </li>
+                    <li>
+                        <RouterLink to="/community" class="sidebar-link">커뮤니티</RouterLink>
+                    </li>
                     <li class="sidebar-category" @click="toggleCategoryMenu">
                         카테고리
-                        <FontAwesomeIcon 
-                            :icon="sidebarCategoryOpen ? faChevronUp : faChevronDown" 
-                            size="sm" 
-                        />
+                        <FontAwesomeIcon :icon="sidebarCategoryOpen ? faChevronUp : faChevronDown" size="sm" />
                     </li>
                     <transition name="slide-down">
                         <div v-if="sidebarCategoryOpen" class="sidebar-category-list">
@@ -215,8 +196,7 @@ onUnmounted(() => {
                         </div>
                     </transition>
                     <li v-if="isAuthenticated">
-                        <RouterLink to="/" class="sidebar-link">강사 등록하기</RouterLink>
-                        
+                        <RouterLink to="/mypage/host-request" class="sidebar-link">강사 등록하기</RouterLink>
                     </li>
                 </ul>
             </div>
@@ -235,17 +215,11 @@ onUnmounted(() => {
     </transition>
 
     <transition name="fade">
-        <div 
-            v-if="(isCategoryOpen && !isResponsive) || isSidebarOpen" 
-            class="dark-page"
-            @click="isResponsive ? toggleSidebar() : toggleCategoryMenu()"
-        ></div>
+        <div v-if="(isCategoryOpen && !isResponsive) || isSidebarOpen" class="dark-page"
+            @click="isResponsive ? toggleSidebar() : toggleCategoryMenu()"></div>
     </transition>
 
-    <Login 
-        v-if="isModalVisible" 
-        @close="handleLoginClose"
-    />
+    <Login v-if="isModalVisible" @close="handleLoginClose" />
 </template>
 
 <style scoped>
@@ -281,7 +255,6 @@ onUnmounted(() => {
     align-items: center;
 }
 
-/* 네비게이션 스타일 수정 */
 .navigation {
     display: flex;
     align-items: center;
@@ -442,12 +415,12 @@ onUnmounted(() => {
 
 .fade-enter-from,
 .fade-leave-to {
-    opacity: 0; 
+    opacity: 0;
 }
 
 .fade-enter-to,
 .fade-leave-from {
-    opacity: 1; 
+    opacity: 1;
 }
 
 
@@ -521,7 +494,7 @@ onUnmounted(() => {
     .navigation {
         display: none;
     }
-    
+
     .category-list {
         padding: 1rem;
     }
@@ -542,5 +515,4 @@ onUnmounted(() => {
         margin-top: 0.5rem;
     }
 }
-
 </style>

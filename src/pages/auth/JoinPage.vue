@@ -158,6 +158,12 @@
         가입하기
       </button>
     </form>
+
+    <InterestSetting
+      v-if="showInterestModal"
+      :is-open="showInterestModal"
+      @close="closeInterestModal"
+    />
   </div>
 </template>
  
@@ -166,10 +172,13 @@ import { ref, computed } from "vue";
 import { useAPI } from "@/axios/useAPI";
 import { useRouter } from "vue-router";
 import { Eye, EyeOff } from "lucide-vue-next";
+import InterestSetting from '@/components/modal/InterestSetting.vue';
 
 const { post, get } = useAPI();
 const router = useRouter();
 const totalCourses = 1000;
+
+const showInterestModal = ref(false);
 
 const formData = ref({
   loginId: "",
@@ -234,9 +243,7 @@ const validateloginId = async () => {
   }
 
   try {
-    const response = await get("/my/check-loginId", {
-      params: { loginId: formData.value.loginId },
-    });
+    const response = await get(`/my/check-loginId?loginId=${encodeURIComponent(formData.value.loginId)}`);
 
     if (response.data && response.data.data) {
       loginIdValidationMessage.value = "사용 가능한 이메일입니다.";
@@ -276,9 +283,11 @@ const validateNickname = async () => {
   }
 
   try {
-    const response = await get("/my/check-nickname", {
-      params: { userNickname: formData.value.userNickname },
-    });
+    // const response = await get("/my/check-nickname", {
+    //   userNickname: formData.value.userNickname,
+    // });
+    const response = await get(`/my/check-nickname?userNickname=${encodeURIComponent(formData.value.userNickname)}`);
+
 
     if (response.data && response.data.data) {
       nicknameValidationMessage.value = "사용 가능한 닉네임입니다.";
@@ -321,10 +330,15 @@ const handleSubmit = async () => {
     const response = await post("/join", payload);
     if (response.status === 200) {
       router.push("/");
+      showInterestModal.value = true;
     }
   } catch (error) {
     console.error(error);
   }
+};
+
+const closeInterestModal = () => {
+  showInterestModal.value = false;
 };
 
 const goBack = () => {
