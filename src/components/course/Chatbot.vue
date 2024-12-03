@@ -30,9 +30,7 @@ onMounted(() => {
     <Transition name="slide-fade">
     <div v-show="showChatbot" class="chatbotModal">
         <div class="chatbotModalHeader">
-            <img src="../../assets/spotlightLogo.png" alt="Logo"  class="logo">
-            <img src="../../assets/logo.png" alt="sportlight" class="titlelogo">
-            <hr>
+          <p>Sportlight</p>
         </div>
         <div class="chatbotModalBody" ref="chatScroll">
             <div v-for="message in messages" class="chatbotMessage">
@@ -104,48 +102,32 @@ onMounted(() => {
     right: 30px;
     bottom: 120px;
     width: 323px;
-    height: 550px;
+    height: 500px;
   
     background: rgb(243, 243, 243);
-  box-shadow: 5px 5px 5px rgba(0,0,0,0.5);
+  box-shadow: 5px 5px 5px rgba(0,0,0,0.3);
   z-index: 1000;
   border: 3px;;
     /* border: 3px solid transparent;  */
   /* border-image: linear-gradient(to left bottom, #FF9500, #008CFF) 1; */ 
-  border-radius: 20px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
+
+ 
   
 }
 
 .chatbotModalHeader {
-    height: 70px;
+    height: 40px;
     background-color: white;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
-    
-}
-
-.logo {
-    margin-left: 10px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    width : 50px; 
-    height : 50px;
-}
-
-.titlelogo {
-    margin-left: 20px;
-    margin-right: 35px;
-    margin-top: 15px;
-    margin-bottom: 5px;
-    width : 200px; 
-    height : 50px;
-    float: right;
+    padding-top: 15px;
+    font-size: 20px;
 }
 
 .chatbotModalBody {
@@ -153,8 +135,6 @@ onMounted(() => {
     height: 363px;
     padding-top: 10px;
     flex: 1;
-    
-   
 }
 
 .chatbotMessage{

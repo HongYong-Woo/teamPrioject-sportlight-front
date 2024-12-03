@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { Notifications } from '../axios/Notifications';
 import  formatRelativeTime from '../util/relativeTimeFormatter';
+import { ca } from 'date-fns/locale';
 
 const {
   notifications,
@@ -47,8 +48,33 @@ var notificationType = ref('ALL');
 
 const selectNotiType = (category) => {
   notificationType.value = category;
+  selectedCategory.value = category;
 };
 
+const categoriyFormatter = (category) => {
+  switch (category) {
+    case 'ALL':
+      return '전체';
+    case 'COURSE':
+      return '클래스';
+    case 'REVIEW':
+      return '리뷰';
+    case 'COUPON':
+      return '쿠폰';
+    case 'QUESTION':
+      return '문의';
+    case 'ADJUSTMENT':
+      return '정산';
+    case 'INTEREST':
+      return '찜';
+    case 'MEMBER':
+      return '회원';
+    default:
+      return category;
+  }
+}
+
+const selectedCategory = ref('ALL');
 
 
 </script>
@@ -65,7 +91,7 @@ const selectNotiType = (category) => {
     <Transition name="slide-fade">
     <div v-if="showNotifications" class="modal" id="noti-modal">
       <div class="modal-header">
-        <span style="color: black; padding-left: 10px; padding-top: 10px; font-size:x-large; font: bolder;">알림
+        <span style="color: black; padding-left: 2px; padding-top: 2px; font-size:x-large; font: bolder;">알림
           
         </span>
         <button @click="deleteAllNotifications" class="delete-all-button">
@@ -74,11 +100,12 @@ const selectNotiType = (category) => {
       </div>
 
       <!-- 메시지 필터링 -->
-      <div class="category-body">
-      
-        <span v-for="(categoriy) in notiCatregorys">
-          <button @click="selectNotiType(categoriy)" class="category-button">{{ categoriy }}</button>
-        </span>
+      <div class="category-body">   
+        <span v-for="(categoriy) in notiCatregorys" class="category-list">
+          <button @click="selectNotiType(categoriy)"
+          class="category-button"
+          :class="{'selected' : selectedCategory === categoriy}">{{ categoriyFormatter(categoriy) }}</button>
+        </span> 
       </div>
 
       <div class="modal-content">
@@ -98,12 +125,10 @@ const selectNotiType = (category) => {
             </div>
             <span  class="notiMessage">{{ notification.notiContent }}</span>
             
-            {{ notification.notiReadOrNot }}   
-            {{ notification.notiType }}
-    
           </div>
         </div>
       </div>
+      <div class="space"></div>
 
       <!-- 삭제 확인 모달 -->
       <div v-if="showDeleteNotificationModal" class="delete-modal-overlay" @click.stop="closeDeleteModal">
@@ -132,16 +157,8 @@ const selectNotiType = (category) => {
 </template>
 
 <style scoped>
-.inputform{
-  position: fixed;
-  top: 550px;
-}
-
 /* 알림창 버튼 */
 .notification-button {
-  /* position: absolute; */
-  /* right: 10px; */
-  /* align-content: center; */
   background : none;
   cursor: pointer;
 
@@ -152,15 +169,15 @@ const selectNotiType = (category) => {
   border-radius: 50%;
   background: none;
   outline: none;
-  width: 50px;
+  width: 40px;
 }
 
 
 .red-dot {
-  bottom: 30px;
-  right: 0px;
-  width: 17px;
-  height: 17px;
+  bottom: 25px;
+  right: -3px;
+  width: 15px;
+  height: 15px;
   background: red;
   border-radius: 50%;
   font-size: 70%;
@@ -174,42 +191,55 @@ const selectNotiType = (category) => {
   position: absolute;
   top: 4rem;
   left: -263px;
-  width: 323px;
+  width: 330px;
   height: 503px;
   background: rgb(230, 230, 230);
-  box-shadow: 5px 5px 5px rgba(0,0,0,0.5);
+  box-shadow: 5px 5px 5px rgba(0,0,0,0.2);
   z-index: 1000;
   /* overflow-y: auto; */
  
   /* outline-style: solid;
-  outline-width: medium; */
-  /* outline-color: fuchsia; */
-  
+  outline-width: 2px;
+  outline-color: rgb(255, 147, 0); */
   border-radius: 10px;
-  display:grid;
+  
+  
+  display:flex;
   flex-direction: column;
 }
 
 .modal-header {
 background: white;
-height: 50px;
 z-index: 1000;
 border-top-left-radius: 10px;
 border-top-right-radius: 10px;
-flex-direction: row;
+height: 3rem;
 
 }
 
 
 .delete-all-button {
   float:right;
+  background: white;
+  padding: 5px;
+  border-radius: 10px;
+  font-size: 10px;
+  align-items: center;
+  outline-width: 2px;
+  border: 1px solid #d9d9d9;
+  color : #767676;
+  
+  cursor: pointer;
+}
+
+.delete-all-button:hover {
+  float:right;
   background: red;
   color: white;
   border: none;
   padding: 5px;
   border-radius: 10px;
-  margin-top: 0px;
-  margin-right: 5px;
+  font-size: 10px;
   align-items: center;
 
   cursor: pointer;
@@ -218,35 +248,54 @@ flex-direction: row;
 .category-body{
   background: rgb(230, 230, 230);
   overflow-x: auto;
-  display: flex;
-  flex-wrap: wrap;
+  height: 50px;
+  margin-left: 5px;
+  z-index: 1001;
+}
+
+.category-list{
+
 }
 
 .category-button{
   display: inline-block; /* 버튼 내부 텍스트를 가로로 */
-  font-size: 15px;
-  border-radius: 20px;
-  border: 1px solid black;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  border: 0;
   margin: 3px;
   padding: 3px 5px;
   background: white;
   
 }
 
-.modal-content {
-  padding: 10px;
-  height: 340px;
-  width: 98%;
-  border-radius: 10px;
-  overflow-y: auto;
-  background-color: transparent;
-  outline: none;
-  border: none;
+.category-button.selected{
+  display: inline-block; /* 버튼 내부 텍스트를 가로로 */
+  font-size: 0.9rem;
+  border-radius: 4px;
+  border: 0;
+  margin: 3px;
+  padding: 3px 5px;
+  color: white;
+  
+  background: rgb(255, 147, 0);
 }
 
-.notification-list {
-  margin-top: 20px;
-  
+.modal-content {
+  /* flex-grow: 2; */
+  height: calc(100% - 50px - 3rem);
+  /* width: 100%; */
+  background-color: transparent;
+  border: none;
+
+}
+
+.notification-list{
+  overflow-y:auto;
+  padding: 0.6rem;
+}
+
+.space {
+  height: 0.5rem;
 }
 
 .notification-item {
@@ -255,7 +304,7 @@ flex-direction: row;
   border-radius: 10px;
   background-color: white;
   margin-bottom: 10px;
-  box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+  box-shadow: 2px 2px 2px rgba(0,0,0,0.5);
 
 }
 
@@ -268,6 +317,7 @@ flex-direction: row;
 }
 .notiMessage-title{
   background-color: transparent;
+  font: bolder;
 }
 
 .notiMessage {
@@ -368,16 +418,16 @@ flex-direction: row;
 
 
 /* 스크롤바 스타일 */
-.modal::-webkit-scrollbar {
+.notification-list::-webkit-scrollbar {
   width: 10px; /* 스크롤바 너비 */
 }
 
-.modal::-webkit-scrollbar-thumb {
+.notification-list::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.5); /* 스크롤바 색상 */
   border-radius: 10px; /* 스크롤바 모서리 둥글게 */
 }
 
-.modal::-webkit-scrollbar-track {
+.notification-list::-webkit-scrollbar-track {
   background-color: rgba(0, 0, 0, 0.1); /* 스크롤바 트랙 색상 */
 }
 
