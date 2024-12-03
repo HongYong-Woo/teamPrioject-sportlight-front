@@ -104,7 +104,7 @@ function clickOutside() {
         <div class="course-info">
             <h2>수강 신청</h2>
             <div class="course-container">
-                <img src="../../assets/running.jpeg" alt="Course-img">
+                <img :src="scheduleDetails.imgUrl" alt="Course-img">
                 <div class="title-container">
                     <div class="title">{{ scheduleDetails.courseTitle }}</div>
                     <div class="host">{{ scheduleDetails.hostNickname }}</div>
@@ -172,12 +172,8 @@ function clickOutside() {
                             <span>{{ selectedCoupon ? priceFormatter(couponDiscountAmount) : "" }}</span>
                         </div>
                         <button class="gray-btn" @click="couponBtnClickEvent">선택</button>
-                        <CouponModal 
-                            v-if="couponIsOpen"
-                            :coupons="coupons" 
-                            v-model:selectedCoupon="selectedCoupon"
-                            @apply="applyCoupon"
-                            @cancel="cancelCoupon" />
+                        <CouponModal v-if="couponIsOpen" :coupons="coupons" v-model:selectedCoupon="selectedCoupon"
+                            @apply="applyCoupon" @cancel="cancelCoupon" />
                     </div>
                 </div>
                 <div class="tuition-calculate">
@@ -212,7 +208,14 @@ function clickOutside() {
         </div>
     </div>
     <div v-if="isOpenPay" @click="clickOutside" class="payment-container">
-        <Payment class="payment-widget" @click.stop/>
+        <Payment class="payment-widget" 
+            :userInfo="userInfo" 
+            :amount="totalAmount"
+            :orderName="scheduleDetails.courseTitle"
+            :participantNum="participantNum"
+            :scheduleId="scheduleDetails.id"
+            :coupon="selectedCoupon"
+            @click.stop />
     </div>
 </template>
 <style scoped>
@@ -265,6 +268,7 @@ function clickOutside() {
 
 .course-container>img {
     width: 30%;
+    aspect-ratio: 3 / 2;
     object-fit: cover;
     border-radius: 0.5rem;
     border: 1px solid #d9d9d9;

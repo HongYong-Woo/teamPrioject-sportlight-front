@@ -1,10 +1,16 @@
 <script setup>
+import { useAPI } from "@/axios/useAPI";
 import { ref, onMounted } from "vue";
+import { usePaymentStore } from "../../stores/payment";
+
+const { get, post } = useAPI();
+const paymentStore = usePaymentStore();
 
 // 결제 데이터 참조 변수 선언
 const paymentKey = ref("");
 const orderId = ref("");
 const amount = ref("");
+const paymentData = ref(null);
 const responseData = ref("");
 
 // URL의 쿼리 파라미터 값을 가져오는 함수
@@ -17,27 +23,25 @@ const confirmPayment = async () => {
       paymentKey: urlParams.get("paymentKey"),
       orderId: urlParams.get("orderId"),
       amount: urlParams.get("amount"),
+      scheduleId: paymentData.value?.scheduleId || null,
+      userId: paymentData.value?.userId || null,
+      userCouponId: paymentData.value?.userCouponId || null,
+      participantNum: paymentData.value?.participantNum || null,
+      finalAmount: paymentData.value?.finalAmount || null,
     };
-
-    const response = await fetch("/confirm/widget", {
-      method: "POST",
+    
+    console.log(requestData);
+    const response = await post("/api/payments/confirm/widget", requestData, {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(requestData),
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw { message: data.message, code: data.code };
-    }
-
+    
     // 서버 응답 데이터를 저장
-    responseData.value = data;
+    responseData.value = response.data;
   } catch (err) {
     // 실패 시 실패 페이지로 이동
-    window.location.href = `/payment/fail?message=${err.message}&code=${err.code}`;
+    // window.location.href = `/widget/fail?message=${err.message}&code=${err.code}`;
   }
 };
 
@@ -47,8 +51,13 @@ onMounted(() => {
   orderId.value = urlParams.get("orderId");
   amount.value = urlParams.get("amount");
 
-  // 결제 승인 요청 함수 호출
-  confirmPayment();
+  paymentData.value = paymentStore.paymentData || JSON.parse(localStorage.getItem("paymentData"));
+  if (!paymentData.value) {
+    console.error("No payment data available");
+    window.location.href = `/widget/fail`;
+  } else {
+    confirmPayment();
+  }
 });
 </script>
 
