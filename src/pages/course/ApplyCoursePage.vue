@@ -213,7 +213,7 @@ function clickOutside() {
             :amount="totalAmount"
             :orderName="scheduleDetails.courseTitle"
             :participantNum="participantNum"
-            :scheduleId="scheduleDetails.id"
+            :schedule="scheduleDetails"
             :coupon="selectedCoupon"
             @click.stop />
     </div>

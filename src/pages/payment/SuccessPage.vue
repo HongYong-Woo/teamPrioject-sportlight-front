@@ -29,19 +29,19 @@ const confirmPayment = async () => {
       participantNum: paymentData.value?.participantNum || null,
       finalAmount: paymentData.value?.finalAmount || null,
     };
-    
+
     console.log(requestData);
     const response = await post("/api/payments/confirm/widget", requestData, {
       headers: {
         "Content-Type": "application/json",
       },
     });
-    
+
     // 서버 응답 데이터를 저장
     responseData.value = response.data;
   } catch (err) {
     // 실패 시 실패 페이지로 이동
-    // window.location.href = `/widget/fail?message=${err.message}&code=${err.code}`;
+    window.location.href = `/widget/fail?message=${err.message}&code=${err.code}`;
   }
 };
 
@@ -65,11 +65,7 @@ onMounted(() => {
   <div>
     <!-- 결제 완료 섹션 -->
     <div class="box_section" style="width: 600px">
-      <img
-        width="100px"
-        src="https://static.toss.im/illusts/check-blue-spot-ending-frame.png"
-        alt="결제 완료 이미지"
-      />
+      <img width="100px" src="https://static.toss.im/illusts/check-blue-spot-ending-frame.png" alt="결제 완료 이미지" />
       <h2>결제를 완료했어요</h2>
 
       <!-- 결제 금액 정보 -->
@@ -87,27 +83,19 @@ onMounted(() => {
       <!-- paymentKey 정보 -->
       <div class="p-grid typography--p" style="margin-top: 10px">
         <div class="p-grid-col text--left"><b>paymentKey</b></div>
-        <div
-          class="p-grid-col text--right"
-          style="white-space: initial; width: 250px"
-        >
+        <div class="p-grid-col text--right" style="white-space: initial; width: 250px">
           {{ paymentKey }}
         </div>
       </div>
 
       <!-- 버튼 섹션 -->
       <div class="p-grid" style="margin-top: 30px">
-        <button
-          class="button p-grid-col5"
-          @click="window.location.href='https://docs.tosspayments.com/guides/v2/payment-widget/integration'"
-        >
+        <button class="button p-grid-col5"
+          @click="window.location.href = 'https://docs.tosspayments.com/guides/v2/payment-widget/integration'">
           연동 문서
         </button>
-        <button
-          class="button p-grid-col5"
-          @click="window.location.href='https://discord.gg/A4fRFXQhRu'"
-          style="background-color: #e8f3ff; color: #1b64da"
-        >
+        <button class="button p-grid-col5" @click="window.location.href = 'https://discord.gg/A4fRFXQhRu'"
+          style="background-color: #e8f3ff; color: #1b64da">
           실시간 문의
         </button>
       </div>
@@ -129,25 +117,31 @@ onMounted(() => {
   border-radius: 8px;
   background-color: #f9f9f9;
 }
+
 .p-grid {
   display: flex;
   justify-content: space-between;
 }
+
 .p-grid-col {
   flex: 1;
 }
+
 .text--left {
   text-align: left;
 }
+
 .text--right {
   text-align: right;
 }
+
 .button {
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
 }
+
 .button:hover {
   opacity: 0.9;
 }

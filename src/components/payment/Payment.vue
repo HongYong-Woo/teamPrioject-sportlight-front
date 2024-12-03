@@ -21,7 +21,7 @@ const props = defineProps({
     amount : {type: Number, required: true},
     orderName : {type: String, required: true},
     participantNum : {type: Number, required: true},
-    scheduleId : {type: Number, required: true},
+    schedule : {type: Object, required: true},
     coupon : {type: Object, required: false},
   })
 
@@ -60,18 +60,19 @@ const initializePaymentWidget = async () => {
   // 결제하기 버튼 클릭 이벤트 추가
   button.addEventListener("click", async () => {
     const paymentData = {
-      scheduleId: props.scheduleId,
+      scheduleId: props.schedule.id,
       userId: props.userInfo.userId,
       userCouponId: props.coupon == null ? null : props.coupon.id,
       participantNum: props.participantNum,
       finalAmount: props.amount,
+      schduleImg: props.schedule.imgUrl,
     }
 
     paymentStore.setPaymentData(paymentData);
 
     await widgets.requestPayment({
       orderId: generateRandomString(), // 주문 번호
-      orderName: props.orderName, // 주문 이름
+      orderName: props.schedule.courseTitle, // 주문 이름
       successUrl: window.location.origin + "/widget/success", // 결제 성공 페이지 URL
       failUrl: window.location.origin + "/widget/fail", // 결제 실패 페이지 URL
       customerEmail: props.userInfo.loginId, // 고객 이메일

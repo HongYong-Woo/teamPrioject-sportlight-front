@@ -50,7 +50,7 @@ async function fetchSchedules() {
         console.log(schedules.value);
         updateSelectableDates();
     } catch (error) {
-        console.error(`Failed to fetch ${endpoint}`, error);
+        console.error(`Failed to fetch schedules`, error);
     }
 }
 
@@ -151,7 +151,7 @@ function addCommas(amount) {
 }
 
 watch([courseDetails, schedules], ([newDetails, newSchedules]) => {
-    if (newDetails.maxCapacity && newSchedules.length) {
+    if (!newDetails && !newSchedules && newDetails.maxCapacity && newSchedules.length) {
         updateSelectableDates();
         updateFilteredSchedules();
     }
