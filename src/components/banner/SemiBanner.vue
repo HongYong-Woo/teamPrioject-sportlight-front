@@ -6,7 +6,10 @@ import img3 from '@/assets/banner/banner3.png';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
-const images = [img1, img2, img3];
+const images = [
+    'https://kr.object.ncloudstorage.com/sportlight/banner_event/%EC%9D%B4%EB%B2%A4%ED%8A%B8%20%EB%B0%B0%EB%84%88%20-%201.png'
+    , 'https://kr.object.ncloudstorage.com/sportlight/banner_event/%EC%9D%B4%EB%B2%A4%ED%8A%B8%20%EB%B0%B0%EB%84%88%20-%202.png'
+    , 'https://kr.object.ncloudstorage.com/sportlight/banner_event/%EC%9D%B4%EB%B2%A4%ED%8A%B8%20%EB%B0%B0%EB%84%88%20-%203.png'];
 let currentIndex = ref(0);
 const currentImage = ref(images[currentIndex.value]);
 

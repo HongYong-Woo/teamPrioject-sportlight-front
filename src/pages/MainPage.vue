@@ -7,7 +7,7 @@ import { useAPI } from '@/axios/useAPI';
 import SemiBanner from '../components/banner/SemiBanner.vue';
 import ReviewList from '../components/main-page/ReviewList.vue';
 import Button from '../components/common/Button.vue';
-import EventCard from '../components/main-page/EventCard.vue';
+// import EventCard from '../components/main-page/EventCard.vue';
 
 const { get } = useAPI();
 const popularCourses = ref([]);
@@ -65,7 +65,7 @@ onMounted(() => {
 
     <ReviewList/>
 
-    <EventCard/>
+    <!-- <EventCard/> -->
 
     <SemiBanner />
 

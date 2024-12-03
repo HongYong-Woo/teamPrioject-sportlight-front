@@ -17,7 +17,7 @@ const props = defineProps({
             <Card v-for="card in courses" :key="card.id" :id="card.id" :nickname="card.nickname" :title="card.title"
                 :address="card.address" :tuition="card.tuition" :discountRate="card.discountRate" :time="card.time"
                 :level="card.level" :category="card.category" :rating="card.rating" :reviewCount="card.reviewCount"
-                :image="card.image" @button-click="handleCardButtonClick(card.id)" class="card-item"/>
+                :image="card.imgUrl" @button-click="handleCardButtonClick(card.id)" class="card-item"/>
         </div>
     </div>
 </template>
