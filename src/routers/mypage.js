@@ -23,6 +23,10 @@ const mypageRouter = [
       path: '/mypage/courses',
       component: () => import('@/pages/mypage/MyCourses.vue'),
   },
+  {
+    path: '/mypage/reviews',
+    component: () => import('@/pages/mypage/MyReview.vue'),
+},
 
   ];
   

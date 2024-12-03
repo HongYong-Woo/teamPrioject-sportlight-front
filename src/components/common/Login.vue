@@ -9,6 +9,10 @@ import { Eye, EyeOff } from 'lucide-vue-next';
 const currentStep = ref('login');
 
 const auth = useAuthStore();
+console.log("auth 상태 확인:", auth);
+console.log("auth.openLoginModal:", auth.openLoginModal);
+console.log("auth.closeLoginModal:", auth.closeLoginModal);
+
 const route = useRoute();
 const router = useRouter();
 
@@ -95,7 +99,7 @@ function handleKeydown(event) {
 
 const handleLogin = async () => {
   try {
-    const success = await auth.login(loginData.value);
+    const success = await auth.handleLogin(loginData.value);
     if (success) {
       console.log("로그인 성공");
       console.log(`유저 권한: ${auth.userRoles.join(', ')}`);
@@ -262,11 +266,11 @@ const passwordMismatchError = computed(() => {
 });
 
 function validatePassword() {
-  console.log("Password Validation:", passwordRules.value);
+  console.log("비밀번호 유효성 검증:", passwordRules.value);
 }
 
 function validatePasswordConfirm() {
-  console.log("Confirm Password Validation:", !passwordMismatchError.value);
+  console.log("비밀번호 확인 유효성 검증:", !passwordMismatchError.value);
 }
 
 
@@ -315,6 +319,30 @@ onUnmounted(() => {
   closeModal();
 });
 
+// const handleSocialLogin = (provider) => {
+//   const width = 500;
+//   const height = 600;
+//   const left = window.screen.width / 2 - width / 2;
+//   const top = window.screen.height / 2 - height / 2;
+
+//   const popup = window.open(
+//     `http://localhost:8080/oauth2/authorization/${provider}`,
+//     'OAuth2 Login',
+//     `width=${width},height=${height},left=${left},top=${top}`
+//   );
+
+//   if (!checkPopupBlocker(popup)) {
+//     return;
+//   }
+
+//   const checkPopupInterval = setInterval(() => {
+//     if (popup.closed) {
+//       clearInterval(checkPopupInterval);
+//     }
+//   }, 1000);
+// };
+
+// Login.vue
 const handleSocialLogin = (provider) => {
   const width = 500;
   const height = 600;
@@ -324,49 +352,56 @@ const handleSocialLogin = (provider) => {
   const popup = window.open(
     `http://localhost:8080/oauth2/authorization/${provider}`,
     'OAuth2 Login',
-    `width=${width},height=${height},left=${left},top=${top}`
+    `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
   );
 
-  if (!checkPopupBlocker(popup)) {
+  if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+    loginError.value = "팝업이 차단되었습니다. 팝업 차단을 해제해주세요.";
     return;
   }
-
-  const checkPopupInterval = setInterval(() => {
-    if (popup.closed) {
-      clearInterval(checkPopupInterval);
-    }
-  }, 1000);
-};
-
-const checkPopupBlocker = (popup) => {
-  if (!popup || popup.closed || typeof popup.closed == 'undefined') {
-    loginError.value = "팝업이 차단되었습니다. 팝업 차단을 해제해주세요.";
-    return false;
-  }
-  return true;
 };
 
 const messageHandler = async (event) => {
-  if (event.origin === 'http://localhost:8080') {
-    const { token, userId, requiresAdditionalInfo } = event.data;
+  // CORS 검증
+  if (event.origin !== 'http://localhost:8080') return;
 
-    if (token) {
-      try {
-        localStorage.setItem('accessToken', token);
-        const success = await auth.setLoginSuccess(token);
-        if (success) {
-          if (requiresAdditionalInfo) {
-            router.push('/additional-info');
-          } else {
-            closeModal();
-          }
+  const data = event.data;
+
+  // 에러 처리
+  if (data.error) {
+    loginError.value = data.error;
+    return;
+  }
+
+  // 성공 처리
+  if (data.token) {
+    try {
+      localStorage.setItem('accessToken', data.token);
+      const success = await auth.setLoginSuccess(data.token);
+      
+      if (success) {
+        if (data.requiresAdditionalInfo) {
+          router.push('/additional-info');
+        } else {
+          closeModal();
+          // 필요한 경우 페이지 새로고침 또는 상태 업데이트
+          window.location.reload();
         }
-      } catch (error) {
-        loginError.value = "로그인 처리 중 오류가 발생했습니다.";
       }
+    } catch (error) {
+      console.error('로그인 처리 중 오류:', error);
+      loginError.value = "로그인 처리 중 오류가 발생했습니다.";
     }
   }
 };
+
+onMounted(() => {
+  window.addEventListener('message', messageHandler);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('message', messageHandler);
+});
 
 </script>
 

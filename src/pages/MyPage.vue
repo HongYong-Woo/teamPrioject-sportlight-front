@@ -120,9 +120,9 @@ const fetchUserInterests = async () => {
 
           <router-link to="/mypage/interests" class="card interest-card">
             <div class="title-group">
-            <Heart class="icon" />
-            <h3>찜 목록</h3>
-          </div>
+              <Heart class="icon" />
+              <h3>찜 목록</h3>
+            </div>
             <p class="subtitle">회원님이 찜한 클래스들을 확인하실 수 있어요.</p>
             <div class="count-info">
               <span class="label">찜:</span>
@@ -144,7 +144,12 @@ const fetchUserInterests = async () => {
         </div>
 
         <div class="side-section">
-          <div class="card action-card" @click="$router.push('/mypage/host-request')">
+          <div v-if="auth.userRoles.includes('HOST')" class="card action-card"
+            @click="$router.push('/hostchannel/main')">
+            <h3>강사 채널</h3>
+            <p class="subtitle">강사님의 활동을 확인하고 관리하세요 :)</p>
+          </div>
+          <div v-else class="card action-card" @click="$router.push('/mypage/host-request')">
             <h3>강사 등록하기</h3>
             <p class="subtitle">회원님의 지식을 다른 회원님에게 공유해보세요 :)</p>
           </div>
@@ -167,6 +172,7 @@ const fetchUserInterests = async () => {
                 </span>
               </div>
             </div>
+
           </div>
         </div>
 
@@ -174,6 +180,12 @@ const fetchUserInterests = async () => {
           <div class="card action-card" @click="openPasswordModal">
             <h3>비밀번호 변경</h3>
             <p class="subtitle">계정 보안을 위해 주기적으로 변경해주세요.</p>
+          </div>
+        </div>
+        <div>
+          <div class="card action-card" @click="$router.push('/mypage/reviews')">
+            <h3>리뷰 관리</h3>
+            <p class="subtitle">회원님이 작성하신 리뷰를 확인하실 수 있어요</p>
           </div>
         </div>
       </div>
