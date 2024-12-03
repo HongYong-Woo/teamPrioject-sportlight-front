@@ -50,7 +50,7 @@ onMounted(fetchInterests);
 
     <div v-else-if="interests.length === 0" class="empty-state">
       <p>아직 찜한 클래스가 없습니다.</p>
-      <button @click="router.push('/courses')" class="browse-btn">
+      <button @click="router.push('/course')" class="browse-btn">
         클래스 둘러보기
       </button>
     </div>

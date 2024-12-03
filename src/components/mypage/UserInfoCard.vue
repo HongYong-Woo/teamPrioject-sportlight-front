@@ -28,7 +28,6 @@ const openEditModal = () => {
 <template>
   <div class="user-info-card">
     <div class="info-grid">
-      <!-- 왼쪽 상단: 프로필 이미지 -->
       <div class="profile-section">
         <div class="user-image-wrapper">
           <div class="user-image-container">
@@ -37,7 +36,6 @@ const openEditModal = () => {
         </div>
       </div>
 
-      <!-- 오른쪽 상단: 제목, 설명, 닉네임 -->
       <div class="header-section">
         <h3>내 정보</h3>
         <p class="subtitle">프로필 이미지와 닉네임, 내 소개를 통해 다른 회원님께 자신을 표현해보세요!</p>
@@ -47,7 +45,6 @@ const openEditModal = () => {
         </div>
       </div>
 
-      <!-- 왼쪽 하단: 연락처 정보 -->
       <div class="contact-section">
         <div class="info-group">
           <span class="label">이메일:</span>
@@ -59,7 +56,6 @@ const openEditModal = () => {
         </div>
       </div>
 
-      <!-- 오른쪽 하단: 자기소개 -->
       <div class="introduce-section">
         <span class="label">내 소개:</span>
         <div class="introduce-box">
