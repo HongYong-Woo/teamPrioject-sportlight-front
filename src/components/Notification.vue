@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Notifications } from '../axios/Notifications';
+import  formatRelativeTime from '../util/relativeTimeFormatter';
 
 const {
   notifications,
@@ -17,6 +18,8 @@ const {
   openDeleteModal,
   closeDeleteModal
 } = Notifications();
+
+
 
 var notificationType = ref('ALL');
 
@@ -45,6 +48,8 @@ var notificationType = ref('ALL');
 const selectNotiType = (category) => {
   notificationType.value = category;
 };
+
+
 
 </script>
 
@@ -86,7 +91,7 @@ const selectNotiType = (category) => {
             :class="{ 'read': notification.notiReadOrNot}" @click="changeReadStatus(index, notification.notificationId)">
             <div style="flex-direction: row;">
             <span  class="notiMessage-title">{{ notification.notiTitle }}</span>
-            <span class="notification-date">· {{ formatTime(notification.createdAt)}}</span>
+            <span class="notification-date">· {{ formatRelativeTime(notification.createdAt)}}</span>
             <button @click.stop="openDeleteModal(index, notification.notificationId)" class="notification-delete">
               <img src="../assets/img/delete.svg" class="deleteImg">
             </button>
@@ -106,7 +111,7 @@ const selectNotiType = (category) => {
         <div class="delete-modal-targetContent">
             <p>
               <span  class="notiMessage">{{ notifications[deleteIndex].notiTitle }}</span>
-              <span class="notification-date">{{ formatTime(notifications[deleteIndex].createdAt)}}</span>
+              <span class="notification-date">{{ formatRelativeTime(notifications[deleteIndex].createdAt)}}</span>
             </p>
             <span  class="notiMessage">{{ notifications[deleteIndex].notiContent }}</span>
           
