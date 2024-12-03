@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { Notifications } from '../axios/Notifications';
+import  formatRelativeTime from '../util/relativeTimeFormatter';
 
 const {
   notifications,
@@ -13,8 +14,6 @@ const {
 } = Notifications();
 
 
-const notiTitle = ref('');
-const notiContent = ref('');
 
   // 필터링된 알림
   const filterNotifications = computed(() => {
@@ -47,7 +46,7 @@ const notiContent = ref('');
             :class="{ 'read': notification.notiReadOrNot}" @click="changeReadStatus(index, notification.notificationId)">
             <div style="flex-direction: row;">
             <span  class="notiMessage-title">{{ notification.notiTitle }}</span>
-            <span class="notification-date">· {{ formatTime(notification.createdAt)}}</span>
+            <span class="notification-date">· {{ formatRelativeTime(notification.createdAt)}}</span>
             <button @click.stop="openDeleteModal(index, notification.notificationId)" class="notification-delete">
               <img src="../assets/img/delete.svg" class="deleteImg">
             </button>
