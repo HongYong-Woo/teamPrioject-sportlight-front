@@ -41,7 +41,7 @@ function formattedDateTime(dateTime) {
             <h3>쿠폰 선택</h3>
             <div class="coupon-list">
                 <div v-if="!coupons.length" class="no-coupon">
-                    <p>🤪</p>
+                    <p>🥲</p>
                     사용 가능한 쿠폰이 없습니다.
                 </div>
                 <div v-for="coupon in coupons" :key="coupon.id" :class="['coupon-option', { selected: coupon === internalSelectedCoupon }]">
@@ -95,13 +95,6 @@ function formattedDateTime(dateTime) {
 
 .no-coupon>p {
     font-size: 4rem;
-    animation: rotate 1s linear infinite;
-}
-
-@keyframes rotate {
-    100% {
-        transform: rotate(-360deg);
-    }
 }
 
 .coupon-list {

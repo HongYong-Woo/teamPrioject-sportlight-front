@@ -242,6 +242,11 @@ onUnmounted(() => {
 .logo-container {
     flex-shrink: 0;
     margin-right: 10px;
+    align-items: center;
+}
+
+.logo-img {
+    height: 2rem;
 }
 
 .responsive-logo-container {

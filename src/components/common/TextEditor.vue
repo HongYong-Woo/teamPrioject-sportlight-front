@@ -127,7 +127,7 @@ const editor = new Editor({
 const content = ref(prop.content);
 
 onBeforeUnmount(() => {
-  this.editor.destroy()
+  editor.destroy()
 });
 </script>
 
