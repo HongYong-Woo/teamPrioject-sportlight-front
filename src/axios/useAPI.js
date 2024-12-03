@@ -1,72 +1,86 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+const subscribeTokenRefresh = (callback) => {
+    refreshSubscribers.push(callback);
+};
+
+const onRefreshed = (token) => {
+    refreshSubscribers.forEach(callback => callback(token));
+    refreshSubscribers = [];
+};
+
 export const useAPI = () => {
     const baseURL = "http://localhost:8080";
     const auth = useAuthStore();
-    const headers = {
-        "Content-Type": "application/json",
-    };
-    console.log("token: " + auth.token);
-    if(auth.isAuthenticated()) {
-        headers['Authorization'] = `Bearer ${auth.token}`;
-    }
+    
     const api = axios.create({
         baseURL: baseURL,
         withCredentials: true,
         timeout: 10000,
-        headers: headers,
+        headers: {
+            "Content-Type": "application/json"
+        }
     });
 
     api.interceptors.request.use(
         (config) => {
-            try {
-                const token = localStorage.getItem("accessToken");
-                if (token) {
-                    config.headers["Authorization"] = `Bearer ${token}`;
-                }
-                return config;
-            } catch (error) {
-                console.error("Request interceptor error:", error);
-                return Promise.reject(error);
+            const token = localStorage.getItem("accessToken");
+            if (token && !config.url.includes('/login')) {
+                config.headers["Authorization"] = `Bearer ${token}`;
             }
+            return config;
         },
         (error) => {
-            console.error("Request interceptor error:", error);
             return Promise.reject(error);
         }
     );
-
 
     api.interceptors.response.use(
         (response) => response,
         async (error) => {
             const originalRequest = error.config;
-            
+
             if (!error.response) {
                 return Promise.reject(new Error("네트워크 연결을 확인해주세요."));
             }
 
-            if (
-                error.response.status === 401 && 
-                !originalRequest._retry && 
-                !originalRequest.url.includes('/login')
-            ) {
+            if (originalRequest.url.includes('/login') || originalRequest.url.includes('/reissue')) {
+                return Promise.reject(error);
+            }
+
+            if (error.response.status === 401 && !originalRequest._retry) {
+                if (isRefreshing) {
+                    return new Promise(resolve => {
+                        subscribeTokenRefresh(token => {
+                            originalRequest.headers['Authorization'] = `Bearer ${token}`;
+                            resolve(api(originalRequest));
+                        });
+                    });
+                }
+
                 originalRequest._retry = true;
-                
+                isRefreshing = true;
+
                 try {
-                    const authStore = useAuthStore();
-                    const success = await authStore.refreshToken();
-                    
+                    const success = await auth.refreshToken();
                     if (success) {
                         const newToken = localStorage.getItem("accessToken");
+                        onRefreshed(newToken);
                         originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
                         return api(originalRequest);
                     }
-                } catch (refreshError) {
-                    const authStore = useAuthStore();
-                    await authStore.logout();
+                    
+                    await auth.logout();
                     throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
+                } catch (refreshError) {
+                    await auth.logout();
+                    throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
+                } finally {
+                    isRefreshing = false;
                 }
             }
 
@@ -79,49 +93,46 @@ export const useAPI = () => {
         }
     );
 
-
-    // GET 요청
     const get = async (url, params) => {
         try {
-            const response = await api.get(url, params);
-            return response;
-        } catch (error) {
-            console.log(error);
-            throw error;
-        }
-    };
-
-    // POST 요청
-    const post = async (url, params, config = {}) => {
-        try {
-            const response = await api.post(url, params, config); // config로 추가 설정 전달
+            const response = await api.get(url, { params });
             return response;
         } catch (error) {
             throw error;
         }
     };
 
-    // PATCH 요청
-    const patch = async (url, params) => {
+    const post = async (url, data, config = {}) => {
         try {
-            const response = await api.patch(url, params);
+            const response = await api.post(url, data, config);
             return response;
         } catch (error) {
             throw error;
         }
     };
-    
-    // DELETE 요청
+
+    const patch = async (url, data, config = {}) => {
+        try {
+            const response = await api.patch(url, data, {
+                ...config,
+                headers: {
+                    ...config.headers
+                }
+            });
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    };
+
     const remove = async (url, params) => {
         try {
-            const response = await api.delete(url, params);
+            const response = await api.delete(url, { params });
             return response;
         } catch (error) {
             throw error;
         }
     };
 
-    
-
     return { get, post, patch, remove };
-}
+};

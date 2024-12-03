@@ -1,4 +1,3 @@
-<!-- 구현 중 -->
 <script setup>
 import { ref, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
@@ -6,22 +5,23 @@ import { useAuthStore } from '@/stores/auth';
 const props = defineProps({
   isOpen: {
     type: Boolean,
-    required: true
+    required: true,
   },
   userInfo: {
     type: Object,
     required: true,
     default: () => ({
-      userImage: null,
+      userImage: '/default-profile.png',
       userNickname: '',
       userIntroduce: '',
+      loginId: '',
+      userName: '',
+      userPhone: '',
       marketingAgreement: false,
-      personalAgreement: false
-    })
-  }
+      personalAgreement: false,
+    }),
+  },
 });
-
-
 
 const emit = defineEmits(['close', 'save']);
 const auth = useAuthStore();
@@ -56,17 +56,18 @@ const handleImageChange = (event) => {
 const handleSubmit = async () => {
   try {
     const formData = new FormData();
-    
+
     if (imageFile.value) {
       formData.append('userImage', imageFile.value);
     }
-    
-    formData.append('userNickname', nickname.value);
-    formData.append('userIntroduce', introduce.value || '');
-    formData.append('marketingAgreement', marketingAgreement.value);
-    formData.append('personalAgreement', personalAgreement.value);
 
+    formData.append('userNickname', nickname.value || '');
+    formData.append('userIntroduce', introduce.value || '');
+    formData.append('marketingAgreement', marketingAgreement.value || false);
+    formData.append('personalAgreement', personalAgreement.value || false);
+    
     await auth.updateProfile(formData);
+
     emit('save');
     emit('close');
   } catch (error) {
@@ -75,16 +76,22 @@ const handleSubmit = async () => {
   }
 };
 
-watch(() => props.userInfo, (newValue) => {
-  if (newValue) {
-    imagePreview.value = newValue.userImage || '/default-profile.png';
-    nickname.value = newValue.userNickname || '';
-    introduce.value = newValue.userIntroduce || '';
-    marketingAgreement.value = newValue.marketingAgreement || false;
-    personalAgreement.value = newValue.personalAgreement || false;
-  }
-}, { immediate: true });
+watch(
+  () => props.userInfo,
+  (newValue) => {
+    if (newValue) {
+      imagePreview.value = newValue.userImage || '/default-profile.png';
+      nickname.value = newValue.userNickname || '';
+      introduce.value = newValue.userIntroduce || '';
+      marketingAgreement.value = newValue.marketingAgreement || false;
+      personalAgreement.value = newValue.personalAgreement || false;
+      imageFile.value = null;
+    }
+  },
+  { immediate: true }
+);
 </script>
+
 
 <template>
   <div v-if="isOpen" class="modal-overlay">

@@ -1,13 +1,13 @@
 <script setup>
 const companyInfo = {
-    name: "(주)스포츠라이트",
-    representative: "트루만쇼",
-    registrationNumber: "000-11-11111",
-    inquiryEmail: "trueManShow@sportlight.net",
-    call: "02-111-1111",
-    mailOrderSles: "2024-서울삼성-0000",
-    cheifPrivacyOfficer: "박트루",
-    addess: "서울특별시 배고프구 졸리니집으로 000길 99 6층",
+  name: "(주)스포츠라이트",
+  representative: "트루만쇼",
+  registrationNumber: "000-11-11111",
+  inquiryEmail: "trueManShow@sportlight.net",
+  call: "02-111-1111",
+  mailOrderSles: "2024-서울삼성-0000",
+  cheifPrivacyOfficer: "박태환",
+  addess: "서울특별시 강남구 삼성로 534, 6층",
 };
 </script>
 
@@ -52,6 +52,7 @@ const companyInfo = {
   color: #404040;
   width: 100%;
   min-width: 320px;
+  position: relative;
 }
 
 .footer-inner {
@@ -83,6 +84,10 @@ const companyInfo = {
   color: #666;
 }
 
+.content a:hover {
+  color: #333;
+}
+
 .content p {
   margin: 0;
   font-size: 14px;
@@ -94,7 +99,7 @@ const companyInfo = {
   content: "";
   position: absolute;
   top: 0;
-  right: 10px;
+  right: -15px;
   width: 1px;
   height: 130px;
   background: #dfdfdf;
@@ -104,17 +109,20 @@ const companyInfo = {
   font-size: 13px;
   color: #909090;
   margin-top: 15px;
+  padding-top: 15px;
 }
 
 @media (max-width: 768px) {
   .footer-inner .flex {
-    flex-direction: column; 
+    flex-direction: column;
     align-items: center;
   }
 
   .content {
     margin: 8px 0;
     text-align: center;
+    min-width: unset;
+    width: 100%;
   }
 
   .content strong {
@@ -122,8 +130,8 @@ const companyInfo = {
   }
 
   .content p {
-    margin: 3px 0; 
-    line-height: 1.3; 
+    margin: 3px 0;
+    line-height: 1.3;
   }
 
   .content:not(:last-child)::after {
@@ -131,7 +139,11 @@ const companyInfo = {
   }
 
   .footer-inner {
-    padding: 5px;
+    padding: 15px;
+  }
+
+  .info {
+    margin-top: 10px;
   }
 }
 </style>

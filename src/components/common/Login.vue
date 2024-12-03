@@ -123,7 +123,7 @@ watch(
 watch(
   currentStep,
   () => {
-    loginError.value = ''; 
+    loginError.value = '';
   }
 );
 
@@ -297,6 +297,7 @@ const formattedTimer = computed(() => {
 });
 
 onMounted(() => {
+  window.addEventListener('message', messageHandler);
   window.addEventListener('keydown', handleKeydown);
   if (route.query.showLoginModal === 'true') {
     isVisible.value = true;
@@ -305,6 +306,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  window.removeEventListener('message', messageHandler);
   window.removeEventListener('keydown', handleKeydown);
   if (timerInterval.value) {
     clearInterval(timerInterval.value);
@@ -312,6 +314,59 @@ onUnmounted(() => {
   }
   closeModal();
 });
+
+const handleSocialLogin = (provider) => {
+  const width = 500;
+  const height = 600;
+  const left = window.screen.width / 2 - width / 2;
+  const top = window.screen.height / 2 - height / 2;
+
+  const popup = window.open(
+    `http://localhost:8080/oauth2/authorization/${provider}`,
+    'OAuth2 Login',
+    `width=${width},height=${height},left=${left},top=${top}`
+  );
+
+  if (!checkPopupBlocker(popup)) {
+    return;
+  }
+
+  const checkPopupInterval = setInterval(() => {
+    if (popup.closed) {
+      clearInterval(checkPopupInterval);
+    }
+  }, 1000);
+};
+
+const checkPopupBlocker = (popup) => {
+  if (!popup || popup.closed || typeof popup.closed == 'undefined') {
+    loginError.value = "팝업이 차단되었습니다. 팝업 차단을 해제해주세요.";
+    return false;
+  }
+  return true;
+};
+
+const messageHandler = async (event) => {
+  if (event.origin === 'http://localhost:8080') {
+    const { token, userId, requiresAdditionalInfo } = event.data;
+
+    if (token) {
+      try {
+        localStorage.setItem('accessToken', token);
+        const success = await auth.setLoginSuccess(token);
+        if (success) {
+          if (requiresAdditionalInfo) {
+            router.push('/additional-info');
+          } else {
+            closeModal();
+          }
+        }
+      } catch (error) {
+        loginError.value = "로그인 처리 중 오류가 발생했습니다.";
+      }
+    }
+  }
+};
 
 </script>
 
@@ -354,10 +409,19 @@ onUnmounted(() => {
             <div class="social-divider">
               <span>간편 회원가입</span>
             </div>
+            <div v-if="loginError && loginError.includes('팝업')" class="popup-blocker-warning">
+              {{ loginError }}
+            </div>
             <div class="social-btn-container">
-              <button class="social-btn kakao">Kakao</button>
-              <button class="social-btn naver">Naver</button>
-              <button class="social-btn google">Google</button>
+              <button class="social-btn kakao" @click.prevent="handleSocialLogin('kakao')">
+                Kakao
+              </button>
+              <button class="social-btn naver" @click.prevent="handleSocialLogin('naver')">
+                Naver
+              </button>
+              <button class="social-btn google" @click.prevent="handleSocialLogin('google')">
+                Google
+              </button>
             </div>
           </div>
         </div>
@@ -654,6 +718,11 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
+.social-btn:hover {
+  transform: translateY(-2px);
+}
+
+
 .social-divider {
   display: flex;
   align-items: center;
@@ -862,5 +931,18 @@ h2 {
 
 .password-input-wrapper .input-box {
   padding-right: 45px;
+}
+
+.popup-blocker-warning {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  color: #856404;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 </style>
