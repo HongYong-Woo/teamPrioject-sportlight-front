@@ -16,6 +16,9 @@ const routes = [
     { path: '/mypage', component: () => import('../pages/MyPage.vue'), meta: { layout: 'default' } },
     { path: '/widget/success', component: () => import('../pages/payment/SuccessPage.vue'), meta: { layout: 'empty' }},
     { path: '/widget/fail', component: () => import('../pages/payment/FailPage.vue'), meta: { layout: 'empty' }},
+    { path: '/payment/success', component: () => import('../pages/payment/SuccessPage.vue'), meta: { layout: 'empty' }},
+    { path: '/payment/fail', component: () => import('../pages/payment/FailPage.vue'), meta: { layout: 'empty' }},
+    { path: '/additional-info', component: () => import('../pages/auth/AdditionalUserInfo.vue'), meta: { layout: 'empty'}},
     courseRouter, communityRouter, courseDetailRouter, hostChannelRouter, applyCourseRouter, ...mypageRouter,
 ];
 

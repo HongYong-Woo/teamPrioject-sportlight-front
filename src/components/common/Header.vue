@@ -23,8 +23,8 @@ const sidebarSearchQuery = ref('');
 const isModalVisible = ref(false);
 
 const toggleLoginModal = () => {
-  isModalVisible.value = !isModalVisible.value; // 로컬 상태 토글
-  auth.toggleLoginModal(isModalVisible.value); // Pinia 상태와 동기화
+    isModalVisible.value = !isModalVisible.value;
+    auth.toggleLoginModal(isModalVisible.value);
 };
 
 const isAuthenticated = computed(() => {
@@ -60,9 +60,6 @@ const updateDropdownVisibility = (value) => {
 
 const toggleSidebar = () => {
     isSidebarOpen.value = !isSidebarOpen.value;
-    if (!isSidebarOpen.value) {
-        sidebarCategoryOpen.value = false;
-    }
 };
 
 function toggleCategoryMenu() {
@@ -86,14 +83,11 @@ const handleSidebarSearch = (e) => {
     router.push(`/search?q=${encodeURIComponent(sidebarSearchQuery.value)}`);
 };
 
-// const toggleLoginModal = () => {
-//     isModalVisible.value = !isModalVisible.value;
-//     if (isModalVisible.value) {
-//         auth.openLoginModal();
-//     } else {
-//         auth.closeLoginModal();
-//     }
-// };
+const handleKeydown = (event) => {
+    if (event.key === "Escape" && isSidebarOpen.value) {
+        toggleSidebar();
+    }
+};
 
 const handleLoginClose = () => {
     isModalVisible.value = false;
@@ -109,11 +103,13 @@ const handleResize = () => {
 
 onMounted(() => {
     window.addEventListener("resize", handleResize);
+    window.addEventListener("keydown", handleKeydown);
     handleResize();
 });
 
 onUnmounted(() => {
     window.removeEventListener("resize", handleResize);
+    window.removeEventListener("keydown", handleKeydown);
 });
 </script>
 
@@ -150,13 +146,14 @@ onUnmounted(() => {
             </form>
 
             <div class="header-right">
-
-                <RouterLink v-if="isAuthenticated" to="/mypage/host-request" class="custom-btn instructor-btn">
+                <RouterLink v-if="isAuthenticated && auth.userRoles.includes('HOST')" to="/hostchannel/main" class="custom-btn instructor-btn">
+                    강사 채널
+                </RouterLink>
+                <RouterLink v-else-if="isAuthenticated" to="/mypage/host-request" class="custom-btn instructor-btn">
                     강사 등록하기
                 </RouterLink>
-                
 
-                <Notification v-if="isAuthenticated" />
+                <Notification v-if="isAuthenticated && !isResponsive" class="notification-btn" />
 
                 <ProfileDropdown v-if="isAuthenticated" :is-visible="isMyPageDropdownVisible" :profile-image="profileImage"
                     @update:is-visible="updateDropdownVisibility" @handle-dropdown="handleDropdownChange" />
@@ -198,7 +195,10 @@ onUnmounted(() => {
                             <li>탁구</li>
                         </div>
                     </transition>
-                    <li v-if="isAuthenticated">
+                    <li v-if="isAuthenticated && auth.userRoles.includes('HOST')">
+                        <RouterLink to="/hostchannel/main" class="sidebar-link">강사 채널</RouterLink>
+                    </li>
+                    <li v-else-if="isAuthenticated">
                         <RouterLink to="/mypage/host-request" class="sidebar-link">강사 등록하기</RouterLink>
                     </li>
                 </ul>
@@ -316,7 +316,6 @@ onUnmounted(() => {
     background-color: white;
 }
 
-/* 사이드바 스타일 수정 */
 .sidebar {
     position: fixed;
     top: 0;
@@ -489,6 +488,11 @@ onUnmounted(() => {
     justify-content: center;
 }
 
+.menu-icon:focus {
+    outline: none;
+    box-shadow: none;
+}
+
 @media (max-width: 768px) {
     .search-container {
         display: none;
@@ -516,6 +520,10 @@ onUnmounted(() => {
 
     .sidebar-menu li .sidebar-link {
         margin-top: 0.5rem;
+    }
+
+    .notification-btn {
+        display: none !important;
     }
 }
 </style>

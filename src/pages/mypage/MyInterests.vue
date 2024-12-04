@@ -8,29 +8,21 @@ const router = useRouter();
 const interests = ref([]);
 const loading = ref(true);
 const error = ref(null);
-const { get, patch } = useAPI();
+const { get } = useAPI();
 
 const fetchInterests = async () => {
   try {
     loading.value = true;
     const response = await get('/my/interests');
-    interests.value = response.data.data;
+    interests.value = response.data.data.map(course => ({
+      ...course,
+      isLiked: true
+    }));
   } catch (error) {
     console.error('찜 목록을 불러오지 못했습니다:', error);
     error.value = '찜 목록을 불러오는 중 오류가 발생했습니다.';
   } finally {
     loading.value = false;
-  }
-};
-
-const toggleInterest = async (courseId) => {
-  try {
-    const response = await patch(`/my/interests/${courseId}`);
-    if (!response.data.data) {
-      interests.value = interests.value.filter(item => item.id !== courseId);
-    }
-  } catch (error) {
-    console.error('찜하기 토글 실패:', error);
   }
 };
 
@@ -60,7 +52,7 @@ onMounted(fetchInterests);
         v-for="course in interests"
         :key="course.id"
         v-bind="course"
-        @interest-toggle="toggleInterest"
+        :isLiked="true"
       />
     </div>
   </div>
@@ -79,13 +71,15 @@ h1 {
 }
 
 .courses-grid {
- display: flex;
- flex-wrap: wrap;
- gap: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: flex-start;
 }
 
-.course-card {
- flex: 0 0 266px;
+.courses-grid > * {
+  flex: 0 0 280px;
+  max-width: 280px;
 }
 
 .empty-state,
@@ -95,7 +89,7 @@ h1 {
   padding: 3rem;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .loading-state {
