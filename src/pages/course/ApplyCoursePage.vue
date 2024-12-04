@@ -25,17 +25,17 @@ const couponDiscountAmount = computed(() => {
     if(!selectedCoupon.value) {
         return 0;
     }
-    return Math.ceil(scheduleDetails.value.tuition * selectedCoupon.value.discountRate / 100);
+    return Math.ceil(scheduleDetails.value.tuition * participantNum * selectedCoupon.value.discountRate / 100);
 })
 const courseDiscountAmount = computed(() => {
     if(scheduleDetails.value.discountRate == 0) return 0;
-    return Math.ceil(scheduleDetails.value.tuition * scheduleDetails.value.discountRate / 100);
+    return Math.ceil(scheduleDetails.value.tuition * participantNum * scheduleDetails.value.discountRate / 100);
 })
 const courseTotalDiscount = computed(() => {
     return Math.ceil(couponDiscountAmount.value + courseDiscountAmount.value);
 })
 const totalAmount = computed(() => {
-    return Math.ceil(scheduleDetails.value.tuition - courseTotalDiscount.value);
+    return Math.ceil(scheduleDetails.value.tuition * participantNum - courseTotalDiscount.value);
 })
 const isOpenPay = ref(false);
 
@@ -179,7 +179,7 @@ function clickOutside() {
                 <div class="tuition-calculate">
                     <div class="payment-info-set-container">
                         <div class="payment-info-title">선택 상품 금액</div>
-                        <div>{{ priceFormatter(scheduleDetails.tuition) }}</div>
+                        <div>{{ priceFormatter(scheduleDetails.tuition * participantNum) }}</div>
                     </div>
                     <div v-if="scheduleDetails.discountRate" class="payment-info-set-container discount-amount">
                         <div class="payment-info-title">할인금액</div>
@@ -407,7 +407,7 @@ function clickOutside() {
 }
 
 .available-coupon>span {
-    color: var(--primary-skyblue-color);
+    color: var(--primary-orange-color);
 }
 
 .discount-amount {
