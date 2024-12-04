@@ -106,6 +106,10 @@ function goToCourseDetail() {
 
 .img-wrapper {
     position: relative;
+    width: 100%;
+    border-radius: 0.25rem;
+    aspect-ratio: 3 / 2;
+    background-color: var(--primary-orange-color);
 }
 
 .discount-rate {
@@ -122,9 +126,8 @@ function goToCourseDetail() {
 .card-image {
     width: 100%;
     aspect-ratio: 3 / 2;
-    border-radius: 0.25rem;
     object-fit: cover;
-    background-color: darkred;
+    border-radius: 0.25rem;
 }
 
 /* 강사 정보 */
@@ -150,7 +153,7 @@ function goToCourseDetail() {
 }
 
 .card-title {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: bold;
 }
 
