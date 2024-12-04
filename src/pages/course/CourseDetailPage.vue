@@ -47,7 +47,6 @@ async function fetchSchedules() {
     try {
         const response = await get(`/courses/${courseId}/schedules`);
         schedules.value = response.data.data;
-        console.log(schedules.value);
         updateSelectableDates();
     } catch (error) {
         console.error(`Failed to fetch schedules`, error);
@@ -66,14 +65,10 @@ onBeforeUnmount(() => {
 })
 
 function updateSelectableDates() {
-    const maxCapacity = courseDetails.value.maxCapacity;
     selectableDates.value = schedules.value
         .reduce((dates, schedule) => {
             const date = new Date(schedule.startTime).toISOString().split('T')[0];
-            if (
-                !dates.includes(date) &&
-                (maxCapacity - schedule.participantNum >= request.value.participantNum)
-            ) {
+            if (!dates.includes(date)) {
                 dates.push(date);
             }
             return dates;
@@ -88,11 +83,14 @@ function updateFilteredSchedules() {
     const selectedDate = new Date(request.value.dateTime).toISOString().split('T')[0];
     filteredSchedules.value = schedules.value.filter(schedule => {
         const scheduleDate = new Date(schedule.startTime).toISOString().split('T')[0];
-        return (
-            scheduleDate === selectedDate &&
-            courseDetails.value.maxCapacity - schedule.participantNum >= request.value.participantNum
-        );
+        return (scheduleDate === selectedDate)
+    }).map(schedule => {
+        schedule.isActive = 
+            courseDetails.value.maxCapacity - schedule.participantNum < request.value.participantNum ||
+            schedule.remainedNum <= 0 ? false : true;
+        return schedule;
     });
+    console.log(filteredSchedules.value);
 }
 
 function updateRequestParticipants(value) {
@@ -105,13 +103,10 @@ function updateRequestParticipants(value) {
 
     updateSelectableDates();
     updateFilteredSchedules();
-    console.log(filteredSchedules.value);
 }
 
 function updateRequestDate(newDate) {
-    console.log(newDate);
     request.value.dateTime = formatDate(newDate);
-    console.log(request.value.dateTime);
     updateFilteredSchedules();
 }
 
@@ -214,7 +209,8 @@ function goToApplyCourse() {
         <div class="top">
             <div class="top-contents-container">
                 <div class="img-container">
-                    <img :src="courseDetails.imgUrl" alt="Course Image" style="background-color: white;" class="img-content">
+                    <img :src="courseDetails.imgUrl" alt="Course Image" style="background-color: white;"
+                        class="img-content">
                 </div>
                 <div class="contents-container">
                     <h4 class="title">{{ courseDetails.title }}</h4>
@@ -253,7 +249,9 @@ function goToApplyCourse() {
                         <div class="start-time">
                             <h6> 시간 </h6>
                             <div class="schedule-item">
-                                <Button v-for="schedule in filteredSchedules" :key="schedule.id" size="small" type="button"
+                                <Button v-for="schedule in filteredSchedules" :key="schedule.id" size="small"
+                                    type="button" :class="schedule.isActive ? 'active-btn' : 'inactive-btn'"
+                                    :disabled="!schedule.isActive"
                                     @click="selectTimeEvent(schedule)">
                                     {{ new Date(schedule.startTime).toLocaleTimeString([], {
                                         hour: '2-digit', minute: '2-digit'
@@ -314,16 +312,17 @@ function goToApplyCourse() {
                     </div>
                     <div class="link-container">
                         <a v-if="courseDetails.instar" :href="courseDetails.instar">
-                            <FontAwesomeIcon :icon="faInstagram" style="color: #DD2A7B;" size="xl"/>
+                            <FontAwesomeIcon :icon="faInstagram" style="color: #DD2A7B;" size="xl" />
                         </a>
                         <a v-if="courseDetails.kakao" :href="courseDetails.kakao">
-                            <FontAwesomeIcon :icon="faFacebook" style="color: #4267B2" size="xl"/>
+                            <FontAwesomeIcon :icon="faFacebook" style="color: #4267B2" size="xl" />
                         </a>
                         <a v-if="courseDetails.blog" :href="courseDetails.blog">
-                            <FontAwesomeIcon :icon="faTwitter" style="color: #1DA1F2;" size="xl"/>
+                            <FontAwesomeIcon :icon="faTwitter" style="color: #1DA1F2;" size="xl" />
                         </a>
                         <a v-if="courseDetails.youtube" :href="courseDetails.youtube">
-                            <FontAwesomeIcon v-if="courseDetails.youtube" :icon="faYoutube" style="color: red;" size="xl"/>
+                            <FontAwesomeIcon v-if="courseDetails.youtube" :icon="faYoutube" style="color: red;"
+                                size="xl" />
                         </a>
                     </div>
                 </div>
@@ -331,7 +330,7 @@ function goToApplyCourse() {
             <div class="detail-container" id="reviews">
                 <h4>리뷰</h4>
                 <div>
-                    <ReviewList :courseId="courseId"/>
+                    <ReviewList :courseId="courseId" />
                 </div>
             </div>
             <div class="detail-container" id="qna">
@@ -462,6 +461,10 @@ function goToApplyCourse() {
     overflow-y: hidden;
     white-space: nowrap;
     scrollbar-width: thin;
+}
+
+.inactive-btn {
+    background-color: #d9d9d9;
 }
 
 .course-time {
