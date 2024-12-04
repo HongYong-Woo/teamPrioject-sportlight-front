@@ -9,6 +9,7 @@ import mypageRouter from './mypage.js';
 const routes = [
     {
         path: '',
+        name: 'Home',
         component: () => import('../pages/MainPage.vue')
     },
 
