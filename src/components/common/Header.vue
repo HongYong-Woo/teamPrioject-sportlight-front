@@ -13,7 +13,6 @@ const auth = useAuthStore();
 const router = useRouter();
 
 const isCategoryOpen = ref(false);
-const isModalVisible = ref(false);
 const isMyPageDropdownVisible = ref(false);
 const isSidebarOpen = ref(false);
 const isResponsive = ref(false);
@@ -21,11 +20,15 @@ const sidebarCategoryOpen = ref(false);
 const searchQuery = ref('');
 const sidebarSearchQuery = ref('');
 
-const instructorRegistrationLink = "/";
+const isModalVisible = ref(false);
 
+const toggleLoginModal = () => {
+  isModalVisible.value = !isModalVisible.value; // 로컬 상태 토글
+  auth.toggleLoginModal(isModalVisible.value); // Pinia 상태와 동기화
+};
 
 const isAuthenticated = computed(() => {
-    return Boolean(auth.token) && auth.isAuthenticated();
+    return Boolean(auth.token) && auth.isAuthenticated;
 });
 
 const defaultProfileImage = new URL('@/assets/default_img.jpg', import.meta.url).href;
@@ -83,14 +86,14 @@ const handleSidebarSearch = (e) => {
     router.push(`/search?q=${encodeURIComponent(sidebarSearchQuery.value)}`);
 };
 
-const toggleLoginModal = () => {
-    isModalVisible.value = !isModalVisible.value;
-    if (isModalVisible.value) {
-        auth.openLoginModal();
-    } else {
-        auth.closeLoginModal();
-    }
-};
+// const toggleLoginModal = () => {
+//     isModalVisible.value = !isModalVisible.value;
+//     if (isModalVisible.value) {
+//         auth.openLoginModal();
+//     } else {
+//         auth.closeLoginModal();
+//     }
+// };
 
 const handleLoginClose = () => {
     isModalVisible.value = false;

@@ -3,6 +3,7 @@ import { useAPI } from './useAPI.js';
 import dayjs from 'dayjs';
 
 
+
 export function Notifications() {
   const notifications = ref([]);
   const showNotifications = ref(false);
@@ -19,14 +20,19 @@ export function Notifications() {
    let eventSource = null;
 
     // SSE 연결
-    const connectSSE = () => {
+    const connectSSE = async () => {
       if(!eventSource) {
-        eventSource = new EventSource("https://sport-lights.shop/api/notifications/subscribe"); //localhost
+        eventSource = new EventSource("http://localhost:8080/api/notifications/subscribe"); //https://sport-lights.shop/api/notifications/subscribe
         console.log("Connected to EventSource");
-        eventSource.onmessage = (event) => {
+         eventSource.onmessage = (event) => {
           const notification = JSON.parse(event.data);
           console.log("Received notification:", notification);
-          notifications.value.unshift(notification);
+          if(notification.notificationId === 0) {
+            console.log("delete all notifications");
+            notifications.value = [];
+          }else {
+            notifications.value.unshift(notification);
+          }
         };
 
         eventSource.onerror = (error) => {

@@ -47,9 +47,10 @@ async function fetchSchedules() {
     try {
         const response = await get(`/courses/${courseId}/schedules`);
         schedules.value = response.data.data;
+        console.log(schedules.value);
         updateSelectableDates();
     } catch (error) {
-        console.error(`Failed to fetch ${endpoint}`, error);
+        console.error(`Failed to fetch schedules`, error);
     }
 }
 
@@ -104,10 +105,13 @@ function updateRequestParticipants(value) {
 
     updateSelectableDates();
     updateFilteredSchedules();
+    console.log(filteredSchedules.value);
 }
 
 function updateRequestDate(newDate) {
+    console.log(newDate);
     request.value.dateTime = formatDate(newDate);
+    console.log(request.value.dateTime);
     updateFilteredSchedules();
 }
 
@@ -142,19 +146,12 @@ function formatTime(date) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-function capitalizeFirstLetter(string) {
-    if (!string || typeof string !== 'string') {
-        return '';
-    }
-    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-}
-
 function addCommas(amount) {
     return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '원';
 }
 
 watch([courseDetails, schedules], ([newDetails, newSchedules]) => {
-    if (newDetails.maxCapacity && newSchedules.length) {
+    if (!newDetails && !newSchedules && newDetails.maxCapacity && newSchedules.length) {
         updateSelectableDates();
         updateFilteredSchedules();
     }
@@ -217,7 +214,7 @@ function goToApplyCourse() {
         <div class="top">
             <div class="top-contents-container">
                 <div class="img-container">
-                    <img :src="courseDetails.imgUrl" alt="Course Image" style="background-color: white;">
+                    <img :src="courseDetails.imgUrl" alt="Course Image" style="background-color: white;" class="img-content">
                 </div>
                 <div class="contents-container">
                     <h4 class="title">{{ courseDetails.title }}</h4>
@@ -371,6 +368,10 @@ function goToApplyCourse() {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+}
+
+.img-content {
+    aspect-ratio: 3 / 2;
 }
 
 @media all and (min-width: 768px) {
