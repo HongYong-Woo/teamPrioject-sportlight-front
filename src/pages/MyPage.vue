@@ -9,8 +9,6 @@ import InterestSetting from '@/components/modal/InterestSetting.vue'
 import { RouterView } from 'vue-router';
 import { Heart, Lock, ClipboardPaste, UserPen, Tags, MessageSquareText, Ticket, CalendarSearch } from 'lucide-vue-next';
 
-
-
 const auth = useAuthStore();
 const pageData = ref({
   interestCount: 0,
@@ -146,7 +144,7 @@ const fetchUserInterests = async () => {
         <div class="side-section">
           <div v-if="auth.userRoles.includes('HOST')" class="card action-card"
             @click="$router.push('/hostchannel/main')">
-            <h3>강사 채널</h3>
+            <h3>강사 채널가기</h3>
             <p class="subtitle">강사님의 활동을 확인하고 관리하세요 :)</p>
           </div>
           <div v-else class="card action-card" @click="$router.push('/mypage/host-request')">

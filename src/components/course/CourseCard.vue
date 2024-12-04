@@ -1,11 +1,16 @@
 <!-- src/components/common/Card.vue -->
 <script setup>
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faArrowRight, faStar, faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRight, faStar, faLocationDot, faHeart as faSolidHeart } from "@fortawesome/free-solid-svg-icons";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
-import { computed, ref } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import priceFormatter from "../../util/priceFormatter.js";
+import { faHeart as faRegularHeart } from "@fortawesome/free-regular-svg-icons";
+import { useAPI } from '@/axios/useAPI';
+import { useInterestStore } from '@/stores/auth';
+import { storeToRefs } from 'pinia';
+
 
 const props = defineProps({
     id: { type: Number, required: true },
@@ -20,26 +25,46 @@ const props = defineProps({
     rating: { type: Number, default: 0.0, },
     reviewCount: { type: Number, default: 0, },
     image: { type: String, default: null, },
-    profileImage: { type: String, default: null, }
+    profileImage: { type: String, default: null, },
+    isLiked: { type: Boolean, default: false },
 });
 
 const router = useRouter();
-const emits = defineEmits(['button-click']);
+const emits = defineEmits(['button-click', 'interest-toggle']);
 const isHovered = ref(false);
 const discounted = computed(() => props.discountRate > 0);
+const interestStore = useInterestStore();
 
 function goToCourseDetail() {
     router.push({ name: 'CourseDetail', params: { id: props.id } });
 }
+
+const isLiked = computed(() => interestStore.isInterested(props.id));
+
+async function toggleInterest() {
+    try {
+        await interestStore.toggleInterest(props.id);
+        emits("interest-toggle", props.id);
+    } catch (error) {
+        console.error("찜 토글 실패:", error);
+    }
+}
+
+onMounted(async () => {
+  await interestStore.initializeInterests();
+});
+
 </script>
 
 <template>
     <div class="wrapper">
         <div class="card-wrapper" @mouseenter="isHovered = true" @mouseleave="isHovered = false" @click="goToCourseDetail">
             <!-- <img v-if="image" :src="image" alt="Card image" class="card-image" /> -->
-             <div class="img-wrapper">
+            <div class="img-wrapper">
                 <div v-if="discounted" class="discount-rate">{{ discountRate }}% off</div>
                 <img :src="image" alt="Card image" class="card-image">
+                <FontAwesomeIcon class="heart-icon" :icon="isLiked ? faSolidHeart : faRegularHeart"
+                    @click.stop="toggleInterest" />
             </div>
             <div class="card-content">
                 <h2 class="card-title">{{ title }}</h2>
@@ -50,7 +75,7 @@ function goToCourseDetail() {
 
                 <div class="card-details" v-if="!isHovered">
 
-                    
+
                     <div class="rating-details">
                         <span>
                             <FontAwesomeIcon :icon="faStar" size="sm" style="color: #FFD43B; margin-right: 4px;" />
@@ -59,7 +84,7 @@ function goToCourseDetail() {
                         <span class="rating-count">({{ reviewCount }})</span>
                     </div>
                     <div v-if="discounted" class="price">
-                        <span class="tuition discounted">{{ priceFormatter(tuition - tuition * discountRate / 100)}}</span>
+                        <span class="tuition discounted">{{ priceFormatter(tuition - tuition * discountRate / 100) }}</span>
                         <span class="original">{{ priceFormatter(tuition) }}</span>
                     </div>
                     <span v-else class="tuition">{{ priceFormatter(tuition) }}</span>
@@ -148,9 +173,7 @@ function goToCourseDetail() {
 }
 
 
-.card-content {
-    
-}
+.card-content {}
 
 .card-title {
     font-size: 1.1rem;
@@ -219,5 +242,26 @@ function goToCourseDetail() {
 
 .time {
     align-content: end;
+}
+
+.heart-icon {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 1.3rem;
+    color: red;
+    cursor: pointer;
+    transition: transform 0.2s;
+    background-color: transparent;
+}
+
+.heart-icon svg {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 0.3rem;
+    border-radius: 50%;
+}
+
+.heart-icon:hover {
+    transform: scale(1.2);
 }
 </style>
