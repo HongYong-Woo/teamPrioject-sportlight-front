@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, watch} from "vue";
+import {watch} from "vue";
 
 const prop = defineProps({
   latitude: {
@@ -27,13 +27,13 @@ const prop = defineProps({
 
 const emit = defineEmits(['assignLatLng']);
 
-onMounted(() => {
+const init = () => {
   if (window.kakao && window.kakao.maps) {
     initializeMap();
   }  else {
     loadKakaoMapScript();
   }
-})
+};
 
 const kakaoAppkey = "c4523886c7cf7fe4a7adca0a977fa00c";
 const loadKakaoMapScript = () => {
@@ -82,7 +82,9 @@ const initializeMap = () => {
 };
 
 watch(() => [prop.latitude, prop.longitude], () => {
-      initializeMap();
+  init();
+}, {
+  immediate: true,
 });
 </script>
 

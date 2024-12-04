@@ -5,7 +5,7 @@ import { onMounted, ref, watch } from "vue";
 import { useAPI } from '@/axios/useAPI';
 const { get } = useAPI();
 import { createPagingParam } from "@/util/PagingParam";
-import { formatDateString } from "@/util/DateTimeFormatter";
+import { formatDateString } from "@/util/LocalDateTimeFormatter.js";
 import PagingBar from "@/components/common/PagingBar.vue";
 
 const route = useRoute();
@@ -67,7 +67,7 @@ const getStatusString = status => {
 </script>
 
 <template>
-  <div>
+  <div class="table-container">
     <h2 class="mb-3">정산 내역</h2>
     <table class="table">
       <thead>
@@ -96,6 +96,9 @@ const getStatusString = status => {
 </template>
 
 <style scoped>
+.table-container {
+  min-height: 500px;
+}
 tr {
   text-align: center;
 }
