@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 
 const prop = defineProps({
   address: {
@@ -14,6 +14,13 @@ const prop = defineProps({
 const emit = defineEmits(['assignAddress', 'assignLatLng']);
 
 const address = ref(prop.address);
+
+watch(() => prop.address,
+    (newAddress) => {
+      address.value = newAddress;
+    },
+    { immediate: true }
+);
 
 let geocoder = null;
 
@@ -37,7 +44,6 @@ const loadKakaoMapScript = () => {
 };
 
 const loadScript = (src, callback) => {
-  console.log(src);
   const script = document.createElement('script');
   script.src = src;
   script.onload = callback.bind(this);

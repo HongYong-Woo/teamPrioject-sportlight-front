@@ -291,4 +291,7 @@ const getDateString = dateTime => {
 .btn-link {
   padding: 0;
 }
+.bi-three-dots-vertical {
+  margin-bottom: 3px;
+}
 </style>

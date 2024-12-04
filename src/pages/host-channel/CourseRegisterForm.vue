@@ -4,16 +4,19 @@ import { useAPI } from "@/axios/useAPI";
 import TextEditor from "@/components/common/TextEditor.vue";
 import DaumAddressAPI from "@/components/common/DaumAddressAPI.vue";
 import KakaoMapAPI from "@/components/common/KakaoMapAPI.vue";
-import DatePicker from "@/components/common/DatePicker.vue";
 import DateTimeSchedule from "@/components/host-channel/DateTimeSchedule.vue";
+import {useRoute} from "vue-router";
 
-const { get, post } = useAPI();
+const route = useRoute();
+const modifyMode = ref(null);
+
+
+const { get, post, patch, remove } = useAPI();
 const categories = ref([]);
 const titleMaxLength = 50;
 const classImgInput = ref(null);
-const possibleTodayReservation = ref(null);
-
 const titleCounter = ref(0);
+
 const onInputTitle = e => {
   const target = e.currentTarget;
   if (target.value.length > titleMaxLength) {
@@ -22,8 +25,8 @@ const onInputTitle = e => {
   titleCounter.value = target.value.length;
   inputData.value.title = target.value;
 }
-
 const fetchCategories = async () => {
+
   try {
     const response = await get('/categories');
     categories.value = response.data.data;
@@ -31,11 +34,18 @@ const fetchCategories = async () => {
     console.error('Failed to fetch Details', error);
   }
 };
+const courseInfo = ref({});
 
-onMounted(() => {
-  fetchCategories();
-})
+const fetchCourseInfo = async () => {
 
+  try {
+    const response = await get(`/hosts/courses/${route.params.id}`);
+    courseInfo.value = response.data.data;
+    initializeInputData();
+  } catch (error) {
+    console.error('Failed to fetch Details', error);
+  }
+};
 const inputData = ref({
   title: '',
   categoryId: null,
@@ -52,7 +62,51 @@ const inputData = ref({
   minDaysPriorToReservation: 1,
   mainImage: null,
   images: [],
+  existMainImage: null,
+  existImages: [],
 });
+
+const initializeInputData = () => {
+
+  if(modifyMode.value) {
+    inputData.value = {
+      title: courseInfo.value.title,
+      categoryId: courseInfo.value.categoryId,
+      content: courseInfo.value.content,
+      tuition: courseInfo.value.tuition,
+      discountRate: courseInfo.value.discountRate,
+      level: courseInfo.value.level,
+      address: courseInfo.value.address,
+      detailAddress: courseInfo.value.detailAddress,
+      latitude: courseInfo.value.latitude,
+      longitude: courseInfo.value.longitude,
+      time: courseInfo.value.time,
+      maxCapacity: courseInfo.value.maxCapacity,
+      minDaysPriorToReservation: courseInfo.value.minDaysPriorToReservation,
+      mainImage: null,
+      images: [],
+      existMainImage: courseInfo.value.mainImage,
+      existImages: courseInfo.value.images,
+    }
+  }
+};
+onMounted(() => {
+
+  fetchCategories();
+  if(!!route.params.id) {
+    modifyMode.value = true;
+    fetchCourseInfo();
+  }
+})
+
+const possibleTodayReservation = ref(null);
+
+watch(() => inputData.value.minDaysPriorToReservation, (newValue) => {
+  possibleTodayReservation.value = newValue === 0;
+},
+    {
+      immediate: true
+    })
 
 const schedules = ref([]);
 
@@ -95,9 +149,14 @@ let classImgThumbList = computed(() => {
   return imgSrcList;
 });
 
-const cancelClassImg = index => {
-  inputData.value.images.splice(index, 1);
+const cancelClassImg = (id, index) => {
+  deletedFileIdList.value.push(id);
+  inputData.value.existImages.splice(index, 1);
 };
+
+const cancelExistImg = img => {
+
+}
 
 const inputContent = text => {
   inputData.value.content = text;
@@ -141,10 +200,30 @@ const createForm = () => {
   return form;
 };
 
+const modifyForm = () => {
+  const form = new FormData();
+  form.append('title', inputData.value.title);
+  form.append('content', inputData.value.content);
+  form.append('tuition', inputData.value.tuition);
+  form.append('discountRate', inputData.value.discountRate);
+  form.append('level', inputData.value.level);
+  form.append('address', inputData.value.address);
+  form.append('detailAddress', inputData.value.detailAddress);
+  form.append('latitude', inputData.value.latitude);
+  form.append('longitude', inputData.value.longitude);
+  form.append('time', inputData.value.time);
+  form.append('maxCapacity', inputData.value.maxCapacity);
+  form.append('minDaysPriorToReservation', inputData.value.minDaysPriorToReservation);
+  form.append('mainImage', inputData.value.mainImage);
+  for (let i = 0; i < inputData.value.images.length; i++) {
+    form.append(`images`, inputData.value.images[i]);
+  }
+}
+
 const submitRegisterForm = async () => {
   try {
     const form = createForm();
-    const response = await post('/courses', form, {
+    const response = await post('/hosts/courses', form, {
       headers: {'Content-Type': 'multipart/form-data'}
     });
     const id = response.data.data.id;
@@ -153,6 +232,29 @@ const submitRegisterForm = async () => {
     alert("클래스 개설 신청이 완료되었습니다.");
   } catch (error) {
     alert("클래스 개설 신청이 실패했습니다.");
+  }
+};
+
+const deletedFileIdList = ref([]);
+
+const submitForm = () => {
+  if(modifyMode.value) {
+    submitModifyForm();
+  } else {
+    submitRegisterForm();
+  }
+}
+
+const submitModifyForm = async () => {
+  try {
+    const form = modifyForm();
+    await patch(`/hosts/courses/${route.params.id}`, form, {
+      headers: {'Content-Type': 'multipart/form-data'}
+    });
+    deletedFileIdList.value.forEach(id => submitFileDeleteForm(id))
+    alert("클래스 수정이 완료되었습니다.");
+  } catch (error) {
+    alert("클래스 수정이 실패했습니다.");
   }
 };
 
@@ -165,12 +267,21 @@ const submitRegisterScheduleForm = async (courseId) => {
     console.log(error);
   }
 };
+
+const submitFileDeleteForm = async id => {
+  try {
+    await remove(`/files/${id}`);
+  } catch (error) {
+    console.log(error);
+  }
+};
 </script>
 <template>
   <div class="mb-4">
-    <h2>클래스 개설</h2>
+    <h2>{{ modifyMode ? '클래스 수정' : '클래스 개설' }}</h2>
   </div>
-<card class="card" style="width: 80%;">
+  {{ courseInfo }}
+<card class="card" style="width: 80%;" v-if="!modifyMode">
   <div class="form-text">
     <h5 style="font-weight: bold">클래스 개설 과정</h5>
     <div class="form-label">
@@ -199,7 +310,7 @@ const submitRegisterScheduleForm = async (courseId) => {
       <span class="require">(필수)</span>
     </div>
     <div>
-      <select class="form-select" v-model="inputData.categoryId">
+      <select :class="modifyMode ? 'form-select disable' : 'form-select'" v-model="inputData.categoryId">
         <option :value="null" disabled>선택</option>
         <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
       </select>
@@ -217,7 +328,8 @@ const submitRegisterScheduleForm = async (courseId) => {
       <div>
         <input type="file" id="upload-main-image" @change="inputMainImage" hidden/>
         <label for="upload-main-image">
-          <img width="250" height="250" class="rounded" alt="main-image" :src="mainImgThumb" />
+          <img v-if="!inputData.mainImage && inputData.existMainImage" width="250" height="250" class="rounded" alt="main-image" :src="inputData.existMainImage.path" />
+          <img v-else width="250" height="250" class="rounded" alt="main-image" :src="mainImgThumb" />
         </label>
       </div>
     </div>
@@ -227,13 +339,19 @@ const submitRegisterScheduleForm = async (courseId) => {
         <span class="non-require">(선택, 최대 8장 등록 가능)</span>
       </div>
       <div class="row">
+        <div v-if="modifyMode" class="class-img-thumb col-3 mb-3" v-for="(image, index) in inputData.existImages" :key="index">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill img-cancel-btn" viewBox="0 0 16 16" @click="cancelExistImg(image.id, index)">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
+          </svg>
+          <img width="100" height="100" class="rounded" alt="class-img" :src="image.path">
+        </div>
         <div class="class-img-thumb col-3 mb-3" v-for="(src, index) in classImgThumbList" :key="index">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill img-cancel-btn" viewBox="0 0 16 16" @click="cancelClassImg(index)">
             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z"/>
           </svg>
           <img width="100" height="100" class="rounded" alt="class-img" :src="src">
         </div>
-        <div v-if="inputData.images.length < 8" class="col-3 mb-3">
+        <div v-if="inputData.images.length + inputData.existImages?.length < 8" class="col-3 mb-3">
           <input type="file" id="upload-class-image" @change="inputClassImg" hidden/>
           <label for="upload-class-image">
             <img class="rounded" width="100" height="100" alt="class-image" src="@/assets/img_upload_thumb.jpg" />
@@ -358,19 +476,22 @@ const submitRegisterScheduleForm = async (courseId) => {
       </div>
     </div>
   </div>
-  <div class="title">
-    6. 클래스 일정
-  </div>
-  <div class="form-text mb-3">
-    일정을 등록하지 않고 클래스 개설 요청이 가능합니다.<br>
-    클래스 일정은 개설 후 개설 클래스 > 클래스 관리에서 언제든지 등록할 수 있습니다.
-  </div>
-  <div class="date-time-schedule-area">
-    <DateTimeSchedule :schedules="schedules"></DateTimeSchedule>
+  <div v-if="!modifyMode">
+    <div class="title">
+      6. 클래스 일정
+    </div>
+    <div class="form-text mb-3">
+      일정을 등록하지 않고 클래스 개설 요청이 가능합니다.<br>
+      클래스 일정은 개설 후 개설 클래스 > 클래스 관리에서 언제든지 등록할 수 있습니다.
+    </div>
+    <div class="date-time-schedule-area">
+      <DateTimeSchedule :schedules="schedules"></DateTimeSchedule>
+    </div>
   </div>
   <div class="text-end mb-3">
-    <button class="btn register-btn" @click="submitRegisterForm">클래스 개설</button>
+    <button class="btn register-btn" @click="submitForm">{{ modifyMode ? '클래스 수정' : '클래스 개설' }}</button>
   </div>
+
 
 </template>
 <style scoped>
