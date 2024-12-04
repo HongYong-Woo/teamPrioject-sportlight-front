@@ -7,6 +7,8 @@ import NumberSelect from '../../components/common/NumberSelect.vue';
 import Slider from '../../components/common/MultiRangeSlider.vue';
 import Datepicker from '../../components/common/DatePicker.vue';
 import DropdownSingle from '../../components/common/DropdownSingle.vue';
+import PagingBar from '../../components/common/PagingBar.vue';
+import { createPagingParam } from '../../util/PagingParam';
 
 // 평점 3.5점 이상 <-- 이런 필터링도 있는게 좋을거 같은데....
 const filterOptions = ref({
@@ -32,6 +34,9 @@ const minRange = ref(0);
 const maxRange = ref(1000000);
 const startDate = ref(null);
 const endDate = ref(null);
+const pagingParam = ref({});
+const page = ref(null);
+const size = ref(null);
 
 const levels = [
     { value: 'BEGINNER', label: '초급' },
@@ -49,7 +54,6 @@ const sortType = [
 
 async function fetchInitialcourses() {
     try {
-        console.log(filterOptions.value.levels.join(','));
         const response = await get('/courses/list', {
             categories: filterOptions.value.categories.join(','),
             levels: filterOptions.value.levels.join(','),
@@ -61,9 +65,16 @@ async function fetchInitialcourses() {
             latitude: filterOptions.value.latitude,
             longitude: filterOptions.value.longitude,
             searchText: filterOptions.value.searchText,
-            sortType: filterOptions.value.sortType
+            sortType: filterOptions.value.sortType,
+            page: pagingParam.value.page,
+            size: 12,
         });
-        courses.value = response.data;
+        pagingParam.value = createPagingParam(response.data);
+        courses.value = response.data.data;
+        console.log(pagingParam.value);
+        console.log(courses.value);
+        console.log(response.page);
+        console.log(response.size);
     } catch (error) {
         console.error("Failed to fetch courses:", error);
     }
@@ -98,6 +109,12 @@ function updateFilterOption(optionKey, newValues) {
 
 function addCommas(amount) {
     return '￦' + amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function reloadPage(page) {
+    pagingParam.value.page = page;
+    fetchInitialcourses();
+    window.scrollTo(0,0);
 }
 
 </script>
@@ -136,6 +153,7 @@ function addCommas(amount) {
             </div>
 
             <CardTable :courses="courses" />
+            <PagingBar :paging-param="pagingParam" @changePage="reloadPage"></PagingBar>
         </div>
     </div>
 </template>
