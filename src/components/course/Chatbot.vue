@@ -1,7 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { chatbot } from '@/axios/ChatBot';
-
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faCommentDots, faXmark, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
 const {
     showChatbot,
@@ -20,12 +21,14 @@ onMounted(() => {
 
 <template>
  
+  <Transition name="rotate-fade">
     <button @click="toggleShowChatbot" class="chatbot_button">
-      <Transition name="rotate-fade">
-        <img v-if="showChatbot" src="../../assets/img/Xbutton.png" class="buttonImg">
-        <img v-else src="../../assets/img/chatbot.png" class="buttonImg">
-      </Transition>
-    </button>
+        <!-- <img v-if="showChatbot" src="../../assets/img/Xbutton.png" class="buttonImg">
+        <img v-else src="../../assets/img/chatbot.png" class="buttonImg"> -->
+        <FontAwesomeIcon v-if="showChatbot" :icon="faXmark" size="xl" class="button-icon"/>
+        <FontAwesomeIcon v-else :icon="faCommentDots" size="xl" class="button-icon"/>
+      </button>
+    </Transition>
   
     <Transition name="slide-fade">
     <div v-show="showChatbot" class="chatbotModal">
@@ -33,20 +36,21 @@ onMounted(() => {
           <p>Sportlight</p>
         </div>
         <div class="chatbotModalBody" ref="chatScroll">
-            <div v-for="message in messages" class="chatbotMessage">
+            <div v-for="message in messages" :key="message.id" class="chatbotMessage" :class="{userment :  message.sender !== 'chatbot'}">
+                <span v-if="message.sender !== 'chatbot'" class="messageTime">{{ message.time }}</span>
                 <div class="chatbotMessagecontent">
                     <img v-if="message.sender === 'chatbot'" src="../../assets/img/chatbot.png" class="messageImg">
-                    <p :class="message.sender">{{ message.text }}</p>
+                    <span :class="message.sender">{{ message.text }}</span>
                 </div>
-                <span class="messageTime">{{ message.time }}</span>
+                <span v-if="message.sender === 'chatbot'" class="messageTime">{{ message.time }}</span>
                
             </div>
 
         </div>
         <div @submit.prevent = sendChatbot() class="chatbotModalFooter">
             <form class="inputQuestionForm">
-                <input type="text" class="input" placeholder="질문을 입력하세요" v-model="questionMessage"/>
-                <button type="submit" class="submit_button"><img src="../../assets/img/arrow.png" class="submit_image"></button>
+                <input type="text" class="input" placeholder="질문을 입력하세요" v-model="questionMessage" required/>
+                <button type="submit" class="submit_button"><FontAwesomeIcon :icon="faPaperPlane"/></button>
             </form>
                 
            
@@ -60,7 +64,7 @@ onMounted(() => {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    /* background-color: blue; */
+    background-color: #ff9500b5;
     text-align: center;
     align-content: center;
     color: white;
@@ -72,7 +76,7 @@ onMounted(() => {
 
     overflow: hidden;
     position: fixed;
-    left: 1800px;
+    right: 2rem;
     bottom: 50px;
 }
 
@@ -85,6 +89,10 @@ onMounted(() => {
   top: 0;
   left: 0;
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; /* 애니메이션 효과 추가 */
+}
+
+.button-icon {
+  transition: all 0.2s ease-in-out; /* 애니메이션 효과 추가 */
 }
 
 
@@ -104,7 +112,7 @@ onMounted(() => {
     width: 323px;
     height: 500px;
   
-    background: rgb(243, 243, 243);
+    background: #f9f9f9;
   box-shadow: 5px 5px 5px rgba(0,0,0,0.3);
   z-index: 1000;
   border: 3px;;
@@ -120,7 +128,8 @@ onMounted(() => {
 
 .chatbotModalHeader {
     height: 40px;
-    background-color: white;
+    background-color: #f0f0f0;
+    color: #333;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     display: flex;
@@ -135,11 +144,13 @@ onMounted(() => {
     height: 363px;
     padding-top: 10px;
     flex: 1;
+    scrollbar-width: thin;
 }
 
 .chatbotMessage{
+  display: flex;
+  flex-direction: row;
     margin: 10px;
-    margin-bottom: 30px;
 }
 
 .chatbotMessagecontent {
@@ -147,7 +158,6 @@ onMounted(() => {
 
     display: flex;
     
-
 }
 
 .messageImg {
@@ -155,8 +165,11 @@ onMounted(() => {
     height: 30px;
 }
 
+.userment {
+  justify-content: end;
+}
+
 .user {
-    
   text-align: right;
   background-color: #d4ecff;
   padding: 10px;
@@ -185,11 +198,14 @@ onMounted(() => {
     float: right;
     margin: 2px;
     margin-right: 10px;
-  font-size: 70%;
+    font-size: 70%;
+
+    white-space: nowrap;
+    align-self: flex-end;
 }
 
 .chatbotModalFooter {
-    background-color: white;
+    background-color: #f0f0f0;
     height: 60px;
     padding: 10px;
     border-bottom-left-radius: 20px;
@@ -202,7 +218,7 @@ onMounted(() => {
 
 .inputQuestionForm {
     border-radius: 20px;
-    background-color: rgb(243, 243, 243);
+    background-color: white;
     width: 300px;
     display: flex;
     
@@ -215,7 +231,8 @@ onMounted(() => {
     background-color: transparent;
     border-width: 0px;
     border-radius: 20px;
-    padding-left: 10px;
+    padding-left: 1rem;
+    
 }
 
 
