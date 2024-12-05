@@ -6,7 +6,7 @@ import koLocale from '@fullcalendar/core/locales/ko'
 import bootstrapPlugin from '@fullcalendar/bootstrap'
 import "@/styles/fullcalendar.css";
 import { useAPI } from "@/axios/useAPI.js";
-import {computed, onMounted, ref} from "vue";
+import {onMounted, ref} from "vue";
 
 const { get } = useAPI()
 
@@ -50,26 +50,24 @@ const calendarOptions = ref({
   weekends: true,
   dayMaxEvents: true,
   themeSystem: 'bootstrap5',
-  views: { // 특정 뷰에 대한 설정을 세부적으로 조정
+  views: {
     dayGridMonth: {
-      dayMaxEventRows: 3, // 하루에 최대 3개의 이벤트 행 표시 (초과되는 건 +more 로 표시됨)
-      buttonText: '월간' // 월간 뷰 버튼 텍스트 설정
+      dayMaxEventRows: 3,
+      buttonText: '월간'
     },
     dayGridWeek: {
-      buttonText: '주간' // 주간 뷰 버튼 텍스트 설정
+      buttonText: '주간'
     },
     dayGridDay: {
-      buttonText: '일간' // 일간 뷰 버튼 텍스트 설정
+      buttonText: '일간'
     }
   },
   dayCellContent: handleDayCellContent,
 });
 
-
 </script>
 
 <template>
-  {{ events }}
   <FullCalendar ref="fullCalendar" :options="calendarOptions" />
 </template>
 
