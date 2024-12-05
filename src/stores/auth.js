@@ -85,22 +85,22 @@ export const useAuthStore = defineStore("auth", {
 
     async fetchUserProfile() {
       try {
-        const { get } = useAPI();
-        const response = await get('/my/profile');
-        
-        if (response.data?.data) {
-          this.userInfo = {
-            ...response.data.data,
-            userImage: response.data.data.userImage || '/assets/default_img.jpg',
-            couponCount: response.data.data.couponCount || 0
-          };
-        }
+          const { get } = useAPI();
+          const response = await get('/my/profile');
+          
+          if (response.data?.data) {
+              this.userInfo = {
+                  ...response.data.data,
+                  userImage: response.data.data.userImage || new URL('@/assets/default_img.jpg', import.meta.url).href,
+                  couponCount: response.data.data.couponCount || 0
+              };
+          }
       } catch (error) {
-        console.error("프로필 정보 가져오기 실패:", error);
-        this.userInfo = null;
-        throw error;
+          console.error("프로필 정보 가져오기 실패:", error);
+          this.userInfo = null;
       }
     },
+
     
 
     async refreshToken() {
@@ -194,25 +194,23 @@ export const useAuthStore = defineStore("auth", {
       this.showLoginModal = show;
     },
 
-        async updateProfile(formData) {
+    async updateProfile(formData) {
       const { patch } = useAPI();
       try {
-        await patch('/my/profile', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        
-        await this.fetchUserProfile();
-        await this.refreshToken();
-        
-        return true;
+          await patch('/my/profile', formData, {
+              headers: {
+                  'Content-Type': 'multipart/form-data'
+              }
+          });
+          
+          await this.fetchUserProfile();
+          return true;
       } catch (error) {
-        console.error('프로필 업데이트 실패:', error);
-        throw error;
+          console.error('프로필 업데이트 실패:', error);
+          throw error;
       }
-    },
   }
+}
 });
 
 export const useInterestStore = defineStore("interest", {
