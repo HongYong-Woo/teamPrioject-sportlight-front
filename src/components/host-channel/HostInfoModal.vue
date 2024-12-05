@@ -59,11 +59,11 @@ watch(
     (newValue) => {
       if (newValue) {
         nickname.value = newValue.userNickname;
-        hostBio.value = newValue.hostBio;
-        hostFacebook.value = newValue.hostFacebook;
-        hostInsta.value = newValue.hostInsta;
-        hostTwitter.value = newValue.hostTwitter;
-        hostYoutube.value = newValue.hostYoutube;
+        hostBio.value = newValue.hostBio ? newValue.hostFacebook : "";
+        hostFacebook.value = newValue.hostFacebook ? newValue.hostFacebook : null;
+        hostInsta.value = newValue.hostInsta ? newValue.hostInsta : null;
+        hostTwitter.value = newValue.hostTwitter ? newValue.hostTwitter : null;
+        hostYoutube.value = newValue.hostYoutube ? newValue.hostYoutube : null;
       }
     },
     { immediate: true }
