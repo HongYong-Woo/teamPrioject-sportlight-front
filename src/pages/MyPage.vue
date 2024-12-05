@@ -107,7 +107,7 @@ const fetchUserInterests = async () => {
           <router-link to="/mypage/coupons" class="card coupon-card">
             <div class="title-group">
               <Ticket class="icon" />
-              <h3>쿠폰</h3>
+              <h2>쿠폰</h2>
             </div>
             <p class="subtitle">할인된 가격으로 클래스를 이용해보세요!</p>
             <div class="count-info">
@@ -119,7 +119,7 @@ const fetchUserInterests = async () => {
           <router-link to="/mypage/interests" class="card interest-card">
             <div class="title-group">
               <Heart class="icon" />
-              <h3>찜 목록</h3>
+              <h2>찜 목록</h2>
             </div>
             <p class="subtitle">회원님이 찜한 클래스들을 확인하실 수 있어요.</p>
             <div class="count-info">
@@ -133,22 +133,27 @@ const fetchUserInterests = async () => {
       <div class="row">
         <div class="main-section">
           <router-link to="/mypage/courses" class="card course-card action-card">
-            <h3>내가 신청한 클래스</h3>
-            <p class="subtitle">회원님이 신청한 클래스에요! 결제 정보를 확인하거나 리뷰를 남길 수 있어요.</p>
-            <div class="count-info">
-              <span class="value">{{ pageData.enrolledClassesCount }} 개</span>
+            <div class="title-group">
+              <CalendarSearch class="icon" />
+              <h2>내가 신청한 클래스</h2>
             </div>
+            <p class="subtitle">회원님이 신청한 클래스에요! 결제 정보를 확인하거나 리뷰를 남길 수 있어요.</p>
           </router-link>
         </div>
 
         <div class="side-section">
-          <div v-if="auth.userRoles.includes('HOST')" class="card action-card"
-            @click="$router.push('/hostchannel/main')">
-            <h3>강사 채널가기</h3>
+          <div v-if="auth.userRoles.includes('HOST')" class="card action-card" @click="$router.push('/hostchannel/main')">
+            <div class="title-group">
+              <UserPen class="icon" />
+              <h2>강사 채널가기</h2>
+            </div>
             <p class="subtitle">강사님의 활동을 확인하고 관리하세요 :)</p>
           </div>
           <div v-else class="card action-card" @click="$router.push('/mypage/host-request')">
-            <h3>강사 등록하기</h3>
+            <div class="title-group">
+              <ClipboardPaste class="icon" />
+              <h2>강사 등록하기</h2>
+            </div>
             <p class="subtitle">회원님의 지식을 다른 회원님에게 공유해보세요 :)</p>
           </div>
         </div>
@@ -157,9 +162,11 @@ const fetchUserInterests = async () => {
       <div class="row">
         <div class="main-section">
           <div class="card action-card" @click="openInterestsModal">
-            <h3>관심 분야 설정</h3>
-            <p class="subtitle">회원님의 관심 분야를 설정할 수 있는 곳이에요! 관심 분야를 설정하고 맞춤 추천을 받아보세요 :)</p>
-
+            <div class="title-group">
+              <Tags class="modified-icon" />
+              <h2>관심 분야 설정</h2>
+              <p class="subtitle">회원님의 관심 분야를 설정할 수 있는 곳이에요! 관심 분야를 설정하고 맞춤 추천을 받아보세요 :)</p>
+            </div>
             <div class="current-interests">
               <div v-if="userInterests.length === 0" class="no-interests">
                 아직 선택된 관심 분야가 없습니다.
@@ -176,13 +183,19 @@ const fetchUserInterests = async () => {
 
         <div class="side-section">
           <div class="card action-card" @click="openPasswordModal">
-            <h3>비밀번호 변경</h3>
+            <div class="title-group">
+              <Lock class="icon" />
+              <h2>비밀번호 변경</h2>
+            </div>
             <p class="subtitle">계정 보안을 위해 주기적으로 변경해주세요.</p>
           </div>
         </div>
         <div>
           <div class="card action-card" @click="$router.push('/mypage/reviews')">
-            <h3>리뷰 관리</h3>
+            <div class="title-group">
+              <MessageSquareText class="icon" />
+              <h2>리뷰 관리</h2>
+            </div>
             <p class="subtitle">회원님이 작성하신 리뷰를 확인하실 수 있어요</p>
           </div>
         </div>
@@ -270,7 +283,7 @@ h1 {
   color: #333;
 }
 
-h3 {
+h2 {
   font-size: 23px;
   font-weight: bold;
   color: #333;
@@ -362,10 +375,17 @@ h3 {
 }
 
 .icon {
-  width: 1.8em;
-  height: 1.8em;
+  width: 30px;
+  height: 30px;
   vertical-align: middle;
 }
+
+.modified-icon {
+  width: 60px;
+  height: 60px;
+  vertical-align: middle;
+}
+
 
 @media (max-width: 768px) {
   .my-page {

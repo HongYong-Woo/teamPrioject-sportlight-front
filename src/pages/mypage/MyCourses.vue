@@ -63,16 +63,34 @@ const formatDate = (start, end = null) => {
 const fetchCourses = async (status = null) => {
   try {
     loading.value = true;
-    const response = await get(`/my/courses${status ? `?status=${status}` : ''}`);
+    const response = await get('/my/courses');
+    const now = new Date();
+
     courses.value = response.data.data
-      .filter(course => !status || course.status === status)
+      .filter(course => {
+        if (!status) return true;
+
+        const courseStartDate = new Date(course.startTime);
+
+        switch (activeTab.value) {
+          case 'upcoming':
+            return course.status === 'UPCOMING' ||
+              (course.status === 'APPROVED' && courseStartDate > now);
+          case 'completed':
+            return course.status === 'COMPLETED' ||
+              (course.status === 'APPROVED' && courseStartDate <= now);
+          case 'refunded':
+            return course.status === 'REFUNDED';
+          default:
+            return true;
+        }
+      })
       .map((course) => ({
         ...course,
         formattedStartTime: formatDate(course.startTime, course.endTime),
         completeDate: course.completeDate ? formatDateString(course.completeDate) : null,
         refundDate: course.refundDate ? formatDateString(course.refundDate) : null,
         canCancel: () => {
-          const now = new Date();
           const startTime = new Date(course.startTime);
           return course.status === 'UPCOMING' && startTime > now;
         },
@@ -83,6 +101,15 @@ const fetchCourses = async (status = null) => {
   } finally {
     loading.value = false;
   }
+};
+
+
+const getDisplayStatus = (status, startDate) => {
+  const now = new Date();
+  if (status === 'APPROVED') {
+    return startDate > now ? 'UPCOMING' : 'COMPLETED';
+  }
+  return 'REFUNDED';
 };
 
 const handleCourseClick = async (courseId) => {
@@ -150,7 +177,6 @@ onMounted(() => {
     <div v-else-if="error" class="error-state">{{ error }}</div>
 
     <div v-else-if="courses.length === 0" class="empty-state">
-      <i class="empty-icon">📚</i>
       <p>등록된 클래스가 없습니다.</p>
     </div>
 
@@ -168,8 +194,8 @@ onMounted(() => {
             <div class="title-section">
               <h1 class="course-title" @click="handleCourseClick(course.courseId)">
                 {{ course.title }}
-                <div :class="['status-badge', getStatusClass(course.status)]">
-                  {{ getStatusLabel(course.status) }}
+                <div :class="['status-badge', getStatusClass(course.displayStatus)]">
+                  {{ getStatusLabel(course.displayStatus) }}
                 </div>
               </h1>
             </div>
@@ -192,12 +218,14 @@ onMounted(() => {
                 <span>{{ course.participantNum }}명</span>
               </div>
               <div class="actions">
-                <button v-if="course.status === 'UPCOMING'" @click="openCancelModal(course)" class="cancel-button">
+                <button v-if="course.displayStatus === 'UPCOMING'" @click="openCancelModal(course)" class="cancel-button">
                   결제 취소
                 </button>
-                <button v-if="course.status === 'COMPLETED' && !course.hasReview" @click="openReviewModal(course)"
-                  class="review-button">
+                <button v-if="!course.hasReview" @click="openReviewModal(course)" class="review-button">
                   리뷰 작성
+                </button>
+                <button v-else @click="handleCourseClick(course.courseId + '/reviews')" class="review-link-button">
+                  내 리뷰
                 </button>
               </div>
             </div>
@@ -365,7 +393,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 1rem;
-  color: #363636; 
+  color: #363636;
 }
 
 .course-title:hover {
