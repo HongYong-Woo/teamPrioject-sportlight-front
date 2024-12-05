@@ -1,30 +1,57 @@
-<script setup>
+<!-- <script setup>
 import { ref, onMounted } from 'vue';
-import { useAPI } from '@/axios/useAPI';
 import { useRouter } from 'vue-router';
+import { useAPI } from '@/axios/useAPI';
+import { formatDateString } from '@/util/DateFormatter.js';
+import Refund from '@/components/modal/Refund.vue';
+import ReviewRegist from '@/components/modal/ReviewRegist.vue';
 
 const router = useRouter();
 const { get, post } = useAPI();
-const activeTab = ref('전체');
-const enrolledClasses = ref([]);
+const courses = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const activeTab = ref('upcoming');
+const showCancelModal = ref(false);
+const selectedCourse = ref(null);
 
-const tabs = ['수강 예정', '수강 완료', '환불', '전체'];
+const showReviewModal = ref(false);
+const selectedCourseForReview = ref(null);
 
-const STATUS_MAP = {
-  '수강 예정': 'RESERVED',
-  '수강 완료': 'COMPLETED',
-  '환불': 'REFUNDED',
-  '전체': null,
+const tabs = [
+  { id: 'upcoming', label: '수강 예정', status: 'UPCOMING' },
+  { id: 'completed', label: '수강 완료', status: 'COMPLETED' },
+  { id: 'refunded', label: '환불', status: 'REFUNDED' },
+  { id: 'all', label: '전체', status: null },
+];
+
+const getStatusLabel = (status) => {
+  switch (status) {
+    case 'UPCOMING':
+      return '수강 예정';
+    case 'COMPLETED':
+      return '수강 완료';
+    case 'REFUNDED':
+      return '환불 완료';
+    default:
+      return '알 수 없음';
+  }
 };
 
-const fetchEnrolledClasses = async (status = null) => {
+const fetchCourses = async (status = null) => {
   try {
     loading.value = true;
-    error.value = null;
     const response = await get(`/my/courses${status ? `?status=${status}` : ''}`);
-    enrolledClasses.value = response.data.data;
+    courses.value = response.data.data.map((course) => ({
+      ...course,
+      formattedStartTime: formatDate(course.startTime),
+      formattedEndTime: formatDate(course.endTime),
+      canCancel: function () {
+        const now = new Date();
+        const startTime = new Date(course.startTime);
+        return course.status === 'UPCOMING' && startTime > now;
+      },
+    }));
   } catch (err) {
     console.error('클래스 목록을 불러오지 못했습니다:', err);
     error.value = '클래스 목록을 불러오는 중 오류가 발생했습니다.';
@@ -33,324 +60,706 @@ const fetchEnrolledClasses = async (status = null) => {
   }
 };
 
-const setTab = (tab) => {
-  activeTab.value = tab;
-  fetchEnrolledClasses(STATUS_MAP[tab]);
+const formatDate = (date) => {
+  if (!date) return '';
+  return formatDateString(date);
 };
 
-const cancelClass = async (courseId) => {
-  if (!confirm('정말로 이 클래스를 취소하시겠습니까?\n환불 규정에 따라 수수료가 발생할 수 있습니다.')) {
+const openCancelModal = (course) => {
+  if (!course.canCancel()) {
+    alert('취소할 수 없는 클래스입니다.');
     return;
   }
+  selectedCourse.value = course;
+  showCancelModal.value = true;
+};
 
+const handleCancelComplete = async () => {
+  showCancelModal.value = false;
+  await fetchCourses(activeTab.value !== 'all' ? tabs.find((t) => t.id === activeTab.value).status : null);
+};
+
+const handleTabChange = (tab) => {
+  activeTab.value = tab.id;
+  fetchCourses(tab.status);
+};
+
+const openReviewModal = (course) => {
+  selectedCourseForReview.value = course;
+  showReviewModal.value = true;
+};
+
+const handleReviewSubmit = async (reviewData) => {
   try {
-    await post(`/my/courses/${courseId}/cancel`);
-    await fetchEnrolledClasses(STATUS_MAP[activeTab.value]);
-  } catch (error) {
-    console.error('클래스 취소 실패:', error);
-    alert('클래스 취소 중 오류가 발생했습니다.');
+    await post(`/my/courses/${selectedCourseForReview.value.courseId}/review`, reviewData);
+    showReviewModal.value = false;
+    await fetchCourses(activeTab.value !== 'all' ? tabs.find((t) => t.id === activeTab.value).status : null);
+  } catch (err) {
+    throw new Error(err.response?.data?.message || '리뷰 작성에 실패했습니다.');
   }
 };
 
-const writeReview = (courseId) => {
-  router.push(`/mypage/courses/${courseId}/review`);
-};
-
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
-
-const calculateRefundAmount = (course) => {
-  const startDate = new Date(course.startTime);
-  const now = new Date();
-  const diffDays = Math.ceil((startDate - now) / (1000 * 60 * 60 * 24));
-
-  if (diffDays >= 7) return course.finalAmount;
-  if (diffDays >= 5) return course.finalAmount * 0.75;
-  if (diffDays >= 3) return course.finalAmount * 0.5;
-  if (diffDays >= 1) return course.finalAmount * 0.25;
-  return 0;
-};
-
-onMounted(() => fetchEnrolledClasses());
+onMounted(() => {
+  fetchCourses();
+});
 </script>
 
 <template>
-  <div class="enrolled-classes-container">
-    <div class="header">
-      <h1>내가 신청한 클래스</h1>
+  <div class="my-courses-container">
+    <div class="tabs">
+      <button
+        v-for="tab in tabs"
+        :key="tab.id"
+        class="tab-button"
+        :class="{ active: activeTab === tab.id }"
+        @click="handleTabChange(tab)"
+      >
+        {{ tab.label }}
+      </button>
     </div>
 
-    <div class="tabs-container">
-      <div class="tabs">
-        <button v-for="tab in tabs" :key="tab" 
-                :class="['tab-button', { active: activeTab === tab }]"
-                @click="setTab(tab)">
-          {{ tab }}
-        </button>
-      </div>
-    </div>
+    <div v-if="loading" class="loading-state">로딩 중입니다. 잠시만 기다려 주세요...</div>
+    <div v-else-if="error" class="error-state">{{ error }}</div>
+    <div v-else-if="courses.length === 0" class="empty-state">등록된 클래스가 없습니다.</div>
 
-    <div v-if="loading" class="loading-state">
-      로딩 중...
-    </div>
-
-    <div v-else-if="error" class="error-message">
-      {{ error }}
-    </div>
-
-    <div v-else>
-      <div v-if="enrolledClasses.length === 0" class="empty-state">
-        <p>신청한 클래스가 없습니다.</p>
-      </div>
-
-      <div v-else class="classes-grid">
-        <div v-for="course in enrolledClasses" :key="course.id" 
-             class="class-card" :class="course.status.toLowerCase()">
-          <div class="class-image">
-            <img :src="course.imgUrl || '/default-class.jpg'" :alt="course.title">
-          </div>
-          
-          <div class="class-content">
-            <div class="class-main">
-              <h3 @click="router.push(`/courses/${course.id}`)" class="class-title">
+    <div v-else class="courses-grid">
+      <div v-for="course in courses" :key="course.id" class="course-card">
+        <div class="card-image" @click="router.push(`/courses/${course.courseId}`)">
+          <img :src="course.imgUrl || '/default-course.jpg'" :alt="course.title" />
+        </div>
+        <div class="card-content">
+          <div class="info-section">
+            <div class="title-status">
+              <h3 class="course-title" @click="router.push(`/courses/${course.courseId}`)">
                 {{ course.title }}
               </h3>
-              <div class="class-details">
-                <p class="instructor">강사: {{ course.instructorName }}</p>
-                <p class="schedule">
-                  일정: {{ formatDate(course.startTime) }} ~ {{ formatDate(course.endTime) }}
-                </p>
-                <p class="participants">신청 인원: {{ course.participantNum }}명</p>
-                <p class="amount">
-                  결제 금액: {{ course.finalAmount.toLocaleString() }}원
-                  <span v-if="course.totalAmount !== course.finalAmount" class="discount">
-                    ({{ ((1 - course.finalAmount/course.totalAmount) * 100).toFixed(0) }}% 할인)
-                  </span>
-                </p>
-              </div>
+              <span class="course-status" :class="course.status.toLowerCase()">
+                {{ getStatusLabel(course.status) }}
+              </span>
             </div>
-
-            <div class="class-actions">
-              <div v-if="course.status === 'RESERVED'" class="action-buttons">
-                <button class="cancel-button" @click="cancelClass(course.id)">
-                  취소하기
-                  <span class="refund-info">
-                    (예상 환불액: {{ calculateRefundAmount(course).toLocaleString() }}원)
-                  </span>
-                </button>
-              </div>
-              <div v-else-if="course.status === 'COMPLETED' && !course.hasReview" 
-                   class="action-buttons">
-                <button class="review-button" @click="writeReview(course.id)">
-                  리뷰 작성
-                </button>
-              </div>
-              <div v-else-if="course.status === 'REFUNDED'" class="refund-info">
-                <p>환불 완료: {{ formatDate(course.refundDate) }}</p>
-                <p>환불 금액: {{ course.refundAmount.toLocaleString() }}원</p>
-              </div>
+            <div class="info-item">
+              <span class="label">강사:</span>
+              <span>{{ course.instructorName }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">수강 일시:</span>
+              <span>{{ formatDate(course.startTime) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">종료 일시:</span>
+              <span>{{ formatDate(course.endTime) }}</span>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="payment-section">
+            <div class="info-item">
+              <span class="label">인원:</span>
+              <span>{{ course.participantNum }}명</span>
+            </div>
+            <div class="info-item">
+              <span class="label">요금:</span>
+              <span>{{ course.totalAmount.toLocaleString() }}원</span>
+            </div>
+            <div class="info-item">
+              <span class="label">총 결제 금액:</span>
+              <span>{{ course.finalAmount.toLocaleString() }}원</span>
+            </div>
+            <div class="info-item">
+              <span class="label">결제 일자:</span>
+              <span>{{ formatDate(course.refundDate) }}</span>
+            </div>
+            <div class="actions">
+              <button v-if="course.status === 'UPCOMING'" @click="openCancelModal(course)" class="cancel-button">
+                취소
+              </button>
+              <button v-if="course.status === 'COMPLETED' && !course.hasReview" @click="openReviewModal(course)" class="review-button">
+                리뷰 작성
+              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <Refund
+      v-if="showCancelModal"
+      :show="showCancelModal"
+      :course="selectedCourse"
+      @close="showCancelModal = false"
+      @cancel-complete="handleCancelComplete"
+    />
+
+    <ReviewRegist
+      v-if="showReviewModal"
+      :show="showReviewModal"
+      :course="selectedCourseForReview"
+      @close="showReviewModal = false"
+      @submit-review="handleReviewSubmit"
+    />
   </div>
 </template>
-
 <style scoped>
-.enrolled-classes-container {
-  max-width: 1200px;
+.my-courses-container {
+  max-width: 1000px;
   margin: 0 auto;
   padding: 2rem;
-}
-
-.header {
-  margin-bottom: 2rem;
-}
-
-.header h1 {
-  font-size: 2rem;
-  color: #333;
-}
-
-.tabs-container {
-  margin-bottom: 2rem;
 }
 
 .tabs {
   display: flex;
   gap: 1rem;
+  margin-bottom: 2rem;
   border-bottom: 2px solid #f0f0f0;
   padding-bottom: 0.5rem;
 }
 
 .tab-button {
+  padding: 0.8rem 1.5rem;
   background: none;
   border: none;
-  padding: 0.8rem 1.5rem;
   font-size: 1rem;
   color: #666;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 8px;
-}
-
-.tab-button:hover {
-  background-color: #f8f9fa;
+  position: relative;
+  transition: color 0.3s;
 }
 
 .tab-button.active {
   color: #FF9800;
   font-weight: 600;
-  position: relative;
 }
 
-.tab-button.active::after {
-  content: '';
-  position: absolute;
-  bottom: -0.5rem;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #FF9800;
-}
-
-.classes-grid {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.class-card {
+.courses-grid {
   display: flex;
-  gap: 1.5rem;
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: transform 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.class-card:hover {
+.course-card {
+  display: flex;
+  flex-direction: row;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.course-card:hover {
   transform: translateY(-4px);
 }
 
-.class-image {
-  flex: 0 0 200px;
-}
-
-.class-image img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
+.card-image {
+  width: 200px;
+  height: 150px;
   border-radius: 8px;
-}
-
-.class-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.class-title {
-  font-size: 1.4rem;
-  margin-bottom: 1rem;
-  color: #333;
+  overflow: hidden;
   cursor: pointer;
 }
 
-.class-title:hover {
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-content {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  padding-left: 1rem;
+}
+
+.info-section {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+}
+
+.payment-section {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.divider {
+  width: 1px;
+  background: #ddd;
+  margin: 0 1rem;
+}
+
+.title-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.course-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin: 0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.course-title:hover {
   color: #FF9800;
 }
 
-.class-details {
+.course-status {
+  font-size: 0.9rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+}
+
+.course-status.upcoming {
+  border: 1px solid #FF9800;
+  color: #FF9800;
+  background: none;
+}
+
+.course-status.completed,
+.course-status.refunded {
+  background-color: #f0f0f0;
   color: #666;
-  line-height: 1.6;
 }
 
-.discount {
-  color: #ff5722;
-  font-weight: 500;
+.info-item {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
 }
 
-.action-buttons {
+.label {
+  font-weight: bold;
+  color: #555;
+}
+
+.amount-row,
+.refund-row {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.amount {
+  font-weight: bold;
+  color: #333;
+}
+
+.refund-date {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+</style> -->
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAPI } from '@/axios/useAPI';
+import { formatDateString } from '@/util/DateFormatter.js';
+import Refund from '@/components/modal/Refund.vue';
+import ReviewRegist from '@/components/modal/ReviewRegist.vue';
+
+const router = useRouter();
+const { get, post } = useAPI();
+const courses = ref([]);
+const loading = ref(true);
+const error = ref(null);
+const activeTab = ref('upcoming');
+const showCancelModal = ref(false);
+const selectedCourse = ref(null);
+
+const showReviewModal = ref(false);
+const selectedCourseForReview = ref(null);
+
+const tabs = [
+  { id: 'upcoming', label: '수강 예정', status: 'UPCOMING' },
+  { id: 'completed', label: '수강 완료', status: 'COMPLETED' },
+  { id: 'refunded', label: '환불', status: 'REFUNDED' },
+  { id: 'all', label: '전체', status: null },
+];
+
+const getStatusLabel = (status) => {
+  switch (status) {
+    case 'UPCOMING':
+      return '수강 예정';
+    case 'COMPLETED':
+      return '수강 완료';
+    case 'REFUNDED':
+      return '환불 완료';
+    default:
+      return '알 수 없음';
+  }
+};
+
+const fetchCourses = async (status = null) => {
+  try {
+    loading.value = true;
+
+    const response = await get(`/my/courses${status ? `?status=${status}` : ''}`);
+
+    courses.value = response.data.data
+      .filter((course) => !status || course.status === status) // 상태에 맞게 필터링
+      .map((course) => ({
+        ...course,
+        formattedStartTime: formatDate(course.startTime, course.endTime),
+        completeDate: course.completeDate ? formatDateString(course.completeDate) : null,
+        refundDate: course.refundDate ? formatDateString(course.refundDate) : null,
+        canCancel: function () {
+          const now = new Date();
+          const startTime = new Date(course.startTime);
+          return course.status === 'UPCOMING' && startTime > now;
+        },
+      }));
+  } catch (err) {
+    console.error('클래스 목록을 불러오지 못했습니다:', err);
+    error.value = '클래스 목록을 불러오는 중 오류가 발생했습니다.';
+  } finally {
+    loading.value = false;
+  }
+};
+
+
+const formatDate = (start, end = null) => {
+  const startDate = new Date(start);
+  const endDate = end ? new Date(end) : null;
+
+  if (endDate && startDate.toDateString() === endDate.toDateString()) {
+    return `${formatDateString(start)} ~ ${formatDateString(end, 'HH:mm')}`;
+  }
+
+  return `${formatDateString(start)} ${end ? `~ ${formatDateString(end)}` : ''}`;
+};
+
+const openCancelModal = (course) => {
+  if (!course.canCancel()) {
+    alert('취소할 수 없는 클래스입니다.');
+    return;
+  }
+  selectedCourse.value = course;
+  showCancelModal.value = true;
+};
+
+const handleCancelComplete = async () => {
+  showCancelModal.value = false;
+  await fetchCourses(activeTab.value !== 'all' ? tabs.find((t) => t.id === activeTab.value).status : null);
+};
+
+const handleTabChange = (tab) => {
+  activeTab.value = tab.id;
+  fetchCourses(tab.status);
+};
+
+const openReviewModal = (course) => {
+  selectedCourseForReview.value = course;
+  showReviewModal.value = true;
+};
+
+const handleReviewSubmit = async (reviewData) => {
+  try {
+    await post(`/my/courses/${selectedCourseForReview.value.courseId}/review`, reviewData);
+    showReviewModal.value = false;
+    await fetchCourses(activeTab.value !== 'all' ? tabs.find((t) => t.id === activeTab.value).status : null);
+  } catch (err) {
+    throw new Error(err.response?.data?.message || '리뷰 작성에 실패했습니다.');
+  }
+};
+
+onMounted(() => {
+  fetchCourses();
+});
+</script>
+
+<template>
+  <div class="my-courses-container">
+    <div class="tabs">
+      <button
+        v-for="tab in tabs"
+        :key="tab.id"
+        class="tab-button"
+        :class="{ active: activeTab === tab.id }"
+        @click="handleTabChange(tab)"
+      >
+        {{ tab.label }}
+      </button>
+    </div>
+
+    <div v-if="loading" class="loading-state">로딩 중입니다. 잠시만 기다려 주세요...</div>
+
+    <div v-else-if="error" class="error-state">{{ error }}</div>
+
+    <div v-else-if="courses.length === 0" class="empty-state">등록된 클래스가 없습니다.</div>
+
+    <div v-else class="courses-grid">
+      <div v-for="course in courses" :key="course.id" class="course-card">
+        <!-- 이미지 -->
+        <div class="card-image" @click="router.push(`/courses/${course.courseId}`)">
+          <img :src="course.imgUrl || '/default-course.jpg'" :alt="course.title" />
+        </div>
+
+        <div class="card-content">
+          <div class="info-section">
+            <div class="title-status">
+              <h3 class="course-title" @click="router.push(`/courses/${course.courseId}`)">
+                {{ course.title }}
+              </h3>
+              <span class="course-status" :class="course.status.toLowerCase()">
+                {{ getStatusLabel(course.status) }}
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="label">강사:</span>
+              <span>{{ course.instructorName }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">수강 일정:</span>
+              <span>{{ course.formattedStartTime }}</span>
+            </div>
+          </div>
+
+          <div class="payment-section">
+            <div class="actions">
+              <button
+                v-if="course.status === 'UPCOMING'"
+                @click="openCancelModal(course)"
+                class="cancel-button"
+              >
+                취소
+              </button>
+              <button
+                v-if="course.status === 'COMPLETED' && !course.hasReview"
+                @click="openReviewModal(course)"
+                class="review-button"
+              >
+                리뷰 작성
+              </button>
+            </div>
+            <div class="info-item">
+              <span class="label">결제 금액:</span>
+              <span>{{ course.finalAmount.toLocaleString() }}원</span>
+            </div>
+            <div v-if="course.completeDate" class="info-item">
+              <span class="label">결제 일시:</span>
+              <span>{{ course.completeDate }}</span>
+            </div>
+            <div v-if="course.refundDate" class="info-item">
+              <span class="label">환불 일시:</span>
+              <span>{{ course.refundDate }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <Refund
+      v-if="showCancelModal"
+      :show="showCancelModal"
+      :course="selectedCourse"
+      @close="showCancelModal = false"
+      @cancel-complete="handleCancelComplete"
+    />
+
+    <ReviewRegist
+      v-if="showReviewModal"
+      :show="showReviewModal"
+      :course="selectedCourseForReview"
+      @close="showReviewModal = false"
+      @submit-review="handleReviewSubmit"
+    />
+  </div>
+</template>
+
+<style scoped>
+.my-courses-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.tabs {
   display: flex;
   gap: 1rem;
-  margin-top: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.5rem;
 }
 
-.cancel-button, 
+.tab-button {
+  padding: 0.8rem 1.5rem;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #666;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s;
+}
+
+.tab-button.active {
+  color: #FF9800;
+  font-weight: 600;
+}
+
+.courses-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.course-card {
+  display: flex;
+  flex-direction: row;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.card-image {
+  width: 200px;
+  height: 150px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-content {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  padding-left: 1rem;
+}
+
+.info-section {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+}
+
+.payment-section {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.divider {
+  width: 1px;
+  background: #ddd;
+  margin: 0 1rem;
+}
+
+.title-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.course-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin: 0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.course-title:hover {
+  color: #FF9800;
+}
+
+.course-status {
+  font-size: 0.9rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+}
+
+.course-status.upcoming {
+  border: 1px solid #FF9800;
+  color: #FF9800;
+  background: none;
+}
+
+.course-status.completed,
+.course-status.refunded {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.info-item {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.label {
+  font-weight: bold;
+  color: #555;
+}
+
+.actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.cancel-button,
 .review-button {
   padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-weight: 500;
+  border-radius: 4px;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
 
 .cancel-button {
-  background-color: white;
+  background: #fff;
   color: #dc3545;
   border: 1px solid #dc3545;
 }
 
 .cancel-button:hover {
-  background-color: #dc3545;
-  color: white;
+  background: #dc3545;
+  color: #fff;
 }
 
 .review-button {
-  background-color: #FF9800;
-  color: white;
+  background: #FF9800;
+  color: #fff;
   border: none;
 }
 
 .review-button:hover {
-  background-color: #F57C00;
-}
-
-.refund-info {
-  color: #666;
-  font-size: 0.9rem;
+  background: #F57C00;
 }
 
 .loading-state,
-.error-message,
+.error-state,
 .empty-state {
   text-align: center;
   padding: 3rem;
-  color: #666;
-}
-
-.error-message {
-  color: #dc3545;
-  background: #ffebee;
-  border-radius: 8px;
-}
-
-@media (max-width: 768px) {
-  .enrolled-classes-container {
-    padding: 1rem;
-  }
-
-  .class-card {
-    flex-direction: column;
-  }
-
-  .class-image {
-    flex: none;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-  }
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 </style>
+
+
+

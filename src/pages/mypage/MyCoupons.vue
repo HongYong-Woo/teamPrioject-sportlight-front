@@ -39,7 +39,7 @@ const fetchCoupons = async (page = 1) => {
         if (response.data) {
             coupons.value = response.data.data.map(coupon => ({
                 ...coupon,
-                status: REVERSE_STATUS_MAP[status]
+                status: activeTab.value
             }));
             totalItems.value = response.data.total || 0;
             currentPage.value = page;

@@ -156,7 +156,7 @@ const sendVerificationCode = async () => {
   const { post } = useAPI();
 
   try {
-    const response = await post("/api/auth/password-reset/request", {
+    const response = await post("/auth/password-reset/request", {
       userName: userName.value,
       userPhone: userPhone.value,
       loginId: loginId.value,
@@ -190,7 +190,7 @@ const verifyCodeAndMoveToResetPwd = async () => {
   const { post } = useAPI();
 
   try {
-    const response = await post("/api/auth/verify-code", {
+    const response = await post("/auth/verify-code", {
       loginId: loginId.value,
       code: verificationCode.value,
     });
@@ -225,7 +225,7 @@ const changePassword = async () => {
 
   try {
     console.log("API 요청 시작");
-    const response = await post("/api/auth/password-reset/confirm", {
+    const response = await post("/auth/password-reset/confirm", {
       newPwd: loginData.value.password,
     });
 
@@ -319,30 +319,6 @@ onUnmounted(() => {
   closeModal();
 });
 
-// const handleSocialLogin = (provider) => {
-//   const width = 500;
-//   const height = 600;
-//   const left = window.screen.width / 2 - width / 2;
-//   const top = window.screen.height / 2 - height / 2;
-
-//   const popup = window.open(
-//     `http://localhost:8080/oauth2/authorization/${provider}`,
-//     'OAuth2 Login',
-//     `width=${width},height=${height},left=${left},top=${top}`
-//   );
-
-//   if (!checkPopupBlocker(popup)) {
-//     return;
-//   }
-
-//   const checkPopupInterval = setInterval(() => {
-//     if (popup.closed) {
-//       clearInterval(checkPopupInterval);
-//     }
-//   }, 1000);
-// };
-
-// Login.vue
 const handleSocialLogin = (provider) => {
   const width = 500;
   const height = 600;
@@ -350,7 +326,7 @@ const handleSocialLogin = (provider) => {
   const top = window.screen.height / 2 - height / 2;
 
   const popup = window.open(
-    `http://localhost:8080/oauth2/authorization/${provider}`,
+    `http://localhost:8080/api/oauth2/authorization/${provider}`,
     'OAuth2 Login',
     `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
   );

@@ -14,7 +14,7 @@ const onRefreshed = (token) => {
 };
 
 export const useAPI = () => {
-    const baseURL = "http://localhost:8080";
+    const baseURL = "http://localhost:8080/api";
     const auth = useAuthStore();
     
     const api = axios.create({
