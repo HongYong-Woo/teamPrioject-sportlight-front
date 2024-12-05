@@ -40,7 +40,7 @@ header button {
 
 main {
     margin: 64px 15% 0 15%;
-    min-height: 100vh;
+    min-height: 80vh;
 }
 
 footer {
@@ -72,4 +72,21 @@ header {
 
 .banner-container{
     z-index: 2;
+}
+
+.modal-overlay * {
+    z-index: 2;
+}
+
+.modal-content {
+    position: absolute;
+    z-index: 1000 !important;
+}
+
+#map[data-v-20eda41f] {
+    z-index: 0 !important;
+}
+
+.footer[data-v-5473ee5f] {
+    position: static;
 }

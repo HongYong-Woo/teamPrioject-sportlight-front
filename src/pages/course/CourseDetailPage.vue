@@ -11,6 +11,7 @@ import NumberSelect from '../../components/common/NumberSelect.vue';
 import ReviewList from '../../components/course/ReviewList.vue';
 import QnAList from '../../components/course/QnAList.vue';
 import router from '@/routers';
+import KakaoMapAPI from '../../components/common/KakaoMapAPI.vue';
 
 const props = defineProps(
     {
@@ -296,7 +297,9 @@ function goToApplyCourse() {
             </div>
             <div class="detail-container" id="location">
                 <h4>위치</h4>
-                <div class="map">{{ courseDetails.latitude }}, {{ courseDetails.longitude }}</div>
+                <div class="map-wrapper">
+                    <KakaoMapAPI class="map" :latitude="courseDetails.latitude" :longitude="courseDetails.longitude"/>
+                </div>
                 <p>{{ courseDetails.address }} {{ courseDetails.detailAddress }}</p>
                 <p>찾아오는 길 ~~~~</p>
             </div>
@@ -543,10 +546,14 @@ function goToApplyCourse() {
     margin-bottom: 1rem;
 }
 
-.map {
+.map-wrapper {
     aspect-ratio: 16/9;
     width: 100%;
-    background-color: khaki;
+}
+
+.map {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .host-intro {

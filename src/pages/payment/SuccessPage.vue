@@ -136,7 +136,6 @@ function goToHomePage() {
 .container {
   position: fixed;
   top: 0;
-  width: 100vh;
   height: 90%;
   display: flex;
   flex-direction: column;

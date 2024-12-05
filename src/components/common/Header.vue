@@ -130,7 +130,6 @@ onUnmounted(() => {
 
             <nav v-if="!isResponsive" class="navigation">
                 <RouterLink to="/course" class="nav-link">클래스</RouterLink>
-                <RouterLink to="/community" class="nav-link">커뮤니티</RouterLink>
                 <button class="nav-link" @click="toggleCategoryMenu">
                     카테고리
                     <FontAwesomeIcon v-if="!isCategoryOpen" :icon="faChevronDown" size="sm" style="margin-left: 4px" />
