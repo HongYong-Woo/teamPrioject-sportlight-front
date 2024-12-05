@@ -120,7 +120,6 @@ function reloadPage(page) {
 </script>
 
 <template>
-    <h1 class="search-title">Search</h1>
     <div class="container">
         <div class="filter-container">
             <div class="filter">
@@ -159,13 +158,11 @@ function reloadPage(page) {
 </template>
 
 <style scoped>
-.search-title {
-    margin: 5rem 0 1rem 0;
-    padding-left: 1rem;
-}
+
 .container {
     display: flex;
     flex-direction: row;
+    margin-top: 7rem;
 }
 
 .filter-container {

@@ -67,7 +67,12 @@ const moveToCourseDetail = id => {
 };
 
 const moveToCourseAdminPage = id => {
-
+  router.push({
+    name: 'ApplicantManagement',
+    params: {
+      id: id,
+    },
+  })
 };
 
 const getTagClass = status => {

@@ -1,5 +1,5 @@
 <script setup>
-import {watch} from "vue";
+import {onMounted, onUnmounted, watch} from "vue";
 
 const prop = defineProps({
   latitude: {
@@ -26,6 +26,10 @@ const prop = defineProps({
 });
 
 const emit = defineEmits(['assignLatLng']);
+
+onMounted(() => {
+  init();
+});
 
 const init = () => {
   if (window.kakao && window.kakao.maps) {
@@ -56,8 +60,17 @@ const loadScript = (src, callback) => {
 };
 
 const initializeMap = () => {
-  const coords = new window.kakao.maps.LatLng(prop.latitude, prop.longitude);
   const mapContainer = document.getElementById('map');
+  if (!mapContainer) {
+    console.error('Map container is not found!');
+    return;
+  }
+
+  const coords = new kakao.maps.LatLng(
+      prop.latitude || 37.5096776765406,
+      prop.longitude || 127.055536318832
+  );
+
   const mapOption = {
     center: coords, // 지도의 중심좌표
     level: 1 // 지도의 확대 레벨
@@ -65,14 +78,14 @@ const initializeMap = () => {
 
   const map = new window.kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
   map.setMaxLevel(1);
-  const markerPosition = coords;
   const marker = new window.kakao.maps.Marker({
-    position: markerPosition
+    position: coords
   });
 
   marker.setDraggable(prop.markerDraggable);
-  if(prop.markerDraggable) {
-    kakao.maps.event.addListener(marker, 'dragend', function() {
+
+  if (prop.markerDraggable) {
+    kakao.maps.event.addListener(marker, 'dragend', function () {
       const position = marker.getPosition();
       emit('assignLatLng', position.getLat(), position.getLng());
     });
@@ -83,8 +96,6 @@ const initializeMap = () => {
 
 watch(() => [prop.latitude, prop.longitude], () => {
   init();
-}, {
-  immediate: true,
 });
 </script>
 

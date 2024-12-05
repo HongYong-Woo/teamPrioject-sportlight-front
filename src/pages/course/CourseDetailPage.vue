@@ -11,6 +11,7 @@ import NumberSelect from '../../components/common/NumberSelect.vue';
 import ReviewList from '../../components/course/ReviewList.vue';
 import QnAList from '../../components/course/QnAList.vue';
 import router from '@/routers';
+import KakaoMapAPI from '../../components/common/KakaoMapAPI.vue';
 
 const props = defineProps(
     {
@@ -296,7 +297,9 @@ function goToApplyCourse() {
             </div>
             <div class="detail-container" id="location">
                 <h4>위치</h4>
-                <div class="map">{{ courseDetails.latitude }}, {{ courseDetails.longitude }}</div>
+                <div class="map-wrapper">
+                    <KakaoMapAPI class="map" :latitude="courseDetails.latitude" :longitude="courseDetails.longitude"/>
+                </div>
                 <p>{{ courseDetails.address }} {{ courseDetails.detailAddress }}</p>
                 <p>찾아오는 길 ~~~~</p>
             </div>
@@ -314,10 +317,10 @@ function goToApplyCourse() {
                         <a v-if="courseDetails.instar" :href="courseDetails.instar">
                             <FontAwesomeIcon :icon="faInstagram" style="color: #DD2A7B;" size="xl" />
                         </a>
-                        <a v-if="courseDetails.kakao" :href="courseDetails.kakao">
+                        <a v-if="courseDetails.facebook" :href="courseDetails.facebook">
                             <FontAwesomeIcon :icon="faFacebook" style="color: #4267B2" size="xl" />
                         </a>
-                        <a v-if="courseDetails.blog" :href="courseDetails.blog">
+                            <a v-if="courseDetails.twitter" :href="courseDetails.twitter">
                             <FontAwesomeIcon :icon="faTwitter" style="color: #1DA1F2;" size="xl" />
                         </a>
                         <a v-if="courseDetails.youtube" :href="courseDetails.youtube">
@@ -543,10 +546,14 @@ function goToApplyCourse() {
     margin-bottom: 1rem;
 }
 
-.map {
+.map-wrapper {
     aspect-ratio: 16/9;
     width: 100%;
-    background-color: khaki;
+}
+
+.map {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .host-intro {

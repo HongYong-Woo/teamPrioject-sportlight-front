@@ -37,6 +37,7 @@ onUnmounted(() => {
 <template>
     <div class="banner-container">
         <img class="banner" :src="currentImage" alt="Banner Image">
+        <img class="banner-background" :src="currentImage" alt="Banner Image">
         
         <div class="nav">
             <div class="nav-container">
@@ -63,16 +64,26 @@ onUnmounted(() => {
     left: 0;
     width: 100%;
     height: 400px;
-    background-color: #767676;
     text-align: center;
     overflow: hidden;
 }
 
 .banner {
+    position: absolute;
     height: 100%;
     width: 100%;
     object-fit: contain;
     transition: opacity 0.5s ease-in-out;
+    z-index: 2;
+}
+
+.banner-background {
+    filter: blur(100px);
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1;
 }
 
 /* 좌우 화살표 스타일 */
@@ -84,6 +95,7 @@ onUnmounted(() => {
     border: none;
     padding: 10px;
     cursor: pointer;
+    z-index: 3;
 }
 
 .nav-container {
@@ -116,6 +128,7 @@ onUnmounted(() => {
     transform: translateX(-50%);
     display: flex;
     gap: 5px;
+    z-index: 7;
 }
 
 .indicator {

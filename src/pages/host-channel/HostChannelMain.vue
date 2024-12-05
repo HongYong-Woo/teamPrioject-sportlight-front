@@ -6,7 +6,6 @@ import CourseScheduleCalendar from "@/components/host-channel/CourseScheduleCale
 
 <template>
   <div class="container">
-    <h2 class="mb-3">메인</h2>
     <HostProfile></HostProfile>
     <CourseScheduleCalendar></CourseScheduleCalendar>
   </div>

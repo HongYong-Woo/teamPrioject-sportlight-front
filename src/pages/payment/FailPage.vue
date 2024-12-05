@@ -37,8 +37,8 @@ function goToHomePage() {
 .container {
   position: fixed;
   top: 0;
-  width: 100vh;
   height: 90%;
+  margin: auto;
   display: flex;
   flex-direction: column;
   align-items: center;

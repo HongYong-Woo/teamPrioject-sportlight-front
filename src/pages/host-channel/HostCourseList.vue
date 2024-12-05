@@ -84,11 +84,11 @@ const moveToCourseRegisterForm = () => {
 </script>
 
 <template>
-  <div class="mb-4">
+  <div>
     <h2>개설 클래스</h2>
   </div>
   <div class="text-end">
-    <button class="btn register-btn" type="button" @click="moveToCourseRegisterForm">클래스 개설</button>
+    <button class="btn register-btn mb-3" type="button" @click="moveToCourseRegisterForm">클래스 개설하기</button>
   </div>
   <div class="course-list row">
     <div class="col-4" v-for="(item, index) in courseList" :key="index">

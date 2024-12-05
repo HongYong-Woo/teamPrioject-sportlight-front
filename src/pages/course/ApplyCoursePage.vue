@@ -7,6 +7,7 @@ import CouponModal from '../../components/course/CouponModal.vue';
 import Button from '../../components/common/Button.vue';
 import router from "@/routers";
 import Payment from '../../components/payment/Payment.vue';
+import KakaoMapAPI from '../../components/common/KakaoMapAPI.vue';
 
 const { get, post } = useAPI();
 const scheduleId = useRoute().query.scheduleId;
@@ -126,16 +127,18 @@ function clickOutside() {
             <div>
                 <div class="title">위치</div>
                 <span>{{ scheduleDetails.address }} {{ scheduleDetails.detailAddress }}</span>
-                <div class="map"></div>
+                <div class="map-wrapper">
+                    <KakaoMapAPI class="map" :latitude="scheduleDetails.latitude" :longitude="scheduleDetails.longitude"/>
+                </div>
             </div>
         </div>
         <div class="important-info">
             <div class="gray-box">
                 <div class="user-info-header">
                     <span>구매자 정보</span>
-                    <button class="gray-btn">
+                    <!-- <button class="gray-btn">
                         수정
-                    </button>
+                    </button> -->
                 </div>
                 <div class="user-info">
                     <div class="user-info-set-container">
@@ -173,7 +176,7 @@ function clickOutside() {
                         </div>
                         <button class="gray-btn" @click="couponBtnClickEvent">선택</button>
                         <CouponModal v-if="couponIsOpen" :coupons="coupons" v-model:selectedCoupon="selectedCoupon"
-                            @apply="applyCoupon" @cancel="cancelCoupon" />
+                            @apply="applyCoupon" @cancel="cancelCoupon" class="coupon-modal"/>
                     </div>
                 </div>
                 <div class="tuition-calculate">
@@ -293,10 +296,15 @@ function clickOutside() {
     flex-direction: column;
 }
 
-.map {
+.map-wrapper {
     aspect-ratio: 16/9;
     width: 100%;
-    background-color: khaki;
+    z-index: 5;
+}
+
+.map {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .gray-box {
@@ -331,6 +339,10 @@ function clickOutside() {
     background-color: #d9d9d9;
     color: #333;
     transition: all 0.3s ease;
+}
+
+.coupon-modal {
+    z-index: 10;
 }
 
 .user-info {
