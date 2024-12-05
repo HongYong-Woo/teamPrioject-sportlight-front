@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div v-for="category in props.categories"
+    <div v-for="category in categories"
          :key="category.id"
          @click="handleMenuClick(category)">
       <router-link class="menu-item" :to="category.link">
@@ -9,7 +9,7 @@
       </router-link>
       <div v-if="isSubmenuVisible === category.id" class="submenu">
         <div class="submenu-item"
-             v-for="submenu in props.submenus[category.id]"
+             v-for="submenu in submenus[category.id]"
              :key="submenu.id">
           <router-link :to="submenu.link">{{ submenu.name }}</router-link>
         </div>
@@ -23,27 +23,24 @@ import { ref } from 'vue';
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
-const props = defineProps({
-  categories: {
-    type: Array,
-    required: true,
-    default: () => {
-      return [];
-    },
-  },
-  submenus: {
-    type: Array,
-    required: false,
-    default: () => {
-      return [];
-    },
-  },
-});
+const categories = [
+  { id: 1, name: '메인', link: '/hostchannel/main' },
+  { id: 2, name: '개설 클래스', link: '/hostchannel/courses' },
+  { id: 3, name: '수익금 관리'}
+];
+
+const submenus = {
+  3: [
+    { id: 1, name: '정산 신청', link: '/hostchannel/adjustments/register' },
+    { id: 2, name: '정산 내역', link: '/hostchannel/adjustments' },
+    { id: 3, name: '결제 내역 관리', link: '/hostchannel/payments' },
+  ]
+};
 
 const isSubmenuVisible = ref(null);
 
 const handleMenuClick = (category) => {
-  if (props.submenus[category.id]) {
+  if (submenus[category.id]) {
     isSubmenuVisible.value = category.id;
   } else {
     isSubmenuVisible.value = null;

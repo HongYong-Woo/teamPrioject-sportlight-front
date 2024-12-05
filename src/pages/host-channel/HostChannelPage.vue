@@ -1,7 +1,7 @@
 <template>
   <div class="main-container row">
     <div class="sidebar col-3">
-      <SideBar :categories="categories" :submenus="submenus"></SideBar>
+      <SideBar></SideBar>
     </div>
 
     <div class="content col-9">
