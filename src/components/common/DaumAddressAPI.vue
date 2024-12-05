@@ -101,7 +101,7 @@ const execDaumPostcode = () => {
       <input class="form-control" type="text" @click="execDaumPostcode" v-model="address" placeholder="주소"><br>
     </div>
     <div class="col-3">
-      <button class="btn" @click="execDaumPostcode">주소 찾기</button>
+      <button class="btn" @click.prevent="execDaumPostcode">주소 찾기</button>
     </div>
   </div>
 </template>
