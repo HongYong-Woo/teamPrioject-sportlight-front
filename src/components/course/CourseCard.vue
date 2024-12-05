@@ -83,7 +83,7 @@ const levelFormatter = (level) => {
             <div class="card-content">
                 <h2 class="card-title">{{ title }}</h2>
                 <div class="host-details">
-                    <img src="../../../public/favicon.ico" alt="Profile image" class="profile-image">
+                    <!-- <img src="../../../public/favicon.ico" alt="Profile image" class="profile-image"> -->
                     <div>{{ nickname }}</div>
                 </div>
 
@@ -180,6 +180,8 @@ const levelFormatter = (level) => {
     flex-direction: row;
     align-items: center;
     margin-top: 0.25rem;
+    color: #767676;
+    font-size: 0.9rem;
 }
 
 .profile-image {
@@ -227,8 +229,7 @@ const levelFormatter = (level) => {
 
 .non-hover-container {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex-direction: column;
 }
 
 .rating-details {}
