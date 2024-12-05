@@ -317,10 +317,10 @@ function goToApplyCourse() {
                         <a v-if="courseDetails.instar" :href="courseDetails.instar">
                             <FontAwesomeIcon :icon="faInstagram" style="color: #DD2A7B;" size="xl" />
                         </a>
-                        <a v-if="courseDetails.kakao" :href="courseDetails.kakao">
+                        <a v-if="courseDetails.facebook" :href="courseDetails.facebook">
                             <FontAwesomeIcon :icon="faFacebook" style="color: #4267B2" size="xl" />
                         </a>
-                        <a v-if="courseDetails.blog" :href="courseDetails.blog">
+                            <a v-if="courseDetails.twitter" :href="courseDetails.twitter">
                             <FontAwesomeIcon :icon="faTwitter" style="color: #1DA1F2;" size="xl" />
                         </a>
                         <a v-if="courseDetails.youtube" :href="courseDetails.youtube">
