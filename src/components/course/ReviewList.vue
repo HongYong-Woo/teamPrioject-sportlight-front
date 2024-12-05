@@ -50,7 +50,7 @@ const getStarClass = (rating, index) => {
   <div class="review-list">
     <div v-for="(review, index) in reviews" :key="index" class="review-item">
       <div class="review-header">
-        <img src="../../../public/favicon.ico" alt="review-profile">
+        <img :src="review.imgUrl" alt="review-profile">
         <div class="review-header-detail-container">
           <span class="nickname">{{ review.nickname }}</span>
           <div class="review-header-detail">

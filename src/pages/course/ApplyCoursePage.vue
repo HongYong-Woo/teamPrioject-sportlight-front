@@ -454,6 +454,6 @@ function clickOutside() {
 }
 
 .payment-widget {
-    margin-top: 10%;
+    
 }
 </style>
