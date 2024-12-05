@@ -7,7 +7,10 @@ import { useAPI } from '@/axios/useAPI';
 import SemiBanner from '../components/banner/SemiBanner.vue';
 import ReviewList from '../components/main-page/ReviewList.vue';
 import Button from '../components/common/Button.vue';
-// import EventCard from '../components/main-page/EventCard.vue';
+import Payment from '../components/payment/Payment.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faBookmark } from '@fortawesome/free-solid-svg-icons';
+import Coupon from '../components/main-page/Coupon.vue';
 
 const { get } = useAPI();
 const popularCourses = ref([]);
@@ -46,6 +49,10 @@ onMounted(() => {
     fetchBeginnerCards();
 });
 
+function developing() {
+    alert('열심히 개발 중입니다!🧑‍💻');
+}
+
 </script>
 
 <template>
@@ -65,37 +72,36 @@ onMounted(() => {
 
     <ReviewList/>
 
-    <!-- <EventCard/> -->
-
-    <SemiBanner />
+    <!-- <SemiBanner /> -->
 
     <div class="service-wrapper">
         <div class="service-container">
             <div class="service-header-wrapper">
                 <span class="service-header-title">다양한 서비스를 신청하세요.</span>
-                <span class="service-header-content">하하 쓸 말이 없다</span>
+                <span class="service-header-content">스포트라이트의 지식공유자 ˙비즈니스˙ 대학생 신청방법에 대해 알아보세요.</span>
             </div>
             <div class="service-box-wrapper">
                 <div class="service-box">
                     <div class="service-title-wrapper">
                         <span class="service-title">지식공유자 되기</span>
-                        <span class="service-content">나의 지식을 나눠 사람들에게 배움의 기회를 주고,<br/> 의미있는 대가를 가져가세요.</span>
+                        <span class="service-content">나의 지식을 나눠 사람들에게<br/> 배움의 기회를 주고,<br/> 의미있는 대가를 가져가세요.</span>
                     </div>
                     <Button class="service-btn">지식 공유자 참여하기</Button>
                 </div>
                 <div class="service-box">
                     <div class="service-title-wrapper">
-                        <span class="service-title">개발자 응원하기</span>
-                        <span class="service-content">우리은행 1002-123-123456</span>
+                        <span class="service-title">커뮤니티 둘러보기</span>
+                        <span class="service-content">커뮤니티에서 위치 기반 채팅방을 통해<br/> 이웃과 스포츠 이야기를 나누고<br/> 함께할 기회를 찾아보세요.
+                        </span>
                     </div>
-                    <Button class="service-btn">도네이션 하러 가기</Button>
+                    <Button class="service-btn" @click="developing">커뮤니티 참여하기</Button>
                 </div>
-                <div class="service-box">
+                <div class="service-box coupon">
                     <div class="service-title-wrapper">
-                        <span class="service-title">아아가그아가아</span>
-                        <span class="service-content">ㅏ아그아ㅏㅇ가으ㅏ아아그ㅏ아으아ㅡ가으으으극어엉나ㅏㄷ그가으가ㅡ아나으아ㅡ아</span>
+                        <span class="service-title">쿠폰 받기</span>
+                        <span class="service-content">스포트라이트에서 제공하는 쿠폰들을<br/> 마음껏 누리세요!</span>
                     </div>
-                    <Button class="service-btn">그아가으으</Button>
+                    <Coupon/>
                 </div>
             </div>
         </div>
@@ -127,7 +133,7 @@ onMounted(() => {
 .service-wrapper {
     position: flex;
     width: 100%;
-    height: 30rem;
+    height: 32rem;
     margin-top: 3rem;
 }
 
@@ -147,7 +153,7 @@ onMounted(() => {
     background-color: rgba(170, 170, 170, 0.1);
     height: fit-content;
     width: 100%;
-    height: 30rem;
+    height: 32rem;
     left: 0;
     padding: 0 2rem;
     justify-content: center;
@@ -176,11 +182,15 @@ onMounted(() => {
     flex-direction: column;
     width: 25rem;
     background-color: white;
-    height: 20rem;
+    height: 22rem;
     padding: 2rem 2rem 3rem 2rem;
     justify-content: space-between;
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 0.5rem;
+}
+
+.coupon {
+    padding-bottom: 1.5rem;
 }
 
 .service-title-wrapper {
@@ -209,5 +219,4 @@ onMounted(() => {
     color: white;
     transition: all 0.2s ease;
 }
-
 </style>
