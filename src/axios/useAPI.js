@@ -42,54 +42,49 @@ export const useAPI = () => {
     api.interceptors.response.use(
         (response) => response,
         async (error) => {
-            const originalRequest = error.config;
-
-            if (!error.response) {
-                return Promise.reject(new Error("네트워크 연결을 확인해주세요."));
-            }
-
-            if (originalRequest.url.includes('/login') || originalRequest.url.includes('/reissue')) {
-                return Promise.reject(error);
-            }
-
-            if (error.response.status === 401 && !originalRequest._retry) {
-                if (isRefreshing) {
-                    return new Promise(resolve => {
-                        subscribeTokenRefresh(token => {
-                            originalRequest.headers['Authorization'] = `Bearer ${token}`;
-                            resolve(api(originalRequest));
-                        });
-                    });
-                }
-
-                originalRequest._retry = true;
-                isRefreshing = true;
-
-                try {
-                    const success = await auth.refreshToken();
-                    if (success) {
-                        const newToken = localStorage.getItem("accessToken");
-                        onRefreshed(newToken);
-                        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-                        return api(originalRequest);
-                    }
-                    
-                    await auth.logout();
-                    throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
-                } catch (refreshError) {
-                    await auth.logout();
-                    throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
-                } finally {
-                    isRefreshing = false;
-                }
-            }
-
-            if (error.response.status === 403) {
-                console.error("Permission denied:", error);
-                throw new Error("접근 권한이 없습니다.");
-            }
-
+        const originalRequest = error.config;
+    
+        if (!error.response) {
+            return Promise.reject(new Error("네트워크 연결을 확인해주세요."));
+        }
+    
+        if (originalRequest.url.includes('/login') || originalRequest.url.includes('/reissue')) {
             return Promise.reject(error);
+        }
+    
+        if (error.response.status === 401 && !originalRequest._retry) {
+            if (isRefreshing) {
+            return new Promise(resolve => {
+                subscribeTokenRefresh(token => {
+                originalRequest.headers['Authorization'] = `Bearer ${token}`;
+                resolve(api(originalRequest));
+                });
+            });
+            }
+    
+            originalRequest._retry = true;
+            isRefreshing = true;
+    
+            try {
+            const response = await api.post('/auth/reissue');
+            const newToken = response.data.data;
+            
+            if (newToken) {
+                localStorage.setItem('accessToken', newToken);
+                api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+                onRefreshed(newToken);
+                return api(originalRequest);
+            }
+            } catch (refreshError) {
+            isRefreshing = false;
+            await auth.logout();
+            return Promise.reject(refreshError);
+            } finally {
+            isRefreshing = false;
+            }
+        }
+    
+        return Promise.reject(error);
         }
     );
 

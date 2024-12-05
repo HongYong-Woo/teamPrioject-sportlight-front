@@ -6,7 +6,13 @@ import router from "@/routers";
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     token: localStorage.getItem("accessToken") || "",
-    userRoles: JSON.parse(localStorage.getItem("userRoles")) || [],
+    userRoles: (() => {
+      try {
+        return JSON.parse(localStorage.getItem("userRoles") || "[]");
+      } catch {
+        return [];
+      }
+    })(),
     loginError: '',
     findIdMessage: [],
     passwordResetMessage: '',
@@ -23,7 +29,8 @@ export const useAuthStore = defineStore("auth", {
         if (!this.token) return false;
         const decodedToken = jwtDecode(this.token);
         return Date.now() / 1000 < decodedToken.exp;
-      } catch {
+      } catch (error) {
+        console.error("JWT 디코딩 실패:", error);
         return false;
       }
     }
@@ -35,38 +42,38 @@ export const useAuthStore = defineStore("auth", {
         const formData = new FormData();
         formData.append('username', loginData.username);
         formData.append('password', loginData.password);
-
+    
         const { post } = useAPI();
         const response = await post('/login', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+          headers: { 'Content-Type': 'multipart/form-data' },
         });
-
-        if (response.data?.code === 200) {
-          return this.setLoginSuccess(response.data.token);
+    
+        console.log('로그인 응답 데이터:', response.data);
+    
+        const { token, roles } = response.data;
+    
+        if (token && roles) {
+          return await this.setLoginSuccess(token, roles);
         }
-        
-        this.clearAuthState();
+    
         this.loginError = response.data?.message || '로그인에 실패했습니다';
         return false;
       } catch (error) {
-        console.error("로그인 에러:", error);
-        this.clearAuthState();
+        console.error('로그인 에러:', error);
         this.loginError = error.response?.data?.message || '로그인에 실패했습니다';
         return false;
       }
     },
+    
 
-    async setLoginSuccess(token) {
+    async setLoginSuccess(token, roles) {
       try {
-        const decodedToken = jwtDecode(token);
         this.token = token;
-        this.userRoles = Array.isArray(decodedToken.roles) 
-          ? decodedToken.roles 
-          : [decodedToken.roles];
-
+        this.userRoles = roles;
+    
         localStorage.setItem('accessToken', token);
-        localStorage.setItem('userRoles', JSON.stringify(this.userRoles));
-
+        localStorage.setItem('userRoles', JSON.stringify(roles));
+    
         await this.fetchUserProfile();
         return true;
       } catch (error) {
@@ -84,7 +91,8 @@ export const useAuthStore = defineStore("auth", {
         if (response.data?.data) {
           this.userInfo = {
             ...response.data.data,
-            userImage: response.data.data.userImage || '/assets/default_img.jpg'
+            userImage: response.data.data.userImage || '/assets/default_img.jpg',
+            couponCount: response.data.data.couponCount || 0
           };
         }
       } catch (error) {
@@ -93,6 +101,7 @@ export const useAuthStore = defineStore("auth", {
         throw error;
       }
     },
+    
 
     async refreshToken() {
       if (!this.canRefresh()) return false;
@@ -122,8 +131,10 @@ export const useAuthStore = defineStore("auth", {
         router.push('/');
       } catch (error) {
         console.error('로그아웃 실패:', error);
+        router.push('/');
       } finally {
         this.clearAuthState();
+        router.push('/');
       }
     },
 
@@ -179,7 +190,6 @@ export const useAuthStore = defineStore("auth", {
       this.showLoginModal = false;
     },
 
-    // 모달 관련
     toggleLoginModal(show) {
       this.showLoginModal = show;
     },
@@ -207,28 +217,41 @@ export const useAuthStore = defineStore("auth", {
 
 export const useInterestStore = defineStore("interest", {
   state: () => ({
-    interestIds: new Set(),
-    isInitialized: false
+    interestIds: new Set(), 
+    isInitialized: false,
   }),
 
   actions: {
+    isUserLoggedIn() {
+      const authStore = useAuthStore();
+      return authStore.isAuthenticated;
+    },
+
     async initializeInterests() {
+      if (!this.isUserLoggedIn()) {
+        console.error("로그인되지 않은 사용자입니다.");
+        return;
+      }
+
       if (this.isInitialized) return;
-      
+
       const { get } = useAPI();
       try {
-        const response = await get('/my/interests');
+        const response = await get("/my/interests");
         this.interestIds = new Set(response.data.data.map(course => course.id));
         this.isInitialized = true;
       } catch (error) {
         console.error("찜 목록을 불러오지 못했습니다:", error);
-        this.interestIds = new Set();
+        this.interestIds = new Set(); 
       }
     },
 
     attachInterestStatus(courses) {
-      if (!Array.isArray(courses)) return courses;
-      
+      if (!this.isUserLoggedIn()) {
+        console.error("로그인되지 않은 사용자입니다.");
+        return courses;
+      }
+
       return courses.map(course => ({
         ...course,
         isLiked: this.interestIds.has(course.id)
@@ -236,25 +259,35 @@ export const useInterestStore = defineStore("interest", {
     },
 
     async toggleInterest(courseId) {
+      if (!this.isUserLoggedIn()) {
+        console.error("로그인되지 않은 사용자입니다.");
+        return false; 
+      }
+
       const { patch } = useAPI();
       try {
         const response = await patch(`/my/interests/${courseId}`);
         const isLiked = response.data.data;
-        
+
         if (isLiked) {
           this.interestIds.add(courseId);
         } else {
           this.interestIds.delete(courseId);
         }
-        
-        return isLiked;
+
+        return isLiked; 
       } catch (error) {
-        console.error("찜하기 토글 실패:", error);
+        console.error("찜 상태 토글 실패:", error);
         throw error;
       }
     },
 
     isInterested(courseId) {
+      if (!this.isUserLoggedIn()) {
+        console.error("로그인되지 않은 사용자입니다.");
+        return false;
+      }
+
       return this.interestIds.has(courseId);
     },
 
