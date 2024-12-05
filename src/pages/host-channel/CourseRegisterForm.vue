@@ -125,13 +125,14 @@ let classImgThumbList = computed(() => {
   return imgSrcList;
 });
 
-const cancelClassImg = (id, index) => {
-  deletedFileIdList.value.push(id);
-  inputData.value.existImages.splice(index, 1);
+const cancelClassImg = index => {
+  inputData.value.images.splice(index, 1);
 };
 
-const cancelExistImg = img => {
-
+const cancelExistImg = (id, index) => {
+  if(modifyMode.value) {
+    deletedFileIdList.value.push(id);
+  }
 }
 
 const inputContent = text => {
@@ -206,6 +207,9 @@ const submitRegisterForm = async () => {
     console.log(id);
     await submitRegisterScheduleForm(id);
     alert("클래스 개설 신청이 완료되었습니다.");
+    router.push({
+      name: 'HostCourseList',
+    });
   } catch (error) {
     alert("클래스 개설 신청이 실패했습니다.");
   }
@@ -264,7 +268,7 @@ const submitFileDeleteForm = async id => {
     </div>
   </div>
 </card>
-  <form class="course-form">
+  <div class="course-form">
     <div class="title">
       1. 클래스 정보
     </div>
@@ -370,7 +374,7 @@ const submitFileDeleteForm = async id => {
             <span class="require">(필수)</span>
           </div>
           <div class="row align-items-center">
-            <input class="form-control m-2" style="width: 80px;" v-model.number="inputData.time" maxlength="3">시간
+            <input class="form-control m-2" style="width: 80px;" v-model.number="inputData.time" maxlength="3">분
           </div>
         </div>
         <div class="col">
@@ -463,7 +467,7 @@ const submitFileDeleteForm = async id => {
         <DateTimeSchedule :schedules="schedules"></DateTimeSchedule>
       </div>
     </div>
-  </form>
+  </div>
   <div class="submit-button-area">
     <button class="btn register-btn" @click="submitForm">{{ modifyMode ? '클래스 수정' : '클래스 개설' }}</button>
   </div>
@@ -522,7 +526,7 @@ const submitFileDeleteForm = async id => {
 .img-cancel-btn {
   position : absolute;
   top: 3px;
-  right: 10px;
+  right: 8px;
 }
 .register-btn {
   width: 200px;
