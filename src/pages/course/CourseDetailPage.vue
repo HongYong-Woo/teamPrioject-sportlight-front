@@ -108,7 +108,6 @@ function updateFilteredSchedules() {
             schedule.remainedNum <= 0 ? false : true;
         return schedule;
     });
-    console.log(filteredSchedules.value);
 }
 
 function updateRequestParticipants(value) {
@@ -235,7 +234,6 @@ function goToApplyCourse() {
                 </div>
                 <div class="contents-container">
                     <h4 class="title">{{ courseDetails.title }}</h4>
-                    <h6 class="content">{{ courseDetails.content }}</h6>
                     <div class="host-info-container">
                         <img :src="currentImage || 'https://kr.object.ncloudstorage.com/sportlight/static_img/default_image.jpg'" alt="Host Profile" @error="e => e.target.src = 'https://kr.object.ncloudstorage.com/sportlight/static_img/user_profile_icon.jpg'"/>
                         <span class="host-nickname">{{ courseDetails.nickname }}</span>
@@ -312,7 +310,7 @@ function goToApplyCourse() {
             </div>
             <div class="detail-container" id="intro">
                 <h4>클래스 소개</h4>
-                <div class="course-intro">{{ courseDetails.content }}</div>
+                <div class="course-intro" v-html="courseDetails.content"></div>
             </div>
             <div class="detail-container" id="location">
                 <h4>위치</h4>
