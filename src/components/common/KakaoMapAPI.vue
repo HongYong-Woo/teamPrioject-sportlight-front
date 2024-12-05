@@ -96,8 +96,6 @@ const initializeMap = () => {
 
 watch(() => [prop.latitude, prop.longitude], () => {
   init();
-}, {
-  immediate: true,
 });
 </script>
 
