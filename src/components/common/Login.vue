@@ -103,11 +103,11 @@ const handleLogin = async () => {
     if (success) {
       console.log("로그인 성공");
       console.log(`유저 권한: ${auth.userRoles.join(', ')}`);
-      
+    
       if (auth.userRoles.includes('ADMIN')) {
         window.location.href = 'https://admin.sport-lights.shop/';
-        closeModal();
-      } 
+      }
+      closeModal();
     } else {
       loginError.value = auth.loginError;
     }
