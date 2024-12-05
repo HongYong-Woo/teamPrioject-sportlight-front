@@ -50,7 +50,7 @@ const getStarClass = (rating, index) => {
   <div class="review-list">
     <div v-for="(review, index) in reviews" :key="index" class="review-item">
       <div class="review-header">
-        <img :src="review.imgUrl" alt="review-profile">
+        <img :src="review.imgUrl || 'https://kr.object.ncloudstorage.com/sportlight/static_img/user_profile_icon.jpg'" alt="review-profile" @error="e => e.target.src = 'https://kr.object.ncloudstorage.com/sportlight/static_img/user_profile_icon.jpg'">
         <div class="review-header-detail-container">
           <span class="nickname">{{ review.nickname }}</span>
           <div class="review-header-detail">
@@ -79,6 +79,7 @@ const getStarClass = (rating, index) => {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
+  margin-right: 0.25rem;
 }
 
 .review-header-detail-container {

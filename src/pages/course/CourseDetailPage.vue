@@ -237,7 +237,7 @@ function goToApplyCourse() {
                     <h4 class="title">{{ courseDetails.title }}</h4>
                     <h6 class="content">{{ courseDetails.content }}</h6>
                     <div class="host-info-container">
-                        <img :src="courseDetails.hostProfile" alt="Host Profile">
+                        <img :src="currentImage || 'https://kr.object.ncloudstorage.com/sportlight/static_img/default_image.jpg'" alt="Host Profile" @error="e => e.target.src = 'https://kr.object.ncloudstorage.com/sportlight/static_img/user_profile_icon.jpg'"/>
                         <span class="host-nickname">{{ courseDetails.nickname }}</span>
                     </div>
                     <div class="course-details-info small-font gray-font">
@@ -325,7 +325,7 @@ function goToApplyCourse() {
             <div class="detail-container" id="host">
                 <h4>강사 소개</h4>
                 <div class="host-info-container">
-                    <img :src="courseDetails.hostProfile" alt="Host Profile">
+                    <img :src="courseDetails.hostProfile || 'https://kr.object.ncloudstorage.com/sportlight/static_img/default_image.jpg'" alt="Host Profile" @error="e => e.target.src = 'https://kr.object.ncloudstorage.com/sportlight/static_img/user_profile_icon.jpg'">
                     <span class="host-nickname">{{ courseDetails.nickname }}</span>
                 </div>
                 <div class="host-intro">
@@ -433,6 +433,7 @@ function goToApplyCourse() {
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 50%;
+    margin-right: 0.25rem;
 }
 
 .course-details-info {
