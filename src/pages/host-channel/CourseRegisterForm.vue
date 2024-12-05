@@ -5,9 +5,10 @@ import TextEditor from "@/components/common/TextEditor.vue";
 import DaumAddressAPI from "@/components/common/DaumAddressAPI.vue";
 import KakaoMapAPI from "@/components/common/KakaoMapAPI.vue";
 import DateTimeSchedule from "@/components/host-channel/DateTimeSchedule.vue";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 
 const route = useRoute();
+const router = useRouter();
 const modifyMode = ref(null);
 
 
@@ -207,12 +208,13 @@ const submitRegisterForm = async () => {
     console.log(id);
     await submitRegisterScheduleForm(id);
     alert("클래스 개설 신청이 완료되었습니다.");
-    router.push({
-      name: 'HostCourseList',
-    });
   } catch (error) {
     alert("클래스 개설 신청이 실패했습니다.");
   }
+  router.push({
+    name: 'HostCourseList',
+    path: '/hostchannel/courses',
+  });
 };
 
 const deletedFileIdList = ref([]);
