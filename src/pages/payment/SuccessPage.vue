@@ -134,9 +134,7 @@ function goToHomePage() {
 
 <style scoped>
 .container {
-  position: fixed;
-  top: 0;
-  height: 90%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -213,14 +211,11 @@ function goToHomePage() {
 
 
 .loading-container {
-    position: fixed;
-  top: 0;
-  width: 100vh;
-  height: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin-top: 45vh;
 }
 
 .loading {

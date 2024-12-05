@@ -9,36 +9,33 @@ import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 import router from "@/routers";
 
 function goToCoursePage() {
-    router.go(-1);
+  router.go(-1);
 }
 
 function goToHomePage() {
-    router.push({ name: 'Home' })
+  router.push({ name: 'Home' })
 }
 
 </script>
 
 <template>
-    <div class="container">
-      <FontAwesomeIcon :icon="faCircleExclamation" class="check-img"/>
-      <span class="order-fail">결제가 정상적으로<br/>완료되지 않았습니다.</span>
+  <div class="container">
+    <FontAwesomeIcon :icon="faCircleExclamation" class="check-img" />
+    <span class="order-fail">결제가 정상적으로<br />완료되지 않았습니다.</span>
 
-      <span class="fail-ment">이용에 불편을 드려죄송합니다.<br/>다시 주문하여 주시기 바랍니다.</span>
+    <span class="fail-ment">이용에 불편을 드려죄송합니다.<br />다시 주문하여 주시기 바랍니다.</span>
 
-      <div class="btn-container">
-        <Button class="btn" @click="goToHomePage">주문 페이지로 가기</Button>
-        <Button class="btn" @click="goToHomePage">홈으로 가기</Button>
+    <div class="btn-container">
+      <Button class="btn" @click="goToHomePage">주문 페이지로 가기</Button>
+      <Button class="btn" @click="goToHomePage">홈으로 가기</Button>
     </div>
 
-    </div>
+  </div>
 </template>
 
 <style scoped>
 .container {
-  position: fixed;
-  top: 0;
-  height: 90%;
-  margin: auto;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -46,7 +43,7 @@ function goToHomePage() {
 }
 
 .container>span {
-    text-align: center;
+  text-align: center;
 }
 
 .check-img {
@@ -66,10 +63,10 @@ function goToHomePage() {
 }
 
 .btn-container {
-    display: flex;
-    flex-direction: row;
-    gap: 0.5rem;
-    margin-top: 5rem;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  margin-top: 5rem;
 }
 
 .btn {
@@ -84,5 +81,4 @@ function goToHomePage() {
   background-color: #FF7575;
   border: 1px solid #FF7575;
 }
-
 </style>
