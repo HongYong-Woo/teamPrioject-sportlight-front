@@ -51,20 +51,20 @@ async function toggleInterest() {
 }
 
 onMounted(async () => {
-  await interestStore.initializeInterests();
+    await interestStore.initializeInterests();
 });
 
 const levelFormatter = (level) => {
-  switch (level) {
-    case 'BEGINNER':
-      return '초급';
-    case 'INTERMEDIATE':
-      return '중급';
-    case 'ADVANCED':
-      return '고급';
-    default:
-      return category;
-  }
+    switch (level) {
+        case 'BEGINNER':
+            return '초급';
+        case 'INTERMEDIATE':
+            return '중급';
+        case 'ADVANCED':
+            return '고급';
+        default:
+            return category;
+    }
 }
 
 
@@ -72,7 +72,8 @@ const levelFormatter = (level) => {
 
 <template>
     <div class="wrapper">
-        <div class="card-wrapper" @mouseenter="isHovered = true" @mouseleave="isHovered = false" @click="goToCourseDetail">
+        <div class="card-wrapper" @mouseenter="isHovered = true" @mouseleave="isHovered = false"
+            @click="goToCourseDetail">
             <!-- <img v-if="image" :src="image" alt="Card image" class="card-image" /> -->
             <div class="img-wrapper">
                 <div v-if="discounted" class="discount-rate">{{ discountRate }}% off</div>
@@ -93,18 +94,19 @@ const levelFormatter = (level) => {
                     <div class="empty-space"></div>
                     <div class="non-hover-container">
                         <div v-if="discounted" class="price">
-                            <span class="tuition discounted">{{ priceFormatter(tuition - tuition * discountRate / 100) }}</span>
+                            <span class="tuition discounted">{{ priceFormatter(tuition - tuition * discountRate / 100)
+                                }}</span>
                             <span class="original">{{ priceFormatter(tuition) }}</span>
                         </div>
                         <span v-else class="tuition">{{ priceFormatter(tuition) }}</span>
-                    <div class="rating-details">
-                        <span>
-                            <FontAwesomeIcon :icon="faStar" size="sm" style="color: #FFD43B; margin-right: 4px;" />
-                        </span>
-                        <span class="rating">{{ rating }}</span>
-                        <span class="rating-count">({{ reviewCount }})</span>
+                        <div class="rating-details">
+                            <span>
+                                <FontAwesomeIcon :icon="faStar" size="sm" style="color: #FFD43B; margin-right: 4px;" />
+                            </span>
+                            <span class="rating">{{ rating }}</span>
+                            <span class="rating-count">({{ reviewCount }})</span>
+                        </div>
                     </div>
-                </div>
                 </div>
 
                 <div v-else class="card-details">
@@ -140,7 +142,7 @@ const levelFormatter = (level) => {
 
     display: flex;
     flex-direction: column;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
 }
 
 .card:hover {
@@ -191,9 +193,7 @@ const levelFormatter = (level) => {
 }
 
 
-.card-content {
-
-}
+.card-content {}
 
 .card-title {
     margin-top: 0.75rem;
@@ -232,8 +232,7 @@ const levelFormatter = (level) => {
     justify-content: space-between;
 }
 
-.rating-details {
-}
+.rating-details {}
 
 .rating {
     margin-right: 0.125rem;
@@ -293,11 +292,12 @@ const levelFormatter = (level) => {
 
 .card-title,
 .host-details div,
-.address {
+.address,
+.price,
+.discount {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
 }
-
 </style>
