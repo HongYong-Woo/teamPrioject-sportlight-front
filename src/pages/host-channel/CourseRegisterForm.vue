@@ -264,7 +264,7 @@ const submitFileDeleteForm = async id => {
     </div>
   </div>
 </card>
-  <form>
+  <form class="course-form">
     <div class="title">
       1. 클래스 정보
     </div>
@@ -286,7 +286,7 @@ const submitFileDeleteForm = async id => {
         <span class="require">(필수)</span>
       </div>
       <div>
-        <select :class="modifyMode ? 'form-select disable' : 'form-select'" v-model="inputData.categoryId">
+        <select :class="modifyMode ? 'form-select' : 'form-select'" v-model="inputData.categoryId" :disabled="modifyMode" style="width: 200px">
           <option :value="null" disabled>선택</option>
           <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
         </select>
@@ -464,7 +464,7 @@ const submitFileDeleteForm = async id => {
       </div>
     </div>
   </form>
-  <div class="text-end mb-3">
+  <div class="submit-button-area">
     <button class="btn register-btn" @click="submitForm">{{ modifyMode ? '클래스 수정' : '클래스 개설' }}</button>
   </div>
 </template>
@@ -531,5 +531,13 @@ const submitFileDeleteForm = async id => {
 }
 .date-time-schedule-area {
   margin-bottom: 40px;
+}
+.submit-button-area {
+  margin-top: 50px;
+  margin-bottom: 100px;
+  text-align: end;
+}
+.course-form {
+  margin: 20px;
 }
 </style>
