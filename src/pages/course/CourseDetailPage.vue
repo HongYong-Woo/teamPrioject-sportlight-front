@@ -35,10 +35,27 @@ const request = ref({
     participantNum: 1,
 });
 
+
+
+let currentIndex = ref(0);
+const images = ref([]);
+const currentImage = ref("");
+
+const updateCourseImage = (img) => {
+    currentImage.value = img;
+}
+
+
+
 async function fetchDetails() {
     try {
         const response = await get(`/courses/${courseId}`);
         courseDetails.value = response.data.data;
+        currentImage.value = courseDetails.value.imgUrl;
+        images.value.push(courseDetails.value.imgUrl);
+        courseDetails.value.imgList.forEach(img => {
+            images.value.push(img);
+        });
     } catch (error) {
         console.error('Failed to fetch Details', error);
     }
@@ -210,8 +227,11 @@ function goToApplyCourse() {
         <div class="top">
             <div class="top-contents-container">
                 <div class="img-container">
-                    <img :src="courseDetails.imgUrl" alt="Course Image" style="background-color: white;"
-                        class="img-content">
+                    <img :src="currentImage" alt="Course Image" class="selected-image" />
+                    <div class="image-list">
+                        <img v-for="(image, index) in images" :key="index" :src="image" alt="Course Image"
+                            class="img-content" @click="updateCourseImage(image)" />
+                    </div>
                 </div>
                 <div class="contents-container">
                     <h4 class="title">{{ courseDetails.title }}</h4>
@@ -252,10 +272,9 @@ function goToApplyCourse() {
                             <div class="schedule-item">
                                 <Button v-for="schedule in filteredSchedules" :key="schedule.id" size="small"
                                     type="button" :class="schedule.isActive ? 'active-btn' : 'inactive-btn'"
-                                    :disabled="!schedule.isActive"
-                                    @click="selectTimeEvent(schedule)">
+                                    :disabled="!schedule.isActive" @click="selectTimeEvent(schedule)">
                                     {{ new Date(schedule.startTime).toLocaleTimeString([], {
-                                        hour: '2-digit', minute: '2-digit'
+                                    hour: '2-digit', minute: '2-digit'
                                     }) }}
                                 </Button>
                             </div>
@@ -298,7 +317,7 @@ function goToApplyCourse() {
             <div class="detail-container" id="location">
                 <h4>위치</h4>
                 <div class="map-wrapper">
-                    <KakaoMapAPI class="map" :latitude="courseDetails.latitude" :longitude="courseDetails.longitude"/>
+                    <KakaoMapAPI class="map" :latitude="courseDetails.latitude" :longitude="courseDetails.longitude" />
                 </div>
                 <p>{{ courseDetails.address }} {{ courseDetails.detailAddress }}</p>
                 <p>찾아오는 길 ~~~~</p>
@@ -320,7 +339,7 @@ function goToApplyCourse() {
                         <a v-if="courseDetails.facebook" :href="courseDetails.facebook">
                             <FontAwesomeIcon :icon="faFacebook" style="color: #4267B2" size="xl" />
                         </a>
-                            <a v-if="courseDetails.twitter" :href="courseDetails.twitter">
+                        <a v-if="courseDetails.twitter" :href="courseDetails.twitter">
                             <FontAwesomeIcon :icon="faTwitter" style="color: #1DA1F2;" size="xl" />
                         </a>
                         <a v-if="courseDetails.youtube" :href="courseDetails.youtube">
@@ -585,4 +604,54 @@ function goToApplyCourse() {
 .gray-font {
     color: #767676;
 }
+
+.img-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.selected-image {
+  width: 300px; /* 선택된 이미지 크기 */
+  height: auto;
+  margin-bottom: 20px;
+  border: 2px solid #ddd; /* 선택 이미지 테두리 */
+  border-radius: 10px;
+  aspect-ratio: 3 / 2;
+}
+
+.image-list {
+  display: flex;
+  overflow-x: auto; /* 가로 스크롤 활성화 */
+  white-space: nowrap; /* 줄바꿈 방지 */
+  width: 100%; /* 가로 크기 설정 */
+  padding: 10px 0;
+}
+
+.img-content {
+  width: 100px; /* 리스트 이미지 크기 */
+  height: 100px; /* 고정 높이 */
+  margin-right: 10px;
+  border-radius: 5px; /* 이미지 모서리 둥글게 */
+  cursor: pointer; /* 클릭 가능 표시 */
+  transition: transform 0.2s; /* 클릭 시 애니메이션 효과 */
+}
+
+.img-content:hover {
+  transform: scale(1.1); /* 확대 효과 */
+}
+
+.image-list::-webkit-scrollbar {
+  height: 8px; /* 스크롤바 높이 */
+}
+
+.image-list::-webkit-scrollbar-thumb {
+  background: #aaa; /* 스크롤바 색상 */
+  border-radius: 10px;
+}
+
+.image-list::-webkit-scrollbar-track {
+  background: #f1f1f1; /* 스크롤바 배경 */
+}
+
 </style>
