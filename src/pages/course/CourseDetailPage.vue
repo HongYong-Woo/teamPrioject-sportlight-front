@@ -237,7 +237,7 @@ function goToApplyCourse() {
                     <h4 class="title">{{ courseDetails.title }}</h4>
                     <h6 class="content">{{ courseDetails.content }}</h6>
                     <div class="host-info-container">
-                        <img src="../../../public/favicon.ico" alt="Host Profile">
+                        <img :src="courseDetails.hostProfile" alt="Host Profile">
                         <span class="host-nickname">{{ courseDetails.nickname }}</span>
                     </div>
                     <div class="course-details-info small-font gray-font">
@@ -325,7 +325,7 @@ function goToApplyCourse() {
             <div class="detail-container" id="host">
                 <h4>강사 소개</h4>
                 <div class="host-info-container">
-                    <img src="../../../public/favicon.ico" alt="Host Profile">
+                    <img :src="courseDetails.hostProfile" alt="Host Profile">
                     <span class="host-nickname">{{ courseDetails.nickname }}</span>
                 </div>
                 <div class="host-intro">
