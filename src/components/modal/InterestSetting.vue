@@ -139,7 +139,6 @@ onMounted(() => {
 
 .modal-header {
   padding: 20px;
-  border-bottom: 1px solid #eee;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -151,7 +150,6 @@ onMounted(() => {
 
 .modal-footer {
   padding: 20px;
-  border-top: 1px solid #eee;
   display: flex;
   justify-content: flex-end;
   gap: 10px;

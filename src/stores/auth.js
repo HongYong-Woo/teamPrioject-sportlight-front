@@ -99,7 +99,7 @@ export const useAuthStore = defineStore("auth", {
 
       try {
         const { post } = useAPI();
-        const response = await post("/api/auth/reissue");
+        const response = await post("/auth/reissue");
         
         if (response.data?.code === 200) {
           const token = response.data.token || response.data.data;
@@ -150,7 +150,7 @@ export const useAuthStore = defineStore("auth", {
         async findLoginIds(userName, userPhone) {
       const { post } = useAPI();
       try {
-        const response = await post('/api/auth/find-login-id', { userName, userPhone });
+        const response = await post('/auth/find-login-id', { userName, userPhone });
         this.findIdMessage = response.data.data;
       } catch (error) {
         this.findIdMessage = ['사용자 정보를 찾을 수 없습니다.'];
@@ -160,7 +160,7 @@ export const useAuthStore = defineStore("auth", {
     async sendPasswordResetLink(userName, userPhone, loginId) {
       const { post } = useAPI();
       try {
-        const response = await post('/api/auth/password-reset/request', {
+        const response = await post('/auth/password-reset/request', {
           userName,
           userPhone,
           loginId
