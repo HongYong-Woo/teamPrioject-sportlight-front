@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { faChevronDown, faChevronUp, faMagnifyingGlass, faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -34,10 +34,10 @@ const isAuthenticated = computed(() => {
 const defaultProfileImage = new URL('@/assets/default_img.jpg', import.meta.url).href;
 
 const profileImage = computed(() => {
-    if (!auth.token || !auth.profileImage) {
+    if (!auth.token || !auth.userInfo?.userImage) {
         return defaultProfileImage;
     }
-    return auth.profileImage;
+    return auth.userInfo.userImage;
 });
 
 const handleDropdownChange = async (selectedValue) => {
@@ -101,7 +101,30 @@ const handleResize = () => {
     }
 };
 
+const userInfo = computed(() => {
+    return auth.userInfo || {
+        userNickname: '',
+        loginId: '',
+        couponCount: 0
+    };
+});
+
+const fetchProfileInfo = async () => {
+    if (isAuthenticated.value) {
+        await auth.fetchUserProfile();
+    }
+};
+
+watch(isAuthenticated, (newValue) => {
+    if (newValue) {
+        fetchProfileInfo();
+    }
+});
+
 onMounted(() => {
+    if (isAuthenticated.value) {
+        fetchProfileInfo();
+    }
     window.addEventListener("resize", handleResize);
     window.addEventListener("keydown", handleKeydown);
     handleResize();
@@ -146,7 +169,8 @@ onUnmounted(() => {
             </form>
 
             <div class="header-right">
-                <RouterLink v-if="isAuthenticated && auth.userRoles.includes('HOST')" to="/hostchannel/main" class="custom-btn instructor-btn">
+                <RouterLink v-if="isAuthenticated && auth.userRoles.includes('HOST')" to="/hostchannel/main"
+                    class="custom-btn instructor-btn">
                     강사 채널
                 </RouterLink>
                 <RouterLink v-else-if="isAuthenticated" to="/mypage/host-request" class="custom-btn instructor-btn">
@@ -156,7 +180,8 @@ onUnmounted(() => {
                 <Notification v-if="isAuthenticated && !isResponsive" class="notification-btn" />
 
                 <ProfileDropdown v-if="isAuthenticated" :is-visible="isMyPageDropdownVisible" :profile-image="profileImage"
-                    @update:is-visible="updateDropdownVisibility" @handle-dropdown="handleDropdownChange" />
+                    :user-info="userInfo" @update:is-visible="updateDropdownVisibility"
+                    @handle-dropdown="handleDropdownChange" />
                 <button v-else class="custom-btn" @click="toggleLoginModal">
                     로그인
                 </button>
