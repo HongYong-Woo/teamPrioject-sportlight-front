@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container">
     <div v-for="category in props.categories"
          :key="category.id"
          @click="handleMenuClick(category)">
@@ -52,12 +52,7 @@ const handleMenuClick = (category) => {
 </script>
 
 <style scoped>
-.sidebar {
-  width: 25%;
-  height: 100%;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  float: left;
-}
+
 a {
   text-decoration: none;
   color: #333333;
@@ -77,6 +72,7 @@ a {
   background-color: #f1f1f1;
   font-weight: normal;
   margin-top: 5px;
+  border-radius: 5px;
 }
 
 .submenu-item {
@@ -86,6 +82,11 @@ a {
 .submenu-item a {
   text-decoration: none;
   color: #333;
+}
+
+.container {
+  padding-top: 10px;
+  padding-bottom: 15px;
 }
 
 </style>

@@ -26,7 +26,6 @@ const onInputTitle = e => {
   inputData.value.title = target.value;
 }
 const fetchCategories = async () => {
-
   try {
     const response = await get('/categories');
     categories.value = response.data.data;
@@ -67,28 +66,8 @@ const inputData = ref({
 });
 
 const initializeInputData = () => {
-
-  if(modifyMode.value) {
-    inputData.value = {
-      title: courseInfo.value.title,
-      categoryId: courseInfo.value.categoryId,
-      content: courseInfo.value.content,
-      tuition: courseInfo.value.tuition,
-      discountRate: courseInfo.value.discountRate,
-      level: courseInfo.value.level,
-      address: courseInfo.value.address,
-      detailAddress: courseInfo.value.detailAddress,
-      latitude: courseInfo.value.latitude,
-      longitude: courseInfo.value.longitude,
-      time: courseInfo.value.time,
-      maxCapacity: courseInfo.value.maxCapacity,
-      minDaysPriorToReservation: courseInfo.value.minDaysPriorToReservation,
-      mainImage: null,
-      images: [],
-      existMainImage: courseInfo.value.mainImage,
-      existImages: courseInfo.value.images,
-    }
-  }
+  inputData.value = { ...inputData.value, ...courseInfo.value }
+  titleCounter.value = inputData.value.title.length;
 };
 onMounted(() => {
 
@@ -101,12 +80,9 @@ onMounted(() => {
 
 const possibleTodayReservation = ref(null);
 
-watch(() => inputData.value.minDaysPriorToReservation, (newValue) => {
+watch(() => courseInfo.value.minDaysPriorToReservation, (newValue) => {
   possibleTodayReservation.value = newValue === 0;
-},
-    {
-      immediate: true
-    })
+});
 
 const schedules = ref([]);
 
@@ -261,7 +237,7 @@ const submitModifyForm = async () => {
 const submitRegisterScheduleForm = async (courseId) => {
   try {
     if(schedules.value && schedules.value.length > 0) {
-      await post(`/courses/${courseId}/schedules`, schedules.value);
+      await post(`/hosts/courses/${courseId}/schedules`, schedules.value);
     }
   } catch (error) {
     console.log(error);
@@ -280,7 +256,6 @@ const submitFileDeleteForm = async id => {
   <div class="mb-4">
     <h2>{{ modifyMode ? '클래스 수정' : '클래스 개설' }}</h2>
   </div>
-  {{ courseInfo }}
 <card class="card" style="width: 80%;" v-if="!modifyMode">
   <div class="form-text">
     <h5 style="font-weight: bold">클래스 개설 과정</h5>
@@ -461,7 +436,6 @@ const submitFileDeleteForm = async id => {
       당일 예약 가능 여부
       <span class="require">(필수)</span>
     </div>
-
     <div class="row radio-area">
       <div class="form-check form-check-inline">
         <input class="form-check-input" type="radio" id="possibleCheck" v-model="possibleTodayReservation" :value="true" @click="inputData.minDaysPriorToReservation=0;">
@@ -491,8 +465,6 @@ const submitFileDeleteForm = async id => {
   <div class="text-end mb-3">
     <button class="btn register-btn" @click="submitForm">{{ modifyMode ? '클래스 수정' : '클래스 개설' }}</button>
   </div>
-
-
 </template>
 <style scoped>
 .card {

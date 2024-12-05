@@ -85,7 +85,7 @@ const handleDateChange = (value) => {
     </div>
 </template>
 
-<style>
+<style scoped>
 .datepicker-container {
     position: relative;
     display: inline-flex;

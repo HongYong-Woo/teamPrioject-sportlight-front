@@ -1,5 +1,5 @@
 <script setup>
-import {watch} from "vue";
+import {onMounted, watch} from "vue";
 
 const prop = defineProps({
   latitude: {
@@ -26,6 +26,10 @@ const prop = defineProps({
 });
 
 const emit = defineEmits(['assignLatLng']);
+
+onMounted(() => {
+  init();
+})
 
 const init = () => {
   if (window.kakao && window.kakao.maps) {
@@ -56,7 +60,7 @@ const loadScript = (src, callback) => {
 };
 
 const initializeMap = () => {
-  const coords = new window.kakao.maps.LatLng(prop.latitude, prop.longitude);
+  const coords = new kakao.maps.LatLng(prop.latitude ? prop.latitude : 37.5096776765406, prop.longitude ? prop.longitude : 127.055536318832);
   const mapContainer = document.getElementById('map');
   const mapOption = {
     center: coords, // 지도의 중심좌표
