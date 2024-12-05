@@ -103,9 +103,10 @@ const getStatusString = status => {
 </script>
 
 <template>
-신청자 내역
+  <div class="menu-title">
+    <h2>신청자 내역</h2>
+  </div>
 <div class="filter-condition-area">
-
   <div class="row mb-3">
     <div class="col">
       <label class="form-label" for="scheduled-date-select">클래스 일정 날짜</label>
@@ -168,12 +169,16 @@ const getStatusString = status => {
     </div>
     <PagingBar :paging-param="pagingParam" @change-page="reloadPage"></PagingBar>
   </div>
-  <div v-else>
+  <div v-else class="non-result">
     <h6>검색 결과가 없습니다.</h6>
   </div>
 </template>
 
 <style scoped>
+.menu-title {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
 .filter-condition-area {
   padding: 3% 5%;
   background-color: rgb(239, 239, 239);
@@ -191,5 +196,8 @@ tr {
 }
 .applicant-table-container {
   min-height: 400px;
+}
+.non-result {
+  margin: 10px;
 }
 </style>
