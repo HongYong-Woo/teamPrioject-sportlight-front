@@ -1,7 +1,7 @@
 <script setup>
 import Datepicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 import {computed, ref} from "vue";
-import Button from "@/components/common/Button.vue";
 
 const prop = defineProps({
   schedules: {

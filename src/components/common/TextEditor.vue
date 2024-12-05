@@ -96,7 +96,7 @@ import TextStyle from '@tiptap/extension-text-style'
 import TextAlign from "@tiptap/extension-text-align";
 import StarterKit from '@tiptap/starter-kit'
 import { Editor, EditorContent } from '@tiptap/vue-3'
-import {onBeforeUnmount, ref} from "vue";
+import {onBeforeUnmount, onMounted, ref, watch} from "vue";
 
 const prop = defineProps({
   content: {
@@ -125,6 +125,10 @@ const editor = new Editor({
 });
 
 const content = ref(prop.content);
+
+watch(() => prop.content, (newContent) => {
+  editor.commands.setContent(newContent, false)
+});
 
 onBeforeUnmount(() => {
   editor.destroy()

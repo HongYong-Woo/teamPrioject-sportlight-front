@@ -55,6 +55,10 @@
     background-color: #ffaa00;
 }
 
+.fc-button-active {
+    background-color: #ffaa00;
+}
+
 /* 날짜변경 화살표 아이콘 */
 .fc .fc-button-primary span {
     font-weight: 500;
