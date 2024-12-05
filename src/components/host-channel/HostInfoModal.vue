@@ -73,21 +73,20 @@ watch(
 <template>
   <div v-if="isOpen" class="modal-overlay">
     <div class="modal-content">
-      <h2>강사 정보 수정</h2>
+      <div class="title">
+        <h2>강사 정보 수정</h2>
+      </div>
       <form @submit.prevent="handleSubmit">
-        <div class="form-group">
-          <label for="nickname">닉네임</label>
-          <div class="form-control">{{ nickname }}</div>
-        </div>
-        <div class="form-group">
-          <label for="hostBio">소개</label>
-          <textarea
-              id="hostBio"
-              v-model="hostBio"
-              rows="3"
-              placeholder="강사 소개를 입력해주세요"
-          ></textarea>
-
+        <form>
+          <div class="form-group">
+            <label for="hostBio">소개</label>
+            <textarea
+                id="hostBio"
+                v-model="hostBio"
+                rows="3"
+                placeholder="강사 소개를 입력해주세요"
+            ></textarea>
+          </div>
           <div class="form-group">
             <label for="hostKakao">인스타 계정</label>
             <input class="form-control" id="hostKakao" type="text" v-model="hostInsta">
@@ -104,7 +103,7 @@ watch(
             <label for="hostYoutube">유튜브</label>
             <input class="form-control" id="hostYoutube" type="text" v-model="hostYoutube">
           </div>
-        </div>
+        </form>
 
         <div class="button-group">
           <button type="button" @click="emit('close')" class="cancel-btn">취소</button>
@@ -116,6 +115,10 @@ watch(
 </template>
 
 <style scoped>
+.title {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -139,54 +142,8 @@ watch(
   overflow-y: auto;
 }
 
-.preview-container {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 1.5rem;
-}
-
-.profile-preview {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.upload-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.3s;
-  cursor: pointer;
-}
-
 .preview-container:hover .upload-overlay {
   opacity: 1;
-}
-
-.upload-label {
-  color: white;
-  text-align: center;
-  cursor: pointer;
-}
-
-.upload-icon {
-  display: block;
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.hidden {
-  display: none;
 }
 
 .form-group {
@@ -206,16 +163,6 @@ watch(
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 1rem;
-}
-
-.checkbox-group {
-  margin-bottom: 1rem;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
 }
 
 .checkbox-label input[type="checkbox"] {

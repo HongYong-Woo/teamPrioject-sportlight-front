@@ -103,7 +103,11 @@ const handleLogin = async () => {
     if (success) {
       console.log("로그인 성공");
       console.log(`유저 권한: ${auth.userRoles.join(', ')}`);
-      closeModal();
+      
+      if (auth.userRoles.includes('ADMIN')) {
+        window.location.href = 'https://admin.sport-lights.shop/';
+        closeModal();
+      } 
     } else {
       loginError.value = auth.loginError;
     }
@@ -338,18 +342,15 @@ const handleSocialLogin = (provider) => {
 };
 
 const messageHandler = async (event) => {
-  // CORS 검증
   if (event.origin !== 'http://localhost:8080') return;
 
   const data = event.data;
 
-  // 에러 처리
   if (data.error) {
     loginError.value = data.error;
     return;
   }
 
-  // 성공 처리
   if (data.token) {
     try {
       localStorage.setItem('accessToken', data.token);
@@ -360,7 +361,6 @@ const messageHandler = async (event) => {
           router.push('/additional-info');
         } else {
           closeModal();
-          // 필요한 경우 페이지 새로고침 또는 상태 업데이트
           window.location.reload();
         }
       }

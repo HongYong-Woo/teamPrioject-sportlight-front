@@ -11,7 +11,6 @@ import { useAPI } from '@/axios/useAPI';
 import { useInterestStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 
-
 const props = defineProps({
     id: { type: Number, required: true },
     nickname: { type: String, default: 'Card Host', },
