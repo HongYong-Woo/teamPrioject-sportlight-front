@@ -54,6 +54,20 @@ onMounted(async () => {
   await interestStore.initializeInterests();
 });
 
+const levelFormatter = (level) => {
+  switch (level) {
+    case 'BEGINNER':
+      return '초급';
+    case 'INTERMEDIATE':
+      return '중급';
+    case 'ADVANCED':
+      return '고급';
+    default:
+      return category;
+  }
+}
+
+
 </script>
 
 <template>
@@ -76,6 +90,13 @@ onMounted(async () => {
                 <div class="card-details" v-if="!isHovered">
 
 
+                    <div class="empty-space"></div>
+                    <div class="non-hover-container">
+                        <div v-if="discounted" class="price">
+                            <span class="tuition discounted">{{ priceFormatter(tuition - tuition * discountRate / 100) }}</span>
+                            <span class="original">{{ priceFormatter(tuition) }}</span>
+                        </div>
+                        <span v-else class="tuition">{{ priceFormatter(tuition) }}</span>
                     <div class="rating-details">
                         <span>
                             <FontAwesomeIcon :icon="faStar" size="sm" style="color: #FFD43B; margin-right: 4px;" />
@@ -83,12 +104,7 @@ onMounted(async () => {
                         <span class="rating">{{ rating }}</span>
                         <span class="rating-count">({{ reviewCount }})</span>
                     </div>
-                    <div v-if="discounted" class="price">
-                        <span class="tuition discounted">{{ priceFormatter(tuition - tuition * discountRate / 100) }}</span>
-                        <span class="original">{{ priceFormatter(tuition) }}</span>
-                    </div>
-                    <span v-else class="tuition">{{ priceFormatter(tuition) }}</span>
-                    <div class="empty-space"></div>
+                </div>
                 </div>
 
                 <div v-else class="card-details">
@@ -97,8 +113,8 @@ onMounted(async () => {
                     </span>
                     <div class="details-container">
                         <div class="details-left">
-                            <span class="category">{{ category }}</span>
-                            <span class="level">{{ level }}</span>
+                            <span class="category"></span>
+                            <span class="level">{{ category }}ㆍ{{ levelFormatter(level) }}</span>
                         </div>
                         <span class="time details-right">
                             <FontAwesomeIcon :icon="faClock" size="sm" /> {{ time }}분
@@ -114,15 +130,17 @@ onMounted(async () => {
 
 <style scoped>
 .wrapper {
-    padding: 0 0.25rem;
+    padding: 0.5rem 0.5rem;
 }
 
 .card-wrapper {
     width: 100%;
     padding: 0.5rem;
+    cursor: pointer;
 
     display: flex;
     flex-direction: column;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 }
 
 .card:hover {
@@ -173,9 +191,12 @@ onMounted(async () => {
 }
 
 
-.card-content {}
+.card-content {
+
+}
 
 .card-title {
+    margin-top: 0.75rem;
     font-size: 1.1rem;
     font-weight: bold;
 }
@@ -185,7 +206,7 @@ onMounted(async () => {
 
 /* 기본 */
 .empty-space {
-    height: 1rem;
+    height: 1.5rem;
 }
 
 .price {
@@ -205,8 +226,13 @@ onMounted(async () => {
     color: #767676;
 }
 
+.non-hover-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
 .rating-details {
-    margin-top: 8px;
 }
 
 .rating {
@@ -246,8 +272,8 @@ onMounted(async () => {
 
 .heart-icon {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    top: 0.25rem;
+    right: 0.25rem;
     font-size: 1.3rem;
     color: red;
     cursor: pointer;
@@ -264,4 +290,14 @@ onMounted(async () => {
 .heart-icon:hover {
     transform: scale(1.2);
 }
+
+.card-title,
+.host-details div,
+.address {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
 </style>
