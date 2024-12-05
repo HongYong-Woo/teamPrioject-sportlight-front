@@ -59,7 +59,7 @@ const registerSchedule = () => {
   const startTimeString = formatTimeString(startTime.value);
   const endTimeString = formatTimeString(endTime.value);
   if(startTimeString >= endTimeString) {
-    alert("시작 시간은 종료 시간 이전으로 설정해주세요");
+    alert("종료 시간은 시작 시간 이후로 설정해주세요");
     return;
   }
   schedules.value.push({
