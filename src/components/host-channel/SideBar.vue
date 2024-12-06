@@ -13,6 +13,7 @@
 <script setup>
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { ref } from 'vue';
 
 const prop = defineProps({
   categories: {
