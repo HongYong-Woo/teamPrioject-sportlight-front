@@ -215,83 +215,41 @@ export const useAuthStore = defineStore("auth", {
 
 export const useInterestStore = defineStore("interest", {
   state: () => ({
-    interestIds: new Set(), 
-    isInitialized: false,
+    interestIds: new Set(),
+    lastFetchTime: null,
+    CACHE_DURATION: 5 * 60 * 1000 // 5분
   }),
 
+  getters: {
+    isInterested: (state) => (courseId) => state.interestIds.has(courseId)
+  },
+
   actions: {
-    isUserLoggedIn() {
-      const authStore = useAuthStore();
-      return authStore.isAuthenticated;
+    async fetchInterestsIfNeeded() {
+      const now = Date.now();
+      if (!this.lastFetchTime || now - this.lastFetchTime > this.CACHE_DURATION) {
+        await this.fetchInterests();
+      }
     },
 
-    async initializeInterests() {
-      if (!this.isUserLoggedIn()) {
-        console.error("로그인되지 않은 사용자입니다.");
-        return;
-      }
-
-      if (this.isInitialized) return;
-
+    async fetchInterests() {
       const { get } = useAPI();
-      try {
-        const response = await get("/my/interests");
-        this.interestIds = new Set(response.data.data.map(course => course.id));
-        this.isInitialized = true;
-      } catch (error) {
-        console.error("찜 목록을 불러오지 못했습니다:", error);
-        this.interestIds = new Set(); 
-      }
-    },
-
-    attachInterestStatus(courses) {
-      if (!this.isUserLoggedIn()) {
-        console.error("로그인되지 않은 사용자입니다.");
-        return courses;
-      }
-
-      return courses.map(course => ({
-        ...course,
-        isLiked: this.interestIds.has(course.id)
-      }));
+      const response = await get("/my/interests");
+      this.interestIds = new Set(response.data.data.map(course => course.id));
+      this.lastFetchTime = Date.now();
     },
 
     async toggleInterest(courseId) {
-      if (!this.isUserLoggedIn()) {
-        console.error("로그인되지 않은 사용자입니다.");
-        return false; 
-      }
-
       const { patch } = useAPI();
-      try {
-        const response = await patch(`/my/interests/${courseId}`);
-        const isLiked = response.data.data;
-
-        if (isLiked) {
-          this.interestIds.add(courseId);
-        } else {
-          this.interestIds.delete(courseId);
-        }
-
-        return isLiked; 
-      } catch (error) {
-        console.error("찜 상태 토글 실패:", error);
-        throw error;
+      const response = await patch(`/my/interests/${courseId}`);
+      
+      if (response.data.data) {
+        this.interestIds.add(courseId);
+      } else {
+        this.interestIds.delete(courseId);
       }
-    },
-
-    isInterested(courseId) {
-      if (!this.isUserLoggedIn()) {
-        console.error("로그인되지 않은 사용자입니다.");
-        return false;
-      }
-
-      return this.interestIds.has(courseId);
-    },
-
-    resetState() {
-      this.interestIds = new Set();
-      this.isInitialized = false;
+      return response.data.data;
     }
   }
+  
 });

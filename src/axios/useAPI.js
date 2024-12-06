@@ -29,7 +29,7 @@ export const useAPI = () => {
     api.interceptors.request.use(
         (config) => {
             const token = localStorage.getItem("accessToken");
-            if (token && !config.url.includes('/login')) {
+            if (token) {
                 config.headers["Authorization"] = `Bearer ${token}`;
             }
             return config;
@@ -38,53 +38,32 @@ export const useAPI = () => {
             return Promise.reject(error);
         }
     );
-
+    
     api.interceptors.response.use(
         (response) => response,
         async (error) => {
-        const originalRequest = error.config;
-    
-        if (!error.response) {
-            return Promise.reject(new Error("네트워크 연결을 확인해주세요."));
-        }
-    
-        if (originalRequest.url.includes('/login') || originalRequest.url.includes('/reissue')) {
+            const originalRequest = error.config;
+        
+            if (originalRequest.url.includes('/login') || 
+                originalRequest.url.includes('/reissue')) {
+                return Promise.reject(error);
+            }
+        
+            if (error.response.status === 401 && !originalRequest._retry) {
+                originalRequest._retry = true;
+        
+                try {
+                    await auth.refreshToken();
+                    const token = localStorage.getItem("accessToken");
+                    originalRequest.headers['Authorization'] = `Bearer ${token}`;
+                    return api(originalRequest);
+                } catch (refreshError) {
+                    await auth.logout();
+                    return Promise.reject(refreshError);
+                }
+            }
+        
             return Promise.reject(error);
-        }
-    
-        if (error.response.status === 401 && !originalRequest._retry) {
-            if (isRefreshing) {
-            return new Promise(resolve => {
-                subscribeTokenRefresh(token => {
-                originalRequest.headers['Authorization'] = `Bearer ${token}`;
-                resolve(api(originalRequest));
-                });
-            });
-            }
-    
-            originalRequest._retry = true;
-            isRefreshing = true;
-    
-            try {
-            const response = await api.post('/auth/reissue');
-            const newToken = response.data.data;
-            
-            if (newToken) {
-                localStorage.setItem('accessToken', newToken);
-                api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-                onRefreshed(newToken);
-                return api(originalRequest);
-            }
-            } catch (refreshError) {
-            isRefreshing = false;
-            await auth.logout();
-            return Promise.reject(refreshError);
-            } finally {
-            isRefreshing = false;
-            }
-        }
-    
-        return Promise.reject(error);
         }
     );
 

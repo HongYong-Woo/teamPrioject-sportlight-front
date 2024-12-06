@@ -11,11 +11,13 @@ import Payment from '../components/payment/Payment.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faBookmark } from '@fortawesome/free-solid-svg-icons';
 import Coupon from '../components/main-page/Coupon.vue';
+import { useInterestStore } from '@/stores/auth';
 
 const { get } = useAPI();
 const popularCourses = ref([]);
 const beginnerCourses = ref([]);
 const loading = ref(true);
+const interestStore = useInterestStore();
 
 async function fetchPopularCards() {
     try {
@@ -44,9 +46,17 @@ function handleCardButtonClick(cardId) {
     console.log(`Button clicked on card ID: ${cardId}`);
 }
 
-onMounted(() => {
-    fetchPopularCards();
-    fetchBeginnerCards();
+
+onMounted(async () => {
+    try {
+        await Promise.all([
+            fetchPopularCards(),
+            fetchBeginnerCards(),
+            interestStore.fetchInterestsIfNeeded()
+        ]);
+    } catch (error) {
+        console.error("초기화 실패:", error);
+    }
 });
 
 function developing() {

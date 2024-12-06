@@ -20,9 +20,20 @@ const handleKeydown = (e) => {
 const fetchReviews = async () => {
   try {
     const response = await get('/my/reviews');
-    reviews.value = response.data.data;
+console.log(response.data);
+    console.log(response.data);
+    if (response.data && Array.isArray(response.data.data)) {
+      reviews.value = response.data.data;
+      reviews.value.forEach(review => {
+        if (!review.id) {
+          console.error('리뷰 ID 없음', review);
+        }
+      });
+    } else {
+      console.error('리뷰 목록 데이터 형식 에러', response.data);
+    }
   } catch (error) {
-    console.error('리뷰 목록을 불러오지 못했습니다:', error);
+    console.error('리뷰 목록 null', error);
   }
 };
 
@@ -32,6 +43,10 @@ const openUpdateModal = (review) => {
 };
 
 const handleUpdate = async (updatedReview) => {
+  if (!updatedReview.id) {
+    console.error('리뷰 ID가 없습니다!');
+    return;
+  }
   try {
     await patch(`/my/reviews/${updatedReview.id}`, {
       content: updatedReview.content,
@@ -45,6 +60,10 @@ const handleUpdate = async (updatedReview) => {
 };
 
 const handleDelete = async (reviewId) => {
+  if (!reviewId) {
+    console.error('리뷰 ID가 없습니다!');
+    return;
+  }
   if (!confirm('정말로 이 리뷰를 삭제하시겠습니까?')) return;
   
   try {
@@ -54,6 +73,7 @@ const handleDelete = async (reviewId) => {
     console.error('리뷰 삭제 실패:', error);
   }
 };
+
 
 onMounted(() => {
   fetchReviews();

@@ -66,12 +66,15 @@ onUnmounted(() => {
                         </div>
                     </div>
                     <div class="menu-items">
-                        <RouterLink to="/mypage" class="menu-item">
-                            마이페이지
-                        </RouterLink>
                         <RouterLink to="/mypage/coupons" class="menu-item coupon-item">
                             보유 쿠폰
                             <span class="coupon-count">{{ userInfo.couponCount }}장</span>
+                        </RouterLink>
+                        <RouterLink to="/mypage" class="menu-item">
+                            마이페이지
+                        </RouterLink>
+                        <RouterLink to="/mypage/courses" class="menu-item">
+                            내가 신청한 클래스
                         </RouterLink>
                         <div class="menu-item" @click="() => handleDropdownChange('logout')">
                             로그아웃
@@ -140,6 +143,9 @@ onUnmounted(() => {
   transition: background-color 0.2s;
   white-space: nowrap;
   text-align: left;
+  display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .menu-item:hover {
@@ -204,12 +210,12 @@ onUnmounted(() => {
 
 .nickname {
     font-weight: 500;
-    font-size: 14px;
+    font-size: 18px;
     color: #333;
 }
 
 .email {
-    font-size: 12px;
+    font-size: 14px;
     color: #666;
 }
 
@@ -228,6 +234,8 @@ onUnmounted(() => {
 }
 
 .menu-item {
+    padding: 10px;
+    font-size: 0.9rem;
     text-decoration: none;
     color: inherit;
 }

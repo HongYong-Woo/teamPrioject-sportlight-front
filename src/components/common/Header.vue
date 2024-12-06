@@ -121,6 +121,10 @@ watch(isAuthenticated, (newValue) => {
     }
 });
 
+const userRoles = computed(() => {
+    return auth.userRoles || [];
+});
+
 onMounted(() => {
     if (isAuthenticated.value) {
         fetchProfileInfo();
@@ -168,13 +172,15 @@ onUnmounted(() => {
             </form>
 
             <div class="header-right">
-                <RouterLink v-if="isAuthenticated && auth.userRoles.includes('HOST')" to="/hostchannel/main"
+                <RouterLink v-if="isAuthenticated && userRoles.includes('HOST')" to="/hostchannel/main"
                     class="custom-btn instructor-btn">
                     강사 채널
                 </RouterLink>
-                <RouterLink v-else-if="isAuthenticated" to="/mypage/host-request" class="custom-btn instructor-btn">
+                <RouterLink v-else-if="isAuthenticated && userRoles.includes('HOST')" to="/mypage/host-request"
+                    class="custom-btn instructor-btn">
                     강사 등록하기
                 </RouterLink>
+
 
                 <Notification v-if="isAuthenticated && !isResponsive" class="notification-btn" />
 
