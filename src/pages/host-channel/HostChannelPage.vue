@@ -1,7 +1,7 @@
 <template>
   <div class="main-container row">
     <div class="sidebar col-3">
-      <SideBar></SideBar>
+      <SideBar :categories="categories"></SideBar>
     </div>
 
     <div class="content col-9">
@@ -16,19 +16,15 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 
+
 const categories = [
   { id: 1, name: '메인', link: '/hostchannel/main' },
   { id: 2, name: '개설 클래스', link: '/hostchannel/courses' },
-  { id: 3, name: '수익금 관리'}
+  { id: 3, name: '정산 신청', link: '/hostchannel/adjustments/register' },
+  { id: 4, name: '정산 내역', link: '/hostchannel/adjustments' },
+  { id: 5, name: '결제 내역 관리', link: '/hostchannel/payments' },
 ];
 
-const submenus = {
-  3: [
-    { id: 1, name: '정산 신청', link: '/hostchannel/adjustments/register' },
-    { id: 2, name: '정산 내역', link: '/hostchannel/adjustments' },
-    { id: 3, name: '결제 내역 관리', link: '/hostchannel/payments' },
-  ]
-};
 </script>
 
 <style scoped>

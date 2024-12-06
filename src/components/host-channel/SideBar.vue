@@ -14,13 +14,18 @@
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
-const categories = [
-  { id: 1, name: '메인', link: '/hostchannel/main' },
-  { id: 2, name: '개설 클래스', link: '/hostchannel/courses' },
-  { id: 3, name: '정산 신청', link: '/hostchannel/adjustments/register' },
-  { id: 4, name: '정산 내역', link: '/hostchannel/adjustments' },
-  { id: 5, name: '결제 내역 관리', link: '/hostchannel/payments' },
-];
+const prop = defineProps({
+  categories: {
+    type: Array,
+    required: true,
+    default: () => {
+      return [];
+    }
+  }
+});
+
+const categories = ref(prop.categories);
+
 </script>
 
 <style scoped>
