@@ -117,8 +117,6 @@ const handleSubmit = async () => {
 </template>
 
 <style scoped>
-/* ... Refund.vue와 동일한 기본 모달 스타일 ... */
-
 .star-rating {
   display: flex;
   gap: 0.3rem;

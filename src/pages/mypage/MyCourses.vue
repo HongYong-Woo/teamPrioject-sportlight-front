@@ -114,7 +114,7 @@ const getDisplayStatus = (status, startDate) => {
 
 const handleCourseClick = async (courseId) => {
   try {
-    await router.push(`/courses/${courseId}`);
+    await router.push(`/course/${courseId}`);
   } catch (err) {
     console.error('클래스 상세 페이지로 이동 중 오류:', err);
     alert('클래스 상세 정보를 불러올 수 없습니다.');
@@ -194,8 +194,8 @@ onMounted(() => {
             <div class="title-section">
               <h1 class="course-title" @click="handleCourseClick(course.courseId)">
                 {{ course.title }}
-                <div :class="['status-badge', getStatusClass(course.displayStatus)]">
-                  {{ getStatusLabel(course.displayStatus) }}
+                <div :class="['status-badge', getStatusClass(course.status)]">
+                  {{ getStatusLabel(course.status) }}
                 </div>
               </h1>
             </div>
@@ -218,15 +218,17 @@ onMounted(() => {
                 <span>{{ course.participantNum }}명</span>
               </div>
               <div class="actions">
-                <button v-if="course.displayStatus === 'UPCOMING'" @click="openCancelModal(course)" class="cancel-button">
+                <button v-if="course.status === 'UPCOMING'" @click="openCancelModal(course)" class="cancel-button">
                   결제 취소
                 </button>
-                <button v-if="!course.hasReview" @click="openReviewModal(course)" class="review-button">
-                  리뷰 작성
-                </button>
-                <button v-else @click="handleCourseClick(course.courseId + '/reviews')" class="review-link-button">
-                  내 리뷰
-                </button>
+                <template v-else-if="course.status === 'COMPLETED'">
+                  <button v-if="!course.hasReview" @click="openReviewModal(course)" class="review-button">
+                    리뷰 작성
+                  </button>
+                  <button v-else @click="handleCourseClick(course.courseId + '/reviews')" class="review-link-button">
+                    내 리뷰
+                  </button>
+                </template>
               </div>
             </div>
             <div class="payment-info">
@@ -400,13 +402,17 @@ onMounted(() => {
   color: #FF9800;
 }
 
+/* 상태 뱃지 관련 스타일 */
 .status-badge {
   display: inline-block;
+  min-width: 80px;
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
   font-size: 0.8rem;
   font-weight: 500;
-  transition: all 0.3s ease;
+  text-align: center;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .status-upcoming {
@@ -458,19 +464,22 @@ onMounted(() => {
   font-weight: 500;
 }
 
+/* 버튼 관련 스타일 */
 .actions {
   display: flex;
   gap: 0.8rem;
 }
 
 .cancel-button,
-.review-button {
+.review-button,
+.review-link-button {
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .cancel-button {
@@ -494,6 +503,16 @@ onMounted(() => {
   background-color: #F57C00;
 }
 
+.review-link-button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+}
+
+.review-link-button:hover {
+  background-color: #45a049;
+}
+
 .payment-info {
   display: flex;
   flex-direction: column;
@@ -514,23 +533,18 @@ onMounted(() => {
   min-width: 70px;
 }
 
-.total-amount {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px dashed #eee;
-  font-weight: 600;
-}
-
-.total-amount span {
-  color: #333;
-}
-
-.loading-state {
+/* 상태 표시 관련 */
+.loading-state,
+.empty-state,
+.error-state {
   text-align: center;
   padding: 2rem;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -547,30 +561,10 @@ onMounted(() => {
 }
 
 .empty-state {
-  text-align: center;
   padding: 3rem 2rem;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.empty-icon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  display: block;
-}
-
-.empty-state p {
-  color: #666;
-  font-size: 1rem;
 }
 
 .error-state {
-  text-align: center;
-  padding: 2rem;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   color: #dc3545;
 }
 
@@ -651,7 +645,3 @@ onMounted(() => {
   text-overflow: ellipsis;
 }
 </style>
-
-
-
-

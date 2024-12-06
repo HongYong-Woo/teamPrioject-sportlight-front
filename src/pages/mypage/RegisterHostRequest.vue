@@ -65,10 +65,9 @@ const handleSubmit = async () => {
 
     await apiCall();
     success.value = true;
-    // setTimeout(() => {
-    //   router.push('/mypage/host-request');
-    //   window.location.reload();
-    // }, 1500);
+    setTimeout(() => {
+      router.push('/mypage/host-request');
+    }, 1500);
   } catch (err) {
     error.value = '요청 처리에 실패했습니다. 다시 시도해주세요.';
     console.error('Error:', err);

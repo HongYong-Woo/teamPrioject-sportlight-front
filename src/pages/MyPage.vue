@@ -8,6 +8,7 @@ import PasswordChange from '@/components/modal/PasswordChange.vue'
 import InterestSetting from '@/components/modal/InterestSetting.vue'
 import { RouterView } from 'vue-router';
 import { Heart, Lock, ClipboardPaste, UserPen, Tags, MessageSquareText, Ticket, CalendarSearch } from 'lucide-vue-next';
+import SideBar from '@/components/host-channel/SideBar.vue';
 
 const auth = useAuthStore();
 const pageData = ref({
@@ -16,11 +17,21 @@ const pageData = ref({
   couponCount: 0,
   enrolledClassesCount: 0
 });
+
 const showEditModal = ref(false);
 const showPasswordModal = ref(false);
 const showInterestsModal = ref(false);
 const userInterests = ref([]);
 const { get } = useAPI();
+
+const categories = [
+  { id: 1, name: '내 쿠폰', link: '/mypage/coupons' },
+  { id: 2, name: '찜 목록', link: '/mypage/interests' },
+  { id: 3, name: '내가 신청한 클래스', link: '/mypage/courses' },
+  { id: 4, name: '리뷰 관리', link: '/mypage/reviews' },
+  { id: 5, name: '관심 분야 설정', link: '/mypage/interests' },
+  { id: 6, name: '강사 등록하기', link: '/mypage/host-request' },
+];
 
 const fetchPageData = async () => {
   try {
@@ -93,6 +104,7 @@ const fetchUserInterests = async () => {
 <template>
   <div class="page-container">
     <div class="my-page">
+      <Sidebar :categories="categories" :submenus="submenus" />
       <h1>마이페이지</h1>
       <router-view />
       <div class="row main-row">
@@ -163,10 +175,10 @@ const fetchUserInterests = async () => {
         <div class="main-section">
           <div class="card action-card" @click="openInterestsModal">
             <div class="title-group">
-              <Tags class="modified-icon" />
+              <Tags class="icon" />
               <h2>관심 분야 설정</h2>
-              <p class="subtitle">회원님의 관심 분야를 설정할 수 있는 곳이에요! 관심 분야를 설정하고 맞춤 추천을 받아보세요 :)</p>
             </div>
+              <p class="subtitle">회원님의 관심 분야를 설정할 수 있는 곳이에요! 관심 분야를 설정하고 맞춤 추천을 받아보세요 :)</p>
             <div class="current-interests">
               <div v-if="userInterests.length === 0" class="no-interests">
                 아직 선택된 관심 분야가 없습니다.
@@ -375,17 +387,10 @@ h2 {
 }
 
 .icon {
-  width: 30px;
-  height: 30px;
+  width: 2rem;
+  height: 2rem;
   vertical-align: middle;
 }
-
-.modified-icon {
-  width: 60px;
-  height: 60px;
-  vertical-align: middle;
-}
-
 
 @media (max-width: 768px) {
   .my-page {

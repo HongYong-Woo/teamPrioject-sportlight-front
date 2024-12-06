@@ -173,6 +173,10 @@ onMounted(() => fetchCoupons(1));
                     다음
                 </button>
             </div>
+            <div v-show="uiStore.loading" class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <p>로딩 중...</p>
+        </div>
         </div>
     </div>
 </template>
@@ -200,6 +204,20 @@ onMounted(() => fetchCoupons(1));
 .stats {
     font-size: 1.1rem;
     color: #666;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    z-index: 999;
 }
 
 .tabs-container {
@@ -264,7 +282,7 @@ onMounted(() => fetchCoupons(1));
     overflow: hidden;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    border: 2px solid #FF9800;
+    border: 1px solid #FF9800;
 }
 
 .coupon-item.expired {

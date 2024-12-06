@@ -55,21 +55,15 @@ const toggleAllAgreements = () => {
 
 const handleSubmit = async () => {
   try {
-    await patch('/api/auth/oauth/additional-info', formData.value);
+    await patch('/auth/oauth/additional-info', formData.value);
     router.push('/');
   } catch (error) {
     if (error.response?.status === 401) {
-      try {
-        await auth.refreshToken();
-        await patch('/api/auth/oauth/additional-info', formData.value);
-        router.push('/');
-      } catch (refreshError) {
-        auth.logout();
-        router.push('/login');
-      }
+      auth.logout();
+      router.push('/login');
     } else {
       errorMessage.value = error.response?.data?.message || '추가 정보 입력 중 오류가 발생했습니다.';
-      console.error('추가 정보 입력 중 오류:', error);
+      console.error('Error updating additional info:', error);
     }
   }
 };

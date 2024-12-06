@@ -53,7 +53,7 @@ onMounted(fetchHostRequest);
     <div v-else-if="!hostRequest" class="empty-state">
       <p>아직 등록된 요청이 없습니다.</p>
       <button @click="router.push('/mypage/host-request-register')" class="register-btn">
-        강사 등록하기
+        강사 전환 요청하기
       </button>
     </div>
 
